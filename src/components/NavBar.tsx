@@ -8,7 +8,7 @@ export function NavBar() {
       <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4">
         <Link to="/" className="flex items-center gap-2 text-xl font-bold">
           <Film className="h-6 w-6" />
-          <span>BingWatch</span>
+          <span>BingeWatch</span>
         </Link>
 
         <SearchBar />
