@@ -1,9 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { SearchBar } from './SearchBar';
 import { cn } from '@/lib/utils';
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
 
 export const Navigation = () => {
   const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -29,16 +32,55 @@ export const Navigation = () => {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <SearchBar />
+          <div className="hidden md:block">
+            <SearchBar />
+          </div>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-2 text-white md:hidden"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="absolute left-0 right-0 top-16 animate-fade-down bg-netflix-black/95 px-4 py-4 backdrop-blur md:hidden">
+          <div className="flex flex-col space-y-4">
+            <NavLink to="/" active={isActive('/')} onClick={() => setIsMenuOpen(false)}>
+              Home
+            </NavLink>
+            <NavLink to="/movies" active={isActive('/movies')} onClick={() => setIsMenuOpen(false)}>
+              Movies
+            </NavLink>
+            <NavLink to="/tv" active={isActive('/tv')} onClick={() => setIsMenuOpen(false)}>
+              TV Shows
+            </NavLink>
+            <div className="pt-2">
+              <SearchBar />
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
 
-const NavLink = ({ to, children, active }: { to: string; children: React.ReactNode; active: boolean }) => (
+const NavLink = ({ 
+  to, 
+  children, 
+  active, 
+  onClick 
+}: { 
+  to: string; 
+  children: React.ReactNode; 
+  active: boolean;
+  onClick?: () => void;
+}) => (
   <Link
     to={to}
+    onClick={onClick}
     className={cn(
       "text-sm font-medium transition-colors hover:text-white/90",
       active ? "text-white" : "text-white/60"

@@ -6,6 +6,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { MediaCard } from "./MediaCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MovieCarouselProps {
   items: Array<{
@@ -21,11 +22,14 @@ interface MovieCarouselProps {
 }
 
 export const MovieCarousel = ({ items }: MovieCarouselProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <Carousel
       opts={{
         align: "start",
         loop: true,
+        dragFree: isMobile,
       }}
       className="w-full"
     >

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { getImageUrl } from '@/services/tmdb';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MediaCardProps {
   id: number;
@@ -11,6 +12,8 @@ interface MediaCardProps {
 }
 
 export const MediaCard = ({ id, title, posterPath, mediaType, releaseDate, voteAverage }: MediaCardProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <Link
       to={`/${mediaType}/${id}`}
@@ -24,7 +27,12 @@ export const MediaCard = ({ id, title, posterPath, mediaType, releaseDate, voteA
           loading="lazy"
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
+      <div 
+        className={cn(
+          "absolute inset-0 bg-gradient-to-t from-black/80 to-transparent",
+          isMobile ? "opacity-100" : "opacity-0 transition-opacity group-hover:opacity-100"
+        )}
+      >
         <div className="absolute bottom-0 p-4 text-white">
           <h3 className="text-lg font-bold">{title}</h3>
           {releaseDate && (

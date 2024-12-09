@@ -14,11 +14,11 @@ const Movies = () => {
   });
 
   return (
-    <main className="container space-y-12 py-8">
-      <section className="space-y-6">
-        <h2 className="text-3xl font-bold text-white">Trending Movies</h2>
+    <main className="container space-y-8 py-4 md:space-y-12 md:py-8">
+      <section className="space-y-4 md:space-y-6">
+        <h2 className="text-2xl font-bold text-white md:text-3xl">Trending Movies</h2>
         {trendingLoading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 md:gap-4">
             {Array.from({ length: 10 }).map((_, i) => (
               <div
                 key={i}
@@ -31,10 +31,10 @@ const Movies = () => {
         )}
       </section>
 
-      <section className="space-y-6">
-        <h2 className="text-3xl font-bold text-white">Top Rated Movies</h2>
+      <section className="space-y-4 md:space-y-6">
+        <h2 className="text-2xl font-bold text-white md:text-3xl">Top Rated Movies</h2>
         {topRatedLoading ? (
-          <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
+          <div className="animate-pulse rounded-lg bg-gray-800 h-[200px] md:h-[300px]" />
         ) : (
           <MovieCarousel items={topRatedMovies?.results || []} />
         )}
