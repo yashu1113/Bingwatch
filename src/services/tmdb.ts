@@ -19,6 +19,21 @@ export const getTrending = async (mediaType: 'all' | 'movie' | 'tv' = 'all', tim
   return response.data;
 };
 
+export const getTopRated = async () => {
+  const response = await tmdbApi.get('/movie/top_rated');
+  return response.data;
+};
+
+export const getMoviesByGenre = async (genreId: number) => {
+  const response = await tmdbApi.get('/discover/movie', {
+    params: {
+      with_genres: genreId,
+      sort_by: 'popularity.desc',
+    },
+  });
+  return response.data;
+};
+
 export const search = async (query: string) => {
   const response = await tmdbApi.get('/search/multi', {
     params: {
@@ -35,5 +50,10 @@ export const getDetails = async (mediaType: 'movie' | 'tv', id: number) => {
       append_to_response: 'videos,credits,similar,recommendations',
     },
   });
+  return response.data;
+};
+
+export const getGenres = async () => {
+  const response = await tmdbApi.get('/genre/movie/list');
   return response.data;
 };

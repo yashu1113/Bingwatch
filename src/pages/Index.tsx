@@ -1,14 +1,34 @@
 import { useQuery } from '@tanstack/react-query';
-import { getTrending } from '@/services/tmdb';
+import { getTrending, getTopRated, getMoviesByGenre } from '@/services/tmdb';
 import { MediaGrid } from '@/components/MediaGrid';
 import { SearchBar } from '@/components/SearchBar';
+import { MovieCarousel } from '@/components/MovieCarousel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+const FEATURED_GENRES = [
+  { id: 28, name: 'Action' },
+  { id: 35, name: 'Comedy' },
+  { id: 18, name: 'Drama' },
+];
+
 const Index = () => {
-  const { data: trendingAll, isLoading } = useQuery({
+  const { data: trendingAll, isLoading: trendingLoading } = useQuery({
     queryKey: ['trending', 'all', 'week'],
     queryFn: () => getTrending('all', 'week'),
   });
+
+  const { data: topRated, isLoading: topRatedLoading } = useQuery({
+    queryKey: ['movies', 'top-rated'],
+    queryFn: () => getTopRated(),
+  });
+
+  const genreQueries = FEATURED_GENRES.map(genre => ({
+    ...useQuery({
+      queryKey: ['movies', 'genre', genre.id],
+      queryFn: () => getMoviesByGenre(genre.id),
+    }),
+    name: genre.name,
+  }));
 
   return (
     <div className="min-h-screen bg-netflix-black text-white">
@@ -21,10 +41,10 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="container py-8">
+      <main className="container space-y-12 py-8">
         <section className="space-y-6">
           <h2 className="text-3xl font-bold">Trending Now</h2>
-          {isLoading ? (
+          {trendingLoading ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {Array.from({ length: 10 }).map((_, i) => (
                 <div
@@ -34,9 +54,29 @@ const Index = () => {
               ))}
             </div>
           ) : (
-            <MediaGrid items={trendingAll?.results || []} />
+            <MovieCarousel items={trendingAll?.results || []} />
           )}
         </section>
+
+        <section className="space-y-6">
+          <h2 className="text-3xl font-bold">Top Rated</h2>
+          {topRatedLoading ? (
+            <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
+          ) : (
+            <MovieCarousel items={topRated?.results || []} />
+          )}
+        </section>
+
+        {genreQueries.map((query, index) => (
+          <section key={index} className="space-y-6">
+            <h2 className="text-3xl font-bold">{query.name} Movies</h2>
+            {query.isLoading ? (
+              <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
+            ) : (
+              <MovieCarousel items={query.data?.results || []} />
+            )}
+          </section>
+        ))}
       </main>
     </div>
   );
