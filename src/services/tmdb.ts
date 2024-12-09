@@ -19,8 +19,8 @@ export const getTrending = async (mediaType: 'all' | 'movie' | 'tv' = 'all', tim
   return response.data;
 };
 
-export const getTopRated = async () => {
-  const response = await tmdbApi.get('/movie/top_rated');
+export const getTopRated = async (type: 'movie' | 'tv' = 'movie') => {
+  const response = await tmdbApi.get(`/${type}/top_rated`);
   return response.data;
 };
 
@@ -53,7 +53,7 @@ export const getDetails = async (mediaType: 'movie' | 'tv', id: number) => {
   return response.data;
 };
 
-export const getGenres = async () => {
-  const response = await tmdbApi.get('/genre/movie/list');
+export const getGenres = async (type: 'movie' | 'tv' = 'movie') => {
+  const response = await tmdbApi.get(`/genre/${type}/list`);
   return response.data;
 };
