@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { getImageUrl } from '@/services/tmdb';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 interface MediaCardProps {
   id: number;
