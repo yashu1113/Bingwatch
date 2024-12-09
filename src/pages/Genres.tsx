@@ -9,7 +9,7 @@ const Genres = () => {
 
   const { data: genres, isLoading: genresLoading } = useQuery({
     queryKey: ['genres'],
-    queryFn: getGenres,
+    queryFn: () => getGenres('movie'),
   });
 
   const { data: movies, isLoading: moviesLoading } = useQuery({

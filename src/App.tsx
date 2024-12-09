@@ -21,11 +21,11 @@ const queryClient = new QueryClient({
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
           <div className="min-h-screen bg-netflix-black">
             <Navigation />
             <Routes>
@@ -36,9 +36,9 @@ const App = () => {
               <Route path="/tv/:id" element={<TVShowDetails />} />
             </Routes>
           </div>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 };
 
