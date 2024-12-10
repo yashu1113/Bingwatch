@@ -29,6 +29,9 @@ export const Navigation = () => {
             <NavLink to="/tv" active={isActive('/tv')}>
               TV Shows
             </NavLink>
+            <NavLink to="/watchlist" active={isActive('/watchlist')}>
+              Watchlist
+            </NavLink>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -44,7 +47,6 @@ export const Navigation = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="absolute left-0 right-0 top-16 animate-fade-down bg-netflix-black/95 px-4 py-4 backdrop-blur md:hidden">
           <div className="flex flex-col space-y-4">
@@ -56,6 +58,9 @@ export const Navigation = () => {
             </NavLink>
             <NavLink to="/tv" active={isActive('/tv')} onClick={() => setIsMenuOpen(false)}>
               TV Shows
+            </NavLink>
+            <NavLink to="/watchlist" active={isActive('/watchlist')} onClick={() => setIsMenuOpen(false)}>
+              Watchlist
             </NavLink>
             <div className="pt-2">
               <SearchBar />
