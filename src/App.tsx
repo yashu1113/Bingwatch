@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import Movies from "./pages/Movies";
+import MovieDetails from "./pages/MovieDetails";
 import TVShows from "./pages/TVShows";
 import TVShowDetails from "./pages/TVShowDetails";
 import Watchlist from "./pages/Watchlist";
@@ -34,6 +35,7 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/movies" element={<Movies />} />
+                <Route path="/movies/:id" element={<MovieDetails />} />
                 <Route path="/tv" element={<TVShows />} />
                 <Route path="/tv/:id" element={<TVShowDetails />} />
                 <Route path="/watchlist" element={<Watchlist />} />

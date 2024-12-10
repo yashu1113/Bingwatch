@@ -3,10 +3,12 @@ import { SearchBar } from './SearchBar';
 import { cn } from '@/lib/utils';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useWatchlist } from '@/contexts/WatchlistContext';
 
 export const Navigation = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { watchlist } = useWatchlist();
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -30,7 +32,11 @@ export const Navigation = () => {
               TV Shows
             </NavLink>
             <NavLink to="/watchlist" active={isActive('/watchlist')}>
-              Watchlist
+              Watchlist {watchlist.length > 0 && (
+                <span className="ml-1 rounded-full bg-netflix-red px-2 py-0.5 text-xs">
+                  {watchlist.length}
+                </span>
+              )}
             </NavLink>
           </div>
         </div>
@@ -60,7 +66,11 @@ export const Navigation = () => {
               TV Shows
             </NavLink>
             <NavLink to="/watchlist" active={isActive('/watchlist')} onClick={() => setIsMenuOpen(false)}>
-              Watchlist
+              Watchlist {watchlist.length > 0 && (
+                <span className="ml-1 rounded-full bg-netflix-red px-2 py-0.5 text-xs">
+                  {watchlist.length}
+                </span>
+              )}
             </NavLink>
             <div className="pt-2">
               <SearchBar />
