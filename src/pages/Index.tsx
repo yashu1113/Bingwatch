@@ -1,9 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getTrending, getTopRated, getMoviesByGenre } from '@/services/tmdb';
 import { MediaGrid } from '@/components/MediaGrid';
-import { SearchBar } from '@/components/SearchBar';
 import { MovieCarousel } from '@/components/MovieCarousel';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -32,15 +30,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-netflix-black text-white">
-      <header className="sticky top-0 z-50 bg-netflix-black/95 backdrop-blur">
-        <div className="container py-4">
-          <div className="flex items-center justify-between gap-4">
-            <h1 className="text-2xl font-bold text-netflix-red">MovieDB</h1>
-            <SearchBar />
-          </div>
-        </div>
-      </header>
-
       <main className="container space-y-12 py-8">
         <section className="space-y-6">
           <h2 className="text-3xl font-bold">Trending Now</h2>
@@ -54,7 +43,7 @@ const Index = () => {
               ))}
             </div>
           ) : (
-            <MovieCarousel items={trendingAll?.results || []} />
+            <MovieCarousel items={trendingAll?.results || []} autoPlay />
           )}
         </section>
 

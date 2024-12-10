@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -7,6 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import { MediaCard } from "./MediaCard";
 import { useIsMobile } from "@/hooks/use-mobile";
+import useEmblaCarousel from 'embla-carousel-react';
 
 interface MovieCarouselProps {
   items: Array<{
@@ -19,10 +21,26 @@ interface MovieCarouselProps {
     first_air_date?: string;
     vote_average?: number;
   }>;
+  autoPlay?: boolean;
 }
 
-export const MovieCarousel = ({ items }: MovieCarouselProps) => {
+export const MovieCarousel = ({ items, autoPlay = false }: MovieCarouselProps) => {
   const isMobile = useIsMobile();
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    loop: true,
+    dragFree: isMobile,
+  });
+
+  useEffect(() => {
+    if (autoPlay && emblaApi) {
+      const intervalId = setInterval(() => {
+        emblaApi.scrollNext();
+      }, 5000); // Change slide every 5 seconds
+
+      return () => clearInterval(intervalId);
+    }
+  }, [emblaApi, autoPlay]);
 
   return (
     <Carousel
