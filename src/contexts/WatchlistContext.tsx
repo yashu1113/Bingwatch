@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from "@/hooks/use-toast";
 
 interface WatchlistItem {
   id: number;
@@ -28,13 +29,35 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
 
   const addToWatchlist = (item: WatchlistItem) => {
     setWatchlist((prev) => {
-      if (prev.some((i) => i.id === item.id)) return prev;
+      if (prev.some((i) => i.id === item.id)) {
+        toast({
+          title: "Already in Watchlist",
+          description: `${item.title} is already in your watchlist`,
+          variant: "default",
+        });
+        return prev;
+      }
+      toast({
+        title: "Added to Watchlist",
+        description: `${item.title} has been added to your watchlist`,
+        variant: "default",
+      });
       return [...prev, item];
     });
   };
 
   const removeFromWatchlist = (id: number) => {
-    setWatchlist((prev) => prev.filter((item) => item.id !== id));
+    setWatchlist((prev) => {
+      const item = prev.find((i) => i.id === id);
+      if (item) {
+        toast({
+          title: "Removed from Watchlist",
+          description: `${item.title} has been removed from your watchlist`,
+          variant: "default",
+        });
+      }
+      return prev.filter((item) => item.id !== id);
+    });
   };
 
   const isInWatchlist = (id: number) => {
