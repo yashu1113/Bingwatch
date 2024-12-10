@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getTrending, getTopRated, getMoviesByGenre } from '@/services/tmdb';
-import { MediaGrid } from '@/components/MediaGrid';
 import { MovieCarousel } from '@/components/MovieCarousel';
+import { HeroSlider } from '@/components/HeroSlider';
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -30,6 +30,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-netflix-black text-white">
+      {!trendingLoading && trendingAll?.results && (
+        <HeroSlider items={trendingAll.results.slice(0, 5)} />
+      )}
+      
       <main className="container space-y-12 py-8">
         <section className="space-y-6">
           <h2 className="text-3xl font-bold">Trending Now</h2>
