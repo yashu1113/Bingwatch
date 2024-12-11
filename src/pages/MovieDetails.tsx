@@ -1,19 +1,28 @@
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getDetails } from '@/services/tmdb';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { Button } from '@/components/ui/button';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, Play } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   
-  const { data: movie, isLoading } = useQuery({
+  const { data: movie, isLoading, isError } = useQuery({
     queryKey: ['movie', id],
     queryFn: () => getDetails('movie', Number(id)),
     enabled: !!id,
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to load movie details. Please try again later.",
+        variant: "destructive",
+      });
+      navigate('/movies');
+    },
   });
 
   const handleWatchlistClick = () => {
@@ -25,7 +34,6 @@ const MovieDetails = () => {
       toast({
         title: "Removed from Watchlist",
         description: `${movie.title} has been removed from your watchlist`,
-        variant: "default",
       });
     } else {
       addToWatchlist({
@@ -37,8 +45,6 @@ const MovieDetails = () => {
       toast({
         title: "Added to Watchlist",
         description: `${movie.title} has been added to your watchlist`,
-        variant: "default",
-        className: "animate-fade-in",
       });
     }
   };
@@ -54,19 +60,29 @@ const MovieDetails = () => {
     );
   }
 
-  if (!movie) {
+  if (isError || !movie) {
     return (
       <div className="container py-8">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold">Movie not found</h1>
+          <Button 
+            onClick={() => navigate('/movies')} 
+            className="mt-4"
+          >
+            Back to Movies
+          </Button>
         </div>
       </div>
     );
   }
 
+  const trailer = movie.videos?.results?.find(
+    (video) => video.type === "Trailer"
+  );
+
   return (
     <div className="min-h-screen bg-netflix-black text-white">
-      <div className="container py-8 space-y-8">
+      <div className="container mx-auto px-4 py-8 space-y-8">
         <div className="grid gap-8 md:grid-cols-[300px,1fr]">
           <img
             src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
@@ -91,36 +107,51 @@ const MovieDetails = () => {
               <p>Rating: ★ {movie.vote_average?.toFixed(1)}</p>
               {movie.runtime && <p>Runtime: {movie.runtime} minutes</p>}
             </div>
-            <Button
-              onClick={handleWatchlistClick}
-              variant={isInWatchlist(movie.id) ? "secondary" : "default"}
-              className="w-full md:w-auto"
-            >
-              {isInWatchlist(movie.id) ? (
-                <>
-                  <Check className="mr-2 h-4 w-4" />
-                  In Watchlist
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add to Watchlist
-                </>
+            <div className="flex flex-wrap gap-4">
+              {trailer && (
+                <Button
+                  onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
+                  className="bg-netflix-red hover:bg-netflix-red/90"
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Watch Trailer
+                </Button>
               )}
-            </Button>
+              <Button
+                onClick={handleWatchlistClick}
+                variant={isInWatchlist(movie.id) ? "secondary" : "default"}
+                className="w-full md:w-auto"
+              >
+                {isInWatchlist(movie.id) ? (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    In Watchlist
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add to Watchlist
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
 
         {movie.videos?.results?.length > 0 && (
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold">Trailer</h2>
-            <div className="aspect-video">
-              <iframe
-                className="w-full h-full rounded-lg"
-                src={`https://www.youtube.com/embed/${movie.videos.results[0].key}`}
-                title="Movie Trailer"
-                allowFullScreen
-              />
+            <h2 className="text-2xl font-bold">Videos</h2>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {movie.videos.results.slice(0, 3).map((video) => (
+                <div key={video.key} className="aspect-video">
+                  <iframe
+                    className="w-full h-full rounded-lg"
+                    src={`https://www.youtube.com/embed/${video.key}`}
+                    title={video.name}
+                    allowFullScreen
+                  />
+                </div>
+              ))}
             </div>
           </section>
         )}

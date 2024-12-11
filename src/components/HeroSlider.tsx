@@ -11,7 +11,6 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import useEmblaCarousel from 'embla-carousel-react';
-import { cn } from "@/lib/utils";
 
 interface HeroSliderProps {
   items: Array<{
@@ -23,6 +22,12 @@ interface HeroSliderProps {
     media_type?: 'movie' | 'tv';
     release_date?: string;
     first_air_date?: string;
+    videos?: {
+      results: Array<{
+        key: string;
+        type: string;
+      }>;
+    };
   }>;
 }
 
@@ -35,6 +40,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     duration: 20,
   });
 
+  // Auto-slide every 5 seconds
   useEffect(() => {
     if (emblaApi) {
       const intervalId = setInterval(() => {
@@ -69,6 +75,9 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     });
   };
 
+  // Limit to 5 items
+  const limitedItems = items.slice(0, 5);
+
   return (
     <div className="relative w-full">
       <Carousel
@@ -80,9 +89,9 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         ref={emblaRef}
       >
         <CarouselContent>
-          {items.map((item) => (
+          {limitedItems.map((item) => (
             <CarouselItem key={item.id}>
-              <div className="relative aspect-[21/9] w-full overflow-hidden">
+              <div className="relative aspect-video w-full overflow-hidden">
                 <img
                   src={getImageUrl(item.backdrop_path, 'original')}
                   alt={item.title || item.name}
@@ -117,6 +126,23 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                           Add to Watchlist
                         </Button>
                       </div>
+                      {item.videos?.results?.some(video => video.type === "Trailer") && (
+                        <div className="mt-4">
+                          <Button
+                            variant="outline"
+                            size="lg"
+                            className="gap-2 border-white text-white hover:bg-white/10"
+                            onClick={() => {
+                              const trailer = item.videos.results.find(v => v.type === "Trailer");
+                              if (trailer) {
+                                window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank');
+                              }
+                            }}
+                          >
+                            Watch Trailer
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
