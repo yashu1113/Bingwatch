@@ -18,6 +18,7 @@ const Watchlist = () => {
             title: item.title,
             poster_path: item.posterPath,
             media_type: item.mediaType,
+            showDeleteButton: true,
           }))}
         />
       )}
