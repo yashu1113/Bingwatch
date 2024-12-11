@@ -30,9 +30,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-netflix-black text-white">
-      {!trendingLoading && trendingAll?.results && (
-        <HeroSlider items={trendingAll.results.slice(0, 5)} />
-      )}
+      <div className="-mt-16">
+        {!trendingLoading && trendingAll?.results && (
+          <HeroSlider items={trendingAll.results.slice(0, 5)} />
+        )}
+      </div>
       
       <main className="container space-y-12 py-8">
         <section className="space-y-6">
