@@ -9,8 +9,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import useEmblaCarousel from 'embla-carousel-react';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -113,7 +111,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                       <Button
                         variant="outline"
                         size="lg"
-                        className="gap-2"
+                        className="gap-2 hover:bg-transparent"
                         onClick={() => handleAddToWatchlist(item)}
                       >
                         <Plus className="h-5 w-5" />
@@ -127,10 +125,6 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
           </CarouselItem>
         ))}
       </CarouselContent>
-      <div className={cn("hidden md:block")}>
-        <CarouselPrevious className="left-4" />
-        <CarouselNext className="right-4" />
-      </div>
     </Carousel>
   );
 };
