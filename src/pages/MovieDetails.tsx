@@ -15,14 +15,16 @@ const MovieDetails = () => {
     queryKey: ['movie', id],
     queryFn: () => getDetails('movie', Number(id)),
     enabled: !!id,
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to load movie details. Please try again later.",
-        variant: "destructive",
-      });
-      navigate('/movies');
-    },
+    meta: {
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Failed to load movie details. Please try again later.",
+          variant: "destructive",
+        });
+        navigate('/movies');
+      }
+    }
   });
 
   const handleWatchlistClick = () => {
