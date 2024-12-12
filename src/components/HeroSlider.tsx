@@ -40,12 +40,12 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     duration: 20,
   });
 
-  // Auto-slide every 5 seconds
+  // Auto-slide every 3 seconds
   useEffect(() => {
     if (emblaApi) {
       const intervalId = setInterval(() => {
         emblaApi.scrollNext();
-      }, 5000);
+      }, 3000); // Changed from 5000 to 3000 milliseconds
 
       return () => clearInterval(intervalId);
     }
