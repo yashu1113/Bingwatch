@@ -79,7 +79,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   const limitedItems = items.slice(0, 5);
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-[95%] mx-auto">
       <Carousel
         opts={{
           loop: true,
@@ -91,47 +91,47 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         <CarouselContent>
           {limitedItems.map((item) => (
             <CarouselItem key={item.id}>
-              <div className="relative aspect-video w-full overflow-hidden">
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg">
                 <img
                   src={getImageUrl(item.backdrop_path, 'original')}
                   alt={item.title || item.name}
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 lg:p-12">
+                <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 lg:p-8">
                   <div className="container mx-auto">
-                    <div className="max-w-2xl space-y-4">
-                      <h2 className="text-2xl font-bold text-white md:text-4xl lg:text-5xl">
+                    <div className="max-w-2xl space-y-2 md:space-y-4">
+                      <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
                         {item.title || item.name}
                       </h2>
-                      <p className="line-clamp-2 text-sm text-gray-200 md:text-base lg:text-lg">
+                      <p className="line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200">
                         {item.overview}
                       </p>
-                      <div className="flex flex-wrap gap-4">
+                      <div className="flex flex-wrap gap-2 md:gap-4">
                         <Button
-                          size="lg"
-                          className="gap-2 bg-netflix-red hover:bg-netflix-red/90"
+                          size="sm"
+                          className="gap-1 md:gap-2 bg-netflix-red hover:bg-netflix-red/90 text-xs md:text-base"
                           onClick={() => navigate(`/${item.media_type || 'movie'}/${item.id}`)}
                         >
-                          <Play className="h-5 w-5" />
+                          <Play className="h-4 w-4" />
                           Watch Now
                         </Button>
                         <Button
                           variant="outline"
-                          size="lg"
-                          className="gap-2 border-white text-white hover:bg-white/10"
+                          size="sm"
+                          className="gap-1 md:gap-2 border-white text-white hover:bg-white/10 text-xs md:text-base"
                           onClick={() => handleAddToWatchlist(item)}
                         >
-                          <Plus className="h-5 w-5" />
+                          <Plus className="h-4 w-4" />
                           Add to Watchlist
                         </Button>
                       </div>
                       {item.videos?.results?.some(video => video.type === "Trailer") && (
-                        <div className="mt-4">
+                        <div className="mt-2 md:mt-4">
                           <Button
                             variant="outline"
-                            size="lg"
-                            className="gap-2 border-white text-white hover:bg-white/10"
+                            size="sm"
+                            className="gap-1 md:gap-2 border-white text-white hover:bg-white/10 text-xs md:text-base"
                             onClick={() => {
                               const trailer = item.videos.results.find(v => v.type === "Trailer");
                               if (trailer) {
