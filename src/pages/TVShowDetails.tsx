@@ -5,6 +5,7 @@ import { useWatchlist } from '@/contexts/WatchlistContext';
 import { Button } from '@/components/ui/button';
 import { Plus, Check, Play } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { MovieCarousel } from '@/components/MovieCarousel';
 
 const TVShowDetails = () => {
   const { id } = useParams<{ id: string }>();
