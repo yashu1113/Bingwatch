@@ -140,21 +140,27 @@ const MovieDetails = () => {
           </div>
         </div>
 
-        {movie.videos?.results?.length > 0 && (
+        {movie?.similar?.results?.length > 0 && (
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold">Videos</h2>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {movie.videos.results.slice(0, 3).map((video) => (
-                <div key={video.key} className="aspect-video">
-                  <iframe
-                    className="w-full h-full rounded-lg"
-                    src={`https://www.youtube.com/embed/${video.key}`}
-                    title={video.name}
-                    allowFullScreen
-                  />
-                </div>
-              ))}
-            </div>
+            <h2 className="text-2xl font-bold">Similar Movies</h2>
+            <MovieCarousel 
+              items={movie.similar.results.map(item => ({
+                ...item,
+                media_type: 'movie'
+              }))} 
+            />
+          </section>
+        )}
+
+        {movie?.recommendations?.results?.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold">Recommended Movies</h2>
+            <MovieCarousel 
+              items={movie.recommendations.results.map(item => ({
+                ...item,
+                media_type: 'movie'
+              }))} 
+            />
           </section>
         )}
       </div>

@@ -27,7 +27,12 @@ const TVShows = () => {
             ))}
           </div>
         ) : (
-          <MovieCarousel items={trendingTV?.results || []} />
+          <MovieCarousel 
+            items={trendingTV?.results.map(show => ({
+              ...show,
+              media_type: 'tv'
+            })) || []} 
+          />
         )}
       </section>
 
@@ -36,7 +41,12 @@ const TVShows = () => {
         {topRatedLoading ? (
           <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
         ) : (
-          <MovieCarousel items={topRatedTV?.results || []} />
+          <MovieCarousel 
+            items={topRatedTV?.results.map(show => ({
+              ...show,
+              media_type: 'tv'
+            })) || []} 
+          />
         )}
       </section>
     </main>
