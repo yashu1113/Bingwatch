@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getDetails } from '@/services/tmdb';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { Button } from '@/components/ui/button';
-import { Plus, Check, Play } from 'lucide-react';
+import { Plus, Check, Play, Video } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { MovieCarousel } from '@/components/MovieCarousel';
 
@@ -55,7 +55,7 @@ const TVShowDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="container py-8">
+      <div className="container py-4 md:py-8">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-1/3 bg-gray-800 rounded" />
           <div className="h-96 bg-gray-800 rounded" />
@@ -66,7 +66,7 @@ const TVShowDetails = () => {
 
   if (isError || !show) {
     return (
-      <div className="container py-8">
+      <div className="container py-4 md:py-8">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold">TV Show not found</h1>
           <Button 
@@ -84,18 +84,22 @@ const TVShowDetails = () => {
     (video) => video.type === "Trailer"
   );
 
+  const videos = show.videos?.results?.filter(
+    (video) => video.site === "YouTube"
+  ) || [];
+
   return (
     <div className="min-h-screen bg-netflix-black text-white">
-      <div className="container mx-auto px-4 py-8 space-y-8">
-        <div className="grid gap-8 md:grid-cols-[300px,1fr]">
+      <div className="container mx-auto px-4 py-4 md:py-8 space-y-6 md:space-y-8">
+        <div className="grid gap-6 md:gap-8 md:grid-cols-[300px,1fr]">
           <img
             src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
             alt={show.name}
             className="rounded-lg shadow-lg w-full"
           />
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold">{show.name}</h1>
-            <p className="text-lg text-gray-400">{show.overview}</p>
+            <h1 className="text-2xl md:text-4xl font-bold">{show.name}</h1>
+            <p className="text-base md:text-lg text-gray-400">{show.overview}</p>
             <div className="flex flex-wrap gap-2">
               {show.genres?.map((genre) => (
                 <span
@@ -112,7 +116,7 @@ const TVShowDetails = () => {
               <p>Seasons: {show.number_of_seasons}</p>
               <p>Rating: ★ {show.vote_average?.toFixed(1)}</p>
             </div>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3">
               {trailer && (
                 <Button
                   onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
@@ -125,7 +129,6 @@ const TVShowDetails = () => {
               <Button
                 onClick={handleWatchlistClick}
                 variant={isInWatchlist(show.id) ? "secondary" : "default"}
-                className="w-full md:w-auto"
               >
                 {isInWatchlist(show.id) ? (
                   <>
@@ -143,9 +146,30 @@ const TVShowDetails = () => {
           </div>
         </div>
 
+        {videos.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+              <Video className="h-5 w-5" />
+              Videos
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {videos.map((video) => (
+                <div key={video.key} className="aspect-video">
+                  <iframe
+                    className="w-full h-full rounded-lg"
+                    src={`https://www.youtube.com/embed/${video.key}`}
+                    title={video.name}
+                    allowFullScreen
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {show?.similar?.results?.length > 0 && (
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold">Similar TV Shows</h2>
+            <h2 className="text-xl md:text-2xl font-bold">Similar TV Shows</h2>
             <MovieCarousel 
               items={show.similar.results.map(item => ({
                 ...item,
@@ -157,7 +181,7 @@ const TVShowDetails = () => {
 
         {show?.recommendations?.results?.length > 0 && (
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold">Recommended TV Shows</h2>
+            <h2 className="text-xl md:text-2xl font-bold">Recommended TV Shows</h2>
             <MovieCarousel 
               items={show.recommendations.results.map(item => ({
                 ...item,
