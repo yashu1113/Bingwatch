@@ -14,7 +14,7 @@ const Movies = () => {
   });
 
   return (
-    <main className="container space-y-8 py-4 md:space-y-12 md:py-8">
+    <main className="container space-y-8 py-4 md:space-y-12 md:py-8 mt-[80px]"> {/* Added margin-top */}
       <section className="space-y-4 md:space-y-6">
         <h2 className="text-2xl font-bold text-white md:text-3xl">Trending Movies</h2>
         {trendingLoading ? (
