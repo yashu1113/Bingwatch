@@ -91,37 +91,22 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         <CarouselContent>
           {limitedItems.map((item) => (
             <CarouselItem key={item.id} className="relative">
-              <div className="relative w-full min-h-screen">
-                {/* Image Container with responsive sizing */}
-                <div className="absolute inset-0 w-full">
-                  <img
-                    src={getImageUrl(item.backdrop_path, 'original')}
-                    alt={item.title || item.name}
-                    className="w-full h-full object-cover"
-                    style={{
-                      aspectRatio: '16/9',
-                      height: 'calc(100vh - var(--header-height, 0px))'
-                    }}
-                  />
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
-                </div>
-
-                {/* Content Container */}
-                <div className="absolute inset-0 flex items-center">
-                  <div className="container mx-auto px-4 md:px-8 lg:px-12">
+              <div className="relative w-full h-[56.25vw] md:h-[85vh] lg:h-[95vh] overflow-hidden">
+                <img
+                  src={getImageUrl(item.backdrop_path, 'original')}
+                  alt={item.title || item.name}
+                  className="absolute top-0 left-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 lg:p-12">
+                  <div className="container mx-auto">
                     <div className="max-w-2xl space-y-3 md:space-y-4 lg:space-y-6">
-                      {/* Title */}
                       <h2 className="text-2xl md:text-4xl lg:text-6xl font-bold text-white line-clamp-2">
                         {item.title || item.name}
                       </h2>
-
-                      {/* Overview */}
-                      <p className="hidden sm:block text-sm md:text-base lg:text-lg text-gray-200 line-clamp-3 max-w-xl">
+                      <p className="hidden sm:block line-clamp-2 text-sm md:text-base lg:text-lg text-gray-200 max-w-xl">
                         {item.overview}
                       </p>
-
-                      {/* Buttons */}
                       <div className="flex flex-wrap gap-2 md:gap-4 pt-2">
                         <Button
                           size="sm"
@@ -141,8 +126,6 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                           Add to Watchlist
                         </Button>
                       </div>
-
-                      {/* Trailer Button */}
                       {item.videos?.results?.some(video => video.type === "Trailer") && (
                         <div className="mt-2 md:mt-4">
                           <Button
