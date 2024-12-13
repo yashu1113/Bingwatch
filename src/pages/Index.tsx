@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getTrending, getTopRated, getMoviesByGenre } from '@/services/tmdb';
 import { MovieCarousel } from '@/components/MovieCarousel';
 import { HeroSlider } from '@/components/HeroSlider';
+import { TrendingSlider } from '@/components/TrendingSlider';
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -39,18 +40,7 @@ const Index = () => {
       <main className="container space-y-12 py-8">
         <section className="space-y-6">
           <h2 className="text-3xl font-bold">Trending Now</h2>
-          {trendingLoading ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="aspect-[2/3] animate-pulse rounded-lg bg-gray-800"
-                />
-              ))}
-            </div>
-          ) : (
-            <MovieCarousel items={trendingAll?.results || []} autoPlay />
-          )}
+          <TrendingSlider />
         </section>
 
         <section className="space-y-6">
