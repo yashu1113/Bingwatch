@@ -14,7 +14,7 @@ const TVShows = () => {
   });
 
   return (
-    <main className="container space-y-12 py-8">
+    <main className="container space-y-12 py-8 mt-[80px]"> {/* Added margin-top */}
       <section className="space-y-6">
         <h2 className="text-3xl font-bold text-white">Trending TV Shows</h2>
         {trendingLoading ? (
