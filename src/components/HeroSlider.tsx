@@ -103,7 +103,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                     <div className="flex flex-wrap gap-2 md:gap-4">
                       <Button
                         size="sm"
-                        className="gap-1 md:gap-2 bg-netflix-red text-xs md:text-base"
+                        className="gap-1 md:gap-2 bg-netflix-red hover:bg-netflix-red/90 text-xs md:text-base"
                         onClick={() =>
                           navigate(`/${item.media_type || "movie"}/${item.id}`)
                         }
@@ -113,11 +113,11 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                       </Button>
                       <Button
                         variant="outline"
-                        size="lg"
-                        className="gap-2 border-white text-white text-sm md:text-base !hover:bg-transparent !border-transparent !text-white !bg-transparent"
+                        size="sm"
+                        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-sm md:text-base lg:text-lg h-10 md:h-12 font-semibold flex items-center justify-center"
                         onClick={() => handleAddToWatchlist(item)}
                       >
-                        <Plus className="h-6 w-6" />
+                        <Plus className="h-5 w-5 md:h-6 md:w-6 mr-2" />
                         Add to Watchlist
                       </Button>
                     </div>
