@@ -14,7 +14,8 @@ const TVShows = () => {
   });
 
   return (
-    <main className="container space-y-12 py-8 mt-[80px] "> {/* Added bg-gray-800 for background color */}
+   <main className="container space-y-12 py-8 mt-[80px] bg-netflix-black/95 backdrop-blur-lg shadow-lg bg-gradient-to-b from-black/80 to-transparent">
+
 
       <section className="space-y-6">
         <h2 className="text-3xl font-bold text-white">Trending TV Shows</h2>
