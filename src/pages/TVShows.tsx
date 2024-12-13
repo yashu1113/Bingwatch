@@ -15,7 +15,7 @@ const TVShows = () => {
 
   return (
     <main className="container space-y-12 py-8 mt-[80px]"> {/* Added margin-top */}
-      <section className="space-y-6">
+      <section className="space-y-6 bg-black p-6 rounded-lg"> {/* Added black background */}
         <h2 className="text-3xl font-bold text-white">Trending TV Shows</h2>
         {trendingLoading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -36,7 +36,7 @@ const TVShows = () => {
         )}
       </section>
 
-      <section className="space-y-6">
+      <section className="space-y-6 bg-black p-6 rounded-lg"> {/* Added black background */}
         <h2 className="text-3xl font-bold text-white">Top Rated TV Shows</h2>
         {topRatedLoading ? (
           <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
