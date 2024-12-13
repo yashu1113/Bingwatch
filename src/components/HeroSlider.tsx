@@ -114,10 +114,10 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-sm md:text-base lg:text-lg h-10 md:h-12 font-semibold flex items-center justify-center"
+                        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 md:h-10 font-semibold flex items-center justify-center"
                         onClick={() => handleAddToWatchlist(item)}
                       >
-                        <Plus className="h-5 w-5 md:h-6 md:w-6 mr-2" />
+                        <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
                         Add to Watchlist
                       </Button>
                     </div>
