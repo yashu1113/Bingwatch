@@ -2,23 +2,36 @@ import { Link, useLocation } from 'react-router-dom';
 import { SearchBar } from './SearchBar';
 import { cn } from '@/lib/utils';
 import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 
 export const Navigation = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { watchlist } = useWatchlist();
   
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-800 bg-netflix-black/95 backdrop-blur">
-      <div className="container flex h-16 items-center justify-between px-4">
+    <nav className={cn(
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+      isScrolled ? "bg-netflix-black/95 backdrop-blur shadow" : "bg-gradient-to-b from-black/80 to-transparent"
+    )}>
+      <div className="container flex h-16 md:h-20 items-center justify-between px-4">
         <div className="flex items-center gap-8">
-          <Link to="/" className="text-2xl font-bold text-netflix-red">
+          <Link to="/" className="text-2xl md:text-3xl font-bold text-netflix-red">
             MovieDB
           </Link>
           <div className="hidden items-center space-x-6 md:flex">

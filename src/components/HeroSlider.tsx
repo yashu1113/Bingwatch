@@ -41,7 +41,6 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     dragFree: true,
   });
 
-  // Auto-slide every 5 seconds
   useEffect(() => {
     if (emblaApi) {
       const intervalId = setInterval(() => {
@@ -76,11 +75,10 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     });
   };
 
-  // Limit to 5 items for better performance
   const limitedItems = items.slice(0, 5);
 
   return (
-    <div className="relative w-[90%] mx-auto">
+    <div className="relative w-full">
       <Carousel
         opts={{
           loop: true,
@@ -93,38 +91,38 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         <CarouselContent>
           {limitedItems.map((item) => (
             <CarouselItem key={item.id} className="relative">
-              <div className="relative aspect-[16/9] sm:aspect-[2/1] lg:aspect-[2.5/1] w-full overflow-hidden rounded-lg">
+              <div className="relative w-full h-[56.25vw] md:h-[85vh] lg:h-[95vh] overflow-hidden">
                 <img
                   src={getImageUrl(item.backdrop_path, 'original')}
                   alt={item.title || item.name}
-                  className="h-full w-full object-cover"
+                  className="absolute top-0 left-0 w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 lg:p-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 lg:p-12">
                   <div className="container mx-auto">
-                    <div className="max-w-2xl space-y-2 md:space-y-4">
-                      <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
+                    <div className="max-w-2xl space-y-3 md:space-y-4 lg:space-y-6">
+                      <h2 className="text-2xl md:text-4xl lg:text-6xl font-bold text-white line-clamp-2">
                         {item.title || item.name}
                       </h2>
-                      <p className="hidden sm:block line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200">
+                      <p className="hidden sm:block line-clamp-2 text-sm md:text-base lg:text-lg text-gray-200 max-w-xl">
                         {item.overview}
                       </p>
-                      <div className="flex flex-wrap gap-2 md:gap-4">
+                      <div className="flex flex-wrap gap-2 md:gap-4 pt-2">
                         <Button
                           size="sm"
-                          className="gap-1 md:gap-2 bg-netflix-red hover:bg-netflix-red/90 text-xs md:text-base"
+                          className="gap-2 bg-netflix-red hover:bg-netflix-red/90 text-sm md:text-base lg:text-lg h-8 md:h-12"
                           onClick={() => navigate(`/${item.media_type || 'movie'}/${item.id}`)}
                         >
-                          <Play className="h-3 w-3 md:h-4 md:w-4" />
+                          <Play className="h-4 w-4 md:h-5 md:w-5" />
                           Watch Now
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1 md:gap-2 border-white text-white hover:bg-white/10 text-xs md:text-base"
+                          className="gap-2 border-white text-white hover:bg-white/10 text-sm md:text-base lg:text-lg h-8 md:h-12"
                           onClick={() => handleAddToWatchlist(item)}
                         >
-                          <Plus className="h-3 w-3 md:h-4 md:w-4" />
+                          <Plus className="h-4 w-4 md:h-5 md:w-5" />
                           Add to Watchlist
                         </Button>
                       </div>
@@ -133,7 +131,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-1 md:gap-2 border-white text-white hover:bg-white/10 text-xs md:text-base"
+                            className="gap-2 border-white text-white hover:bg-white/10 text-sm md:text-base lg:text-lg h-8 md:h-12"
                             onClick={() => {
                               const trailer = item.videos.results.find(v => v.type === "Trailer");
                               if (trailer) {
