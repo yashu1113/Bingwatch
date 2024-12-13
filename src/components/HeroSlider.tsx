@@ -73,16 +73,16 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   return (
     <div
-      className="relative w-[95%] mx-auto"
+      className="relative w-full h-screen"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div ref={emblaRef} className="w-full overflow-hidden">
-        <div className="flex">
+      <div ref={emblaRef} className="w-full h-full overflow-hidden">
+        <div className="flex h-full w-full">
           {limitedItems.map((item) => (
             <div
               key={item.id}
-              className="relative flex-none aspect-video w-full overflow-hidden rounded-lg"
+              className="relative flex-none w-full h-full overflow-hidden"
             >
               <img
                 src={getImageUrl(item.backdrop_path, "original")}
