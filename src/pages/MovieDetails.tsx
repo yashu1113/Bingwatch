@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Check, Play, Video } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { MovieCarousel } from '@/components/MovieCarousel';
+import { Suspense, lazy } from 'react';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -152,14 +153,20 @@ const MovieDetails = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {videos.map((video) => (
-                <div key={video.key} className="aspect-video">
+                <Suspense 
+                  key={video.key} 
+                  fallback={
+                    <div className="aspect-video bg-gray-800 animate-pulse rounded-lg" />
+                  }
+                >
                   <iframe
+                    loading="lazy"
                     className="w-full h-full rounded-lg"
                     src={`https://www.youtube.com/embed/${video.key}`}
                     title={video.name}
                     allowFullScreen
                   />
-                </div>
+                </Suspense>
               ))}
             </div>
           </section>
