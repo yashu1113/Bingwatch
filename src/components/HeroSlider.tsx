@@ -38,14 +38,15 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     duration: 20,
+    dragFree: true,
   });
 
-  // Auto-slide every 3 seconds
+  // Auto-slide every 5 seconds
   useEffect(() => {
     if (emblaApi) {
       const intervalId = setInterval(() => {
         emblaApi.scrollNext();
-      }, 3000); // Changed from 5000 to 3000 milliseconds
+      }, 5000);
 
       return () => clearInterval(intervalId);
     }
@@ -75,23 +76,24 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     });
   };
 
-  // Limit to 5 items
+  // Limit to 5 items for better performance
   const limitedItems = items.slice(0, 5);
 
   return (
-    <div className="relative w-[95%] mx-auto">
+    <div className="relative w-[90%] mx-auto">
       <Carousel
         opts={{
           loop: true,
           duration: 20,
+          dragFree: true,
         }}
         className="w-full"
         ref={emblaRef}
       >
         <CarouselContent>
           {limitedItems.map((item) => (
-            <CarouselItem key={item.id}>
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+            <CarouselItem key={item.id} className="relative">
+              <div className="relative aspect-[16/9] sm:aspect-[2/1] lg:aspect-[2.5/1] w-full overflow-hidden rounded-lg">
                 <img
                   src={getImageUrl(item.backdrop_path, 'original')}
                   alt={item.title || item.name}
@@ -104,7 +106,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                       <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
                         {item.title || item.name}
                       </h2>
-                      <p className="line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200">
+                      <p className="hidden sm:block line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200">
                         {item.overview}
                       </p>
                       <div className="flex flex-wrap gap-2 md:gap-4">
@@ -113,7 +115,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                           className="gap-1 md:gap-2 bg-netflix-red hover:bg-netflix-red/90 text-xs md:text-base"
                           onClick={() => navigate(`/${item.media_type || 'movie'}/${item.id}`)}
                         >
-                          <Play className="h-4 w-4" />
+                          <Play className="h-3 w-3 md:h-4 md:w-4" />
                           Watch Now
                         </Button>
                         <Button
@@ -122,7 +124,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                           className="gap-1 md:gap-2 border-white text-white hover:bg-white/10 text-xs md:text-base"
                           onClick={() => handleAddToWatchlist(item)}
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="h-3 w-3 md:h-4 md:w-4" />
                           Add to Watchlist
                         </Button>
                       </div>
