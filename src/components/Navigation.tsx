@@ -34,7 +34,7 @@ export const Navigation = () => {
       <div className="container flex h-16 md:h-20 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-8">
           <Link to="/" className="text-2xl md:text-3xl font-bold text-netflix-red">
-            MovieDB
+            BingWatch
           </Link>
           <div className="hidden items-center space-x-6 md:flex">
             <NavLink to="/" active={isActive('/')}>Home</NavLink>
