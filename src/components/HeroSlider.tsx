@@ -23,7 +23,7 @@ interface HeroSliderProps {
         type: string;
       }>;
     };
-  }> ;
+  }>;
 }
 
 export const HeroSlider = ({ items }: HeroSliderProps) => {
@@ -73,16 +73,16 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   return (
     <div
-      className="relative w-full h-screen" // Fullscreen
+      className="relative w-[95%] mx-auto"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div ref={emblaRef} className="w-full h-full overflow-hidden">
-        <div className="flex w-full h-full">
+      <div ref={emblaRef} className="w-full overflow-hidden">
+        <div className="flex">
           {limitedItems.map((item) => (
             <div
               key={item.id}
-              className="relative flex-none w-full h-full"
+              className="relative flex-none aspect-video w-full overflow-hidden rounded-lg"
             >
               <img
                 src={getImageUrl(item.backdrop_path, "original")}
@@ -91,30 +91,30 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 lg:p-12">
+              <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 lg:p-8">
                 <div className="container mx-auto">
                   <div className="max-w-2xl space-y-2 md:space-y-4">
-                    <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold text-white line-clamp-2">
+                    <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
                       {item.title || item.name}
                     </h2>
-                    <p className="line-clamp-3 text-xs md:text-sm lg:text-base text-gray-200">
+                    <p className="line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200">
                       {item.overview}
                     </p>
-                    <div className="flex flex-wrap gap-4 pt-4">
+                    <div className="flex flex-wrap gap-2 md:gap-4">
                       <Button
-                        size="lg"
-                        className="gap-2 bg-netflix-red hover:bg-netflix-red/90 text-sm md:text-base"
+                        size="sm"
+                        className="gap-1 md:gap-2 bg-netflix-red text-xs md:text-base"
                         onClick={() =>
                           navigate(`/${item.media_type || "movie"}/${item.id}`)
                         }
                       >
-                        <Play className="h-6 w-6" />
+                        <Play className="h-4 w-4" />
                         Watch Now
                       </Button>
                       <Button
                         variant="outline"
                         size="lg"
-                        className="gap-2 border-white text-white hover:bg-white/10 text-sm md:text-base"
+                        className="gap-2 border-white text-white text-sm md:text-base"
                         onClick={() => handleAddToWatchlist(item)}
                       >
                         <Plus className="h-6 w-6" />
@@ -131,18 +131,18 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
       {/* Navigation Buttons */}
       <button
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-3 hover:bg-black"
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 hover:bg-black"
         onClick={() => emblaApi?.scrollPrev()}
         aria-label="Previous Slide"
       >
-        <ChevronLeft className="h-8 w-8" />
+        <ChevronLeft className="h-6 w-6" />
       </button>
       <button
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-3 hover:bg-black"
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 hover:bg-black"
         onClick={() => emblaApi?.scrollNext()}
         aria-label="Next Slide"
       >
-        <ChevronRight className="h-8 w-8" />
+        <ChevronRight className="h-6 w-6" />
       </button>
     </div>
   );
