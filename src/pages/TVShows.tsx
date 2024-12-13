@@ -14,15 +14,15 @@ const TVShows = () => {
   });
 
   return (
-    <main className="container space-y-12 py-8 mt-[80px]"> {/* Add margin-top for spacing */}
-      <section className="space-y-6 bg-gray-800 p-6 rounded-lg"> {/* Same bg-gray-800 color */}
+    <main className="container space-y-12 py-8">
+      <section className="space-y-6">
         <h2 className="text-3xl font-bold text-white">Trending TV Shows</h2>
         {trendingLoading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {Array.from({ length: 10 }).map((_, i) => (
               <div
                 key={i}
-                className="aspect-[2/3] animate-pulse rounded-lg bg-gray-700" {/* Adjusted color for loading placeholder */}
+                className="aspect-[2/3] animate-pulse rounded-lg bg-gray-800"
               />
             ))}
           </div>
@@ -36,10 +36,10 @@ const TVShows = () => {
         )}
       </section>
 
-      <section className="space-y-6 bg-gray-800 p-6 rounded-lg"> {/* Same bg-gray-800 color */}
+      <section className="space-y-6">
         <h2 className="text-3xl font-bold text-white">Top Rated TV Shows</h2>
         {topRatedLoading ? (
-          <div className="animate-pulse rounded-lg bg-gray-700 h-[300px]" /> {/* Adjusted color for loading placeholder */}
+          <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
         ) : (
           <MovieCarousel 
             items={topRatedTV?.results.map(show => ({
@@ -53,4 +53,4 @@ const TVShows = () => {
   );
 };
 
-export default TVShows;
+export default TVShows; 
