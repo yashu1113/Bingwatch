@@ -5,7 +5,7 @@ const Watchlist = () => {
   const { watchlist } = useWatchlist();
 
   return (
-    <main className="container py-8">
+    <main className="container py-8 mt-[80px]"> {/* Added margin-top to prevent overlap with navbar */}
       <h1 className="mb-8 text-3xl font-bold text-white">My Watchlist</h1>
       {watchlist.length === 0 ? (
         <div className="text-center text-gray-400">
