@@ -37,15 +37,16 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   const { addToWatchlist, isInWatchlist } = useWatchlist();
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    duration: 20,
+    duration: 20, // smooth transition duration
     dragFree: true,
+    skipSnaps: false, // Ensures snaps happen
   });
 
   useEffect(() => {
     if (emblaApi) {
       const intervalId = setInterval(() => {
         emblaApi.scrollNext();
-      }, 5000); // Change the interval to scroll every 5 seconds
+      }, 5000); // Scroll every 5 seconds
 
       return () => clearInterval(intervalId);
     }
@@ -75,7 +76,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     });
   };
 
-  const limitedItems = items.slice(0, 5); // Limit the items to the first 5
+  const limitedItems = items.slice(0, 5);
 
   return (
     <div className="relative w-full">
@@ -119,7 +120,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-2 border-white text-white text-sm md:text-base lg:text-lg h-8 md:h-12" // Removed hover effect
+                          className="gap-2 border-white text-white text-sm md:text-base lg:text-lg h-8 md:h-12 hover:border-transparent" // Removed hover effect
                           onClick={() => handleAddToWatchlist(item)}
                         >
                           <Plus className="h-4 w-4 md:h-5 md:w-5" />
