@@ -10,7 +10,6 @@ import MovieDetails from "./pages/MovieDetails";
 import TVShows from "./pages/TVShows";
 import TVShowDetails from "./pages/TVShowDetails";
 import Watchlist from "./pages/Watchlist";
-import GenrePage from "./pages/GenrePage";
 import { Navigation } from "./components/Navigation";
 import { WatchlistProvider } from "./contexts/WatchlistContext";
 
@@ -42,7 +41,6 @@ const App = () => {
                 <Route path="/tv" element={<TVShows />} />
                 <Route path="/tv/:id" element={<TVShowDetails />} />
                 <Route path="/watchlist" element={<Watchlist />} />
-                <Route path="/genre/:id" element={<GenrePage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>
