@@ -12,8 +12,8 @@ import {
 
 export const GenreCarousel = () => {
   const { data: genres, isLoading } = useQuery({
-    queryKey: ['genres'],
-    queryFn: getGenres,
+    queryKey: ['genres', 'movie'],
+    queryFn: () => getGenres('movie'),
   });
 
   if (isLoading) {
