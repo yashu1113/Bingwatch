@@ -1,68 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
-import { getTrending, getTopRated, getMoviesByGenre } from '@/services/tmdb';
-import { MovieCarousel } from '@/components/MovieCarousel';
-import { HeroSlider } from '@/components/HeroSlider';
-import { TrendingSlider } from '@/components/TrendingSlider';
-
-const FEATURED_GENRES = [
-  { id: 28, name: 'Action' },
-  { id: 35, name: 'Comedy' },
-  { id: 18, name: 'Drama' },
-];
+import { TrendingSlider } from "@/components/TrendingSlider";
+import { Genres } from "@/components/Genres";
 
 const Index = () => {
-  const { data: trendingAll, isLoading: trendingLoading } = useQuery({
-    queryKey: ['trending', 'all', 'week'],
-    queryFn: () => getTrending('all', 'week'),
-  });
-
-  const { data: topRated, isLoading: topRatedLoading } = useQuery({
-    queryKey: ['movies', 'top-rated'],
-    queryFn: () => getTopRated(),
-  });
-
-  const genreQueries = FEATURED_GENRES.map(genre => ({
-    ...useQuery({
-      queryKey: ['movies', 'genre', genre.id],
-      queryFn: () => getMoviesByGenre(genre.id),
-    }),
-    name: genre.name,
-  }));
-
   return (
-    <div className="min-h-screen bg-netflix-black text-white">
+    <div className="space-y-8">
       <div className="-mt-16">
-        {!trendingLoading && trendingAll?.results && (
-          <HeroSlider items={trendingAll.results.slice(0, 5)} />
-        )}
+        <TrendingSlider />
       </div>
       
-      <main className="container space-y-12 py-8">
-        <section className="space-y-6">
-          <h2 className="text-3xl font-bold">Trending Now</h2>
-          <TrendingSlider />
-        </section>
-
-        <section className="space-y-6">
-          <h2 className="text-3xl font-bold">Top Rated</h2>
-          {topRatedLoading ? (
-            <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
-          ) : (
-            <MovieCarousel items={topRated?.results || []} />
-          )}
-        </section>
-
-        {genreQueries.map((query, index) => (
-          <section key={index} className="space-y-6">
-            <h2 className="text-3xl font-bold">{query.name} Movies</h2>
-            {query.isLoading ? (
-              <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
-            ) : (
-              <MovieCarousel items={query.data?.results || []} />
-            )}
-          </section>
-        ))}
-      </main>
+      <div className="container">
+        <h2 className="mb-4 text-2xl font-bold text-white md:text-3xl">
+          Explore by Genre
+        </h2>
+        <Genres />
+      </div>
     </div>
   );
 };
