@@ -31,7 +31,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <div className="min-h-screen bg-netflix-black">
+            <div className="min-h-screen bg-netflix-black pb-16 md:pb-0">
               <Navigation />
               <Routes>
                 <Route path="/" element={<Index />} />

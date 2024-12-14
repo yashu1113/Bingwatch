@@ -41,7 +41,7 @@ export const MediaCard = ({
   return (
     <Link
       to={`/${mediaType}/${id}`}
-      className="group relative overflow-hidden rounded-lg transition-transform hover:scale-105"
+      className="group relative overflow-hidden rounded-lg transition-transform hover:scale-105 touch-manipulation"
     >
       <div className="aspect-[2/3] w-full">
         <img
@@ -70,7 +70,7 @@ export const MediaCard = ({
         )}
       >
         <div className="absolute bottom-0 p-4 text-white">
-          <h3 className="text-lg font-bold">{title}</h3>
+          <h3 className="text-lg font-bold line-clamp-2">{title}</h3>
           {releaseDate && (
             <p className="text-sm opacity-80">
               {new Date(releaseDate).getFullYear()}

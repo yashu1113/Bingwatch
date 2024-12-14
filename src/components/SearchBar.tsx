@@ -11,6 +11,7 @@ export const SearchBar = () => {
     e.preventDefault();
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+      setQuery('');
     }
   };
 
