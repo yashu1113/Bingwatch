@@ -3,6 +3,7 @@ import { getTrending, getTopRated, getMoviesByGenre } from '@/services/tmdb';
 import { MovieCarousel } from '@/components/MovieCarousel';
 import { HeroSlider } from '@/components/HeroSlider';
 import { TrendingSlider } from '@/components/TrendingSlider';
+import { GenreCarousel } from '@/components/GenreCarousel';
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -38,6 +39,11 @@ const Index = () => {
       </div>
       
       <main className="container space-y-12 py-8">
+        <section className="space-y-6">
+          <h2 className="text-3xl font-bold">Genres</h2>
+          <GenreCarousel />
+        </section>
+
         <section className="space-y-6">
           <h2 className="text-3xl font-bold">Trending Now</h2>
           <TrendingSlider />
