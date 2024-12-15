@@ -10,11 +10,11 @@ interface StreamingButtonsProps {
 
 const getProviderColor = (providerName: string): string => {
   const name = providerName.toLowerCase();
-  if (name.includes('netflix')) return 'streaming-netflix';
-  if (name.includes('prime')) return 'streaming-prime';
-  if (name.includes('hotstar')) return 'streaming-hotstar';
-  if (name.includes('jio')) return 'streaming-jio';
-  return 'default';
+  if (name.includes('netflix')) return 'bg-red-600 hover:bg-red-700 border-red-700';  // Netflix: Red hover
+  if (name.includes('prime')) return 'bg-[#00A8E8] hover:bg-[#009ACD] border-[#00A8E8]';  // Prime: Light Blue hover
+  if (name.includes('hotstar')) return 'bg-[#FF8000] hover:bg-[#E65C00] border-[#FF8000]';  // Hotstar: Orange hover
+  if (name.includes('jio')) return 'bg-[#F10F29] hover:bg-[#C40D24] border-[#F10F29]';  // Jio: Red hover
+  return 'bg-gray-600 hover:bg-gray-700 border-gray-700'; // Default: Gray hover
 };
 
 export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
@@ -24,17 +24,13 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
   });
 
   const handleStreamingClick = (url: string) => {
-    // Open in a new window/tab with proper origin handling
     const newWindow = window.open(url, '_blank');
     if (newWindow) {
-      // Only attempt postMessage if the window was successfully opened
       try {
-        // Use a more secure approach with specific origin
         const targetOrigin = new URL(url).origin;
         newWindow.postMessage({ type: 'STREAMING_PROVIDER_OPENED' }, targetOrigin);
       } catch (error) {
         console.warn('Failed to send postMessage:', error);
-        // Fallback to opening the URL directly if postMessage fails
       }
     }
   };
@@ -67,8 +63,7 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
             key={provider.provider_id}
             variant="outline"
             className={`flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg transition-all duration-300
-              hover:bg-${providerColor} hover:border-${providerColor} hover:animate-glow
-              focus:ring-2 focus:ring-${providerColor}/50`}
+              ${providerColor} focus:ring-2 focus:ring-${providerColor.split(" ")[0]}/50`}
             onClick={() => handleStreamingClick(providers.results.IN.link)}
             aria-label={`Watch on ${provider.provider_name}`}
           >
