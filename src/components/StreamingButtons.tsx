@@ -39,7 +39,7 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
         <Button
           key={provider.provider_id}
           variant="outline"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg transition-colors"
           onClick={() => window.open(providers.results.IN.link, '_blank')}
           aria-label={`Watch on ${provider.provider_name}`}
         >

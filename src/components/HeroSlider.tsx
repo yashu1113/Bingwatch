@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Play, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { getImageUrl } from "@/services/tmdb";
@@ -31,7 +31,19 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   const { toast } = useToast();
   const { addToWatchlist, isInWatchlist } = useWatchlist();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    };
+
+    emblaApi.on("select", onSelect);
+    return () => emblaApi.off("select", onSelect);
+  }, [emblaApi]);
 
   // Auto-slide logic
   useEffect(() => {
@@ -73,7 +85,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   return (
     <div
-      className="relative w-full h-screen"
+      className="relative w-full h-screen overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -129,21 +141,19 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <button
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 hover:bg-black"
-        onClick={() => emblaApi?.scrollPrev()}
-        aria-label="Previous Slide"
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </button>
-      <button
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 hover:bg-black"
-        onClick={() => emblaApi?.scrollNext()}
-        aria-label="Next Slide"
-      >
-        <ChevronRight className="h-6 w-6" />
-      </button>
+      {/* Dot Navigation */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+        {limitedItems.map((_, index) => (
+          <button
+            key={index}
+            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+              index === selectedIndex ? "bg-white scale-125" : "bg-white/50"
+            }`}
+            onClick={() => emblaApi?.scrollTo(index)}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
     </div>
   );
 };

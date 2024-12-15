@@ -19,7 +19,7 @@ export const GenreCard = ({ id, name, className }: GenreCardProps) => {
     <button
       onClick={handleClick}
       className={cn(
-        "w-full h-24 rounded-lg bg-gradient-to-br from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 transition-all duration-300 flex items-center justify-center p-4 text-white font-semibold text-lg shadow-lg hover:shadow-xl",
+        "w-full h-24 rounded-lg bg-gradient-to-br from-purple-600/90 to-purple-800/90 flex items-center justify-center p-4 text-white font-semibold text-lg shadow-md",
         className
       )}
     >
