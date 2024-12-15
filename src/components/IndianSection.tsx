@@ -26,9 +26,13 @@ export const IndianSection = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl sm:text-3xl font-bold">Indian Entertainment</h2>
         <Tabs defaultValue="movie" onValueChange={(value) => setMediaType(value as 'movie' | 'tv')}>
-          <TabsList className="space-x-2 sm:space-x-4">
-            <TabsTrigger value="movie" className="text-sm sm:text-base">Movies</TabsTrigger>
-            <TabsTrigger value="tv" className="text-sm sm:text-base">TV Shows</TabsTrigger>
+          <TabsList className="flex space-x-4 sm:space-x-6 md:space-x-8">
+            <TabsTrigger value="movie" className="text-sm sm:text-base font-medium">
+              Movies
+            </TabsTrigger>
+            <TabsTrigger value="tv" className="text-sm sm:text-base font-medium">
+              TV Shows
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
