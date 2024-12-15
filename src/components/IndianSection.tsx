@@ -26,7 +26,7 @@ export const IndianSection = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl sm:text-3xl font-bold">Indian Entertainment</h2>
         <Tabs defaultValue="movie" onValueChange={(value) => setMediaType(value as 'movie' | 'tv')}>
-          <TabsList className="flex space-x-4 sm:space-x-6 md:space-x-8">
+          <TabsList className="flex justify-center space-x-4 sm:space-x-6 md:space-x-8">
             <TabsTrigger value="movie" className="text-sm sm:text-base font-medium">
               Movies
             </TabsTrigger>
@@ -55,7 +55,7 @@ export const IndianSection = () => {
                 onClick={handleLoadMore}
                 disabled={isFetching}
                 variant="outline"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto hover:unset"
               >
                 {isFetching ? 'Loading...' : 'Load More'}
               </Button>
