@@ -10,7 +10,7 @@ interface StreamingButtonsProps {
 
 const getProviderColor = (providerName: string): string => {
   const name = providerName.toLowerCase();
-  if (name.includes('netflix')) return 'bg-red-600 hover:bg-red-700 border-red-700';  // Netflix: Red hover
+  if (name.includes('netflix')) return 'bg-#E50914 hover:bg-red-700 border-red-700';  // Netflix: Red hover
   if (name.includes('prime')) return 'bg-[#00A8E8] hover:bg-[#009ACD] border-[#00A8E8]';  // Prime: Light Blue hover
   if (name.includes('hotstar')) return 'bg-[#FF8000] hover:bg-[#E65C00] border-[#FF8000]';  // Hotstar: Orange hover
   if (name.includes('jio')) return 'bg-[#F10F29] hover:bg-[#C40D24] border-[#F10F29]';  // Jio: Red hover
