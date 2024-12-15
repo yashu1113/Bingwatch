@@ -90,3 +90,9 @@
 .streaming-jio {
   @apply bg-streaming-jio text-white border-streaming-jio;
 }
+
+
+/* Add this CSS to hide the GPT Engineer logo or branding */
+.gptengineer-logo, .gptengineer-branding {
+  display: none;
+}
