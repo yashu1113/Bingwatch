@@ -12,7 +12,7 @@ export const IndianSection = () => {
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['indian-content', mediaType, page],
     queryFn: () => getIndianContent(mediaType, page),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   const handleLoadMore = () => {
