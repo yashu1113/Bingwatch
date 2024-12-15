@@ -144,18 +144,13 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
       </div>
 
       {/* Navigation Dots */}
-      <div
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20 sm:bottom-8 md:bottom-6"
-        style={{
-          zIndex: 9999,
-        }}
-      >
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {limitedItems.map((_, index) => (
           <button
             key={index}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === selectedIndex
-                ? "bg-white scale-125"
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              index === selectedIndex 
+                ? "bg-white scale-125" 
                 : "bg-white/50 hover:bg-white/75"
             }`}
             onClick={() => emblaApi?.scrollTo(index)}
