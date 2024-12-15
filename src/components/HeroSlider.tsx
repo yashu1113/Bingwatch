@@ -42,7 +42,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     };
 
     emblaApi.on("select", onSelect);
-    
+
     return () => {
       emblaApi.off("select", onSelect);
     };
@@ -101,7 +101,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               <img
                 src={getImageUrl(item.backdrop_path, "original")}
                 alt={item.title || item.name}
-                className="h-full w-full object-cover mt-8" // Adjust margin-top to move image down
+                className="h-full w-full object-cover mt-16 sm:mt-12 md:mt-8"
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
