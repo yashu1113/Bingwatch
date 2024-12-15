@@ -1,4 +1,4 @@
-// indian section   import { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getIndianContent } from '@/services/tmdb';
 import { MediaGrid } from '@/components/MediaGrid';
