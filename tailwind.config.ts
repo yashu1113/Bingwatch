@@ -23,6 +23,12 @@ export default {
           red: "#E50914",
           black: "#141414",
         },
+        streaming: {
+          netflix: "#E50914",
+          prime: "#00A8E1",
+          hotstar: "#1F80E0",
+          jio: "#E019B0",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -78,10 +84,19 @@ export default {
             transform: "translateY(0)",
           },
         },
+        glow: {
+          "0%, 100%": {
+            boxShadow: "0 0 5px currentColor",
+          },
+          "50%": {
+            boxShadow: "0 0 20px currentColor",
+          },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.5s ease-out",
         "fade-down": "fade-down 0.5s ease-out",
+        glow: "glow 2s ease-in-out infinite",
       },
     },
   },

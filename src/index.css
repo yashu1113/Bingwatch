@@ -53,11 +53,14 @@
   * {
     @apply border-border;
   }
+  html, body {
+    @apply overflow-x-hidden;
+  }
   body {
-    @apply bg-background text-foreground overflow-x-hidden;
+    @apply bg-background text-foreground;
   }
   #root {
-    @apply overflow-x-hidden;
+    @apply overflow-x-hidden max-w-[100vw];
   }
 }
 
@@ -69,4 +72,21 @@
 .swiper-button-next::after,
 .swiper-button-prev::after {
   @apply text-lg !important;
+}
+
+/* Streaming provider button styles */
+.streaming-netflix {
+  @apply bg-streaming-netflix text-white border-streaming-netflix;
+}
+
+.streaming-prime {
+  @apply bg-streaming-prime text-white border-streaming-prime;
+}
+
+.streaming-hotstar {
+  @apply bg-streaming-hotstar text-white border-streaming-hotstar;
+}
+
+.streaming-jio {
+  @apply bg-streaming-jio text-white border-streaming-jio;
 }

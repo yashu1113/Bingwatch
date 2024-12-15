@@ -43,13 +43,11 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
     emblaApi.on("select", onSelect);
     
-    // Return cleanup function directly
     return () => {
       emblaApi.off("select", onSelect);
     };
   }, [emblaApi]);
 
-  // Auto-slide logic
   useEffect(() => {
     if (!emblaApi) return;
 
@@ -89,7 +87,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   return (
     <div
-      className="relative w-full h-screen overflow-hidden"
+      className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -107,7 +105,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 lg:p-8">
+              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8">
                 <div className="container mx-auto">
                   <div className="max-w-2xl space-y-2 md:space-y-4">
                     <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
@@ -130,10 +128,10 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 md:h-10 font-semibold flex items-center justify-center"
+                        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 md:h-10 font-semibold flex items-center justify-center hover:bg-white/20"
                         onClick={() => handleAddToWatchlist(item)}
                       >
-                        <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
+                        <Plus className="h-4 w-4 md:h-5 md:w-5" />
                         Add to Watchlist
                       </Button>
                     </div>
@@ -145,13 +143,15 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         </div>
       </div>
 
-      {/* Dot Navigation */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+      {/* Navigation Dots */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {limitedItems.map((_, index) => (
           <button
             key={index}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-              index === selectedIndex ? "bg-white scale-125" : "bg-white/50"
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              index === selectedIndex 
+                ? "bg-white scale-125" 
+                : "bg-white/50 hover:bg-white/75"
             }`}
             onClick={() => emblaApi?.scrollTo(index)}
             aria-label={`Go to slide ${index + 1}`}
