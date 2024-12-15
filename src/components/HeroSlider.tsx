@@ -144,7 +144,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
       </div>
 
       {/* Navigation Dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10 sm:bottom-8 md:bottom-4">
         {limitedItems.map((_, index) => (
           <button
             key={index}
