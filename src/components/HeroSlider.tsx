@@ -42,7 +42,11 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     };
 
     emblaApi.on("select", onSelect);
-    return () => emblaApi.off("select", onSelect);
+    
+    // Return cleanup function directly
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
   }, [emblaApi]);
 
   // Auto-slide logic
