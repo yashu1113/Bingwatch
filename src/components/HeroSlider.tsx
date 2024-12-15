@@ -145,7 +145,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
       {/* Navigation Dots */}
       <div
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20 sm:bottom-8 md:bottom-6"
+        className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20 sm:bottom-4 md:bottom-3"
         style={{
           zIndex: 9999,
         }}
@@ -153,7 +153,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         {limitedItems.map((_, index) => (
           <button
             key={index}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            className={`w-1 h-1 rounded-full transition-all duration-300 ${
               index === selectedIndex
                 ? "bg-white scale-125"
                 : "bg-white/50 hover:bg-white/75"
