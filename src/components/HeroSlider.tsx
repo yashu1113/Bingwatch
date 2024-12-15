@@ -101,7 +101,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               <img
                 src={getImageUrl(item.backdrop_path, "original")}
                 alt={item.title || item.name}
-                className="h-full w-full object-cover mt-8" // Added mt-8 to push the image down
+                className="h-full w-full object-cover mt-8" // Adjust margin-top to move image down
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
@@ -153,7 +153,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         {limitedItems.map((_, index) => (
           <button
             key={index}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
               index === selectedIndex
                 ? "bg-white scale-125"
                 : "bg-white/50 hover:bg-white/75"
