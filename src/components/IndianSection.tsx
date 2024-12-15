@@ -1,4 +1,4 @@
-import { useState } from 'react';
+// indian section   import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getIndianContent } from '@/services/tmdb';
 import { MediaGrid } from '@/components/MediaGrid';
@@ -22,23 +22,19 @@ export const IndianSection = () => {
   };
 
   return (
-    <section className="space-y-6 px-4 sm:px-8 md:px-12">
+    <section className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl sm:text-3xl font-bold">Indian Entertainment</h2>
+        <h2 className="text-3xl font-bold">Indian Entertainment</h2>
         <Tabs defaultValue="movie" onValueChange={(value) => setMediaType(value as 'movie' | 'tv')}>
-          <TabsList className="flex justify-center space-x-4 sm:space-x-6 md:space-x-8">
-            <TabsTrigger value="movie" className="text-sm sm:text-base font-medium">
-              Movies
-            </TabsTrigger>
-            <TabsTrigger value="tv" className="text-sm sm:text-base font-medium">
-              TV Shows
-            </TabsTrigger>
+          <TabsList>
+            <TabsTrigger value="movie">Movies</TabsTrigger>
+            <TabsTrigger value="tv">TV Shows</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {Array.from({ length: 10 }).map((_, i) => (
             <div
               key={i}
@@ -51,11 +47,10 @@ export const IndianSection = () => {
           <MediaGrid items={data?.results?.map(item => ({ ...item, media_type: mediaType })) || []} />
           {data?.total_pages && page < data.total_pages && (
             <div className="flex justify-center mt-8">
-              <Button
+              <Button 
                 onClick={handleLoadMore}
                 disabled={isFetching}
                 variant="outline"
-                className="w-full sm:w-auto hover:unset"
               >
                 {isFetching ? 'Loading...' : 'Load More'}
               </Button>
