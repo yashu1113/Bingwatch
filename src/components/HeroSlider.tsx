@@ -101,7 +101,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               <img
                 src={getImageUrl(item.backdrop_path, "original")}
                 alt={item.title || item.name}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover mt-8" // Added mt-8 to push the image down
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
@@ -144,13 +144,18 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
       </div>
 
       {/* Navigation Dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+      <div
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20 sm:bottom-8 md:bottom-6"
+        style={{
+          zIndex: 9999,
+        }}
+      >
         {limitedItems.map((_, index) => (
           <button
             key={index}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === selectedIndex 
-                ? "bg-white scale-125" 
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              index === selectedIndex
+                ? "bg-white scale-125"
                 : "bg-white/50 hover:bg-white/75"
             }`}
             onClick={() => emblaApi?.scrollTo(index)}
