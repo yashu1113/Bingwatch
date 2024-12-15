@@ -57,3 +57,16 @@ export const getGenres = async (type: 'movie' | 'tv' = 'movie') => {
   const response = await tmdbApi.get(`/genre/${type}/list`);
   return response.data;
 };
+
+export const getIndianContent = async (mediaType: 'movie' | 'tv' = 'movie', page: number = 1) => {
+  const response = await tmdbApi.get(`/discover/${mediaType}`, {
+    params: {
+      with_original_language: 'hi|ta|te|ml|bn',  // Hindi, Tamil, Telugu, Malayalam, Bengali
+      region: 'IN',
+      sort_by: 'popularity.desc',
+      page,
+      include_adult: false,
+    },
+  });
+  return response.data;
+};
