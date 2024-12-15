@@ -70,3 +70,8 @@ export const getIndianContent = async (mediaType: 'movie' | 'tv' = 'movie', page
   });
   return response.data;
 };
+
+export const getWatchProviders = async (mediaType: 'movie' | 'tv', id: number) => {
+  const response = await tmdbApi.get(`/${mediaType}/${id}/watch/providers`);
+  return response.data;
+};

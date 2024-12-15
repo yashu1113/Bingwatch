@@ -1,17 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDetails } from '@/services/tmdb';
-import { useWatchlist } from '@/contexts/WatchlistContext';
-import { Button } from '@/components/ui/button';
-import { Plus, Check, Play, Video } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 import { MovieCarousel } from '@/components/MovieCarousel';
-import { Suspense, lazy } from 'react';
+import { DetailHeader } from '@/components/details/DetailHeader';
+import { VideoSection } from '@/components/details/VideoSection';
+import { StreamingButtons } from '@/components/StreamingButtons';
+import { useToast } from '@/hooks/use-toast';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
+  const { toast } = useToast();
   
   const { data: movie, isLoading, isError } = useQuery({
     queryKey: ['movie', id],
@@ -29,30 +28,6 @@ const MovieDetails = () => {
     }
   });
 
-  const handleWatchlistClick = () => {
-    if (!movie) return;
-    
-    const inWatchlist = isInWatchlist(movie.id);
-    if (inWatchlist) {
-      removeFromWatchlist(movie.id);
-      toast({
-        title: "Removed from Watchlist",
-        description: `${movie.title} has been removed from your watchlist`,
-      });
-    } else {
-      addToWatchlist({
-        id: movie.id,
-        title: movie.title,
-        posterPath: movie.poster_path,
-        mediaType: 'movie'
-      });
-      toast({
-        title: "Added to Watchlist",
-        description: `${movie.title} has been added to your watchlist`,
-      });
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="container py-4 md:py-8">
@@ -69,12 +44,6 @@ const MovieDetails = () => {
       <div className="container py-4 md:py-8">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold">Movie not found</h1>
-          <Button 
-            onClick={() => navigate('/movies')} 
-            className="mt-4"
-          >
-            Back to Movies
-          </Button>
         </div>
       </div>
     );
@@ -91,86 +60,22 @@ const MovieDetails = () => {
   return (
     <div className="min-h-screen bg-netflix-black text-white">
       <div className="container mx-auto px-4 py-4 md:py-8 space-y-6 md:space-y-8">
-        <div className="grid gap-6 md:gap-8 md:grid-cols-[300px,1fr]">
-          <img
-            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-            alt={movie.title}
-            className="rounded-lg shadow-lg w-full"
-          />
-          <div className="space-y-4">
-            <h1 className="text-2xl md:text-4xl font-bold">{movie.title}</h1>
-            <p className="text-base md:text-lg text-gray-400">{movie.overview}</p>
-            <div className="flex flex-wrap gap-2">
-              {movie.genres?.map((genre) => (
-                <span
-                  key={genre.id}
-                  className="rounded-full bg-gray-800 px-3 py-1 text-sm"
-                >
-                  {genre.name}
-                </span>
-              ))}
-            </div>
-            <div className="space-y-2">
-              <p>Release Date: {movie.release_date}</p>
-              <p>Rating: ★ {movie.vote_average?.toFixed(1)}</p>
-              {movie.runtime && <p>Runtime: {movie.runtime} minutes</p>}
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {trailer && (
-                <Button
-                  onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
-                  className="bg-netflix-red hover:bg-netflix-red/90"
-                >
-                  <Play className="mr-2 h-4 w-4" />
-                  Watch Trailer
-                </Button>
-              )}
-              <Button
-                onClick={handleWatchlistClick}
-                variant={isInWatchlist(movie.id) ? "secondary" : "default"}
-              >
-                {isInWatchlist(movie.id) ? (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    In Watchlist
-                  </>
-                ) : (
-                  <>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add to Watchlist
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <DetailHeader
+          id={movie.id}
+          title={movie.title}
+          overview={movie.overview}
+          posterPath={movie.poster_path}
+          genres={movie.genres}
+          releaseDate={movie.release_date}
+          voteAverage={movie.vote_average}
+          runtime={movie.runtime}
+          trailer={trailer}
+          mediaType="movie"
+        />
 
-        {videos.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-              <Video className="h-5 w-5" />
-              Videos
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {videos.map((video) => (
-                <Suspense 
-                  key={video.key} 
-                  fallback={
-                    <div className="aspect-video bg-gray-800 animate-pulse rounded-lg" />
-                  }
-                >
-                  <iframe
-                    loading="lazy"
-                    className="w-full h-full rounded-lg"
-                    src={`https://www.youtube.com/embed/${video.key}`}
-                    title={video.name}
-                    allowFullScreen
-                  />
-                </Suspense>
-              ))}
-            </div>
-          </section>
-        )}
+        <StreamingButtons mediaType="movie" id={movie.id} />
+
+        <VideoSection videos={videos} />
 
         {movie?.similar?.results?.length > 0 && (
           <section className="space-y-4">
