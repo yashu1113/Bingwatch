@@ -23,6 +23,22 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
     queryFn: () => getWatchProviders(mediaType, id),
   });
 
+  const handleStreamingClick = (url: string) => {
+    // Open in a new window/tab with proper origin handling
+    const newWindow = window.open(url, '_blank');
+    if (newWindow) {
+      // Only attempt postMessage if the window was successfully opened
+      try {
+        // Use a more secure approach with specific origin
+        const targetOrigin = new URL(url).origin;
+        newWindow.postMessage({ type: 'STREAMING_PROVIDER_OPENED' }, targetOrigin);
+      } catch (error) {
+        console.warn('Failed to send postMessage:', error);
+        // Fallback to opening the URL directly if postMessage fails
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 text-gray-400">
@@ -53,7 +69,7 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
             className={`flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg transition-all duration-300
               hover:bg-${providerColor} hover:border-${providerColor} hover:animate-glow
               focus:ring-2 focus:ring-${providerColor}/50`}
-            onClick={() => window.open(providers.results.IN.link, '_blank')}
+            onClick={() => handleStreamingClick(providers.results.IN.link)}
             aria-label={`Watch on ${provider.provider_name}`}
           >
             <img
