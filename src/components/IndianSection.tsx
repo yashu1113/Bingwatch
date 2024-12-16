@@ -60,12 +60,13 @@ export const IndianSection = () => {
         <>
           <MediaGrid items={data?.results?.map(item => ({ ...item, media_type: mediaType })) || []} />
           {data?.total_pages && page < data.total_pages && (
-            <div className="flex justify-center mt-8 px-4">
+            <div className="flex justify-center mt-8">
               <Button
                 onClick={handleLoadMore}
                 disabled={isFetching}
-                variant="outline"
-                className="w-full sm:w-auto min-h-[44px] text-base transition-none hover:bg-transparent"
+                className="w-full sm:w-auto px-8 py-2 bg-netflix-red text-white rounded-md font-medium 
+                          transition-none hover:bg-netflix-red focus:ring-2 focus:ring-netflix-red/50 
+                          disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isFetching ? 'Loading...' : 'Load More'}
               </Button>
