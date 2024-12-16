@@ -41,7 +41,7 @@ export const MediaCard = ({
   return (
     <Link
       to={`/${mediaType}/${id}`}
-      className="group relative overflow-hidden rounded-lg transition-transform hover:scale-105 touch-manipulation"
+      className="group relative overflow-hidden rounded-lg transition-transform hover:scale-105 touch-manipulation w-full"
     >
       <div className="aspect-[2/3] w-full">
         <img

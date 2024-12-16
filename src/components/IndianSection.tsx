@@ -65,7 +65,7 @@ export const IndianSection = () => {
                 onClick={handleLoadMore}
                 disabled={isFetching}
                 variant="outline"
-                className="w-full sm:w-auto min-h-[44px] text-base"
+                className="w-full sm:w-auto min-h-[44px] text-base transition-none hover:bg-transparent"
               >
                 {isFetching ? 'Loading...' : 'Load More'}
               </Button>
