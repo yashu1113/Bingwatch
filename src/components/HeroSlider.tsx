@@ -101,7 +101,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               <img
                 src={getImageUrl(item.backdrop_path, "original")}
                 alt={item.title || item.name}
-                className="h-full w-full object-cover md:mt-8" // Apply margin-top only on medium and larger screens
+                className="h-full w-full object-cover mt-8" // Adjust margin-top to move image down
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
