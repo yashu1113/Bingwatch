@@ -42,7 +42,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     };
 
     emblaApi.on("select", onSelect);
-
+    
     return () => {
       emblaApi.off("select", onSelect);
     };
@@ -55,7 +55,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
       if (!isHovered) emblaApi.scrollNext();
     };
 
-    const intervalId = setInterval(autoScroll, 4000);
+    const intervalId = setInterval(autoScroll, 3000);
     return () => clearInterval(intervalId);
   }, [emblaApi, isHovered]);
 
@@ -87,11 +87,10 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   return (
     <div
-      className="relative w-full h-[60vh] sm:h-[70vh] lg:h-[85vh] overflow-hidden"
+      className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Carousel */}
       <div ref={emblaRef} className="w-full h-full overflow-hidden">
         <div className="flex h-full w-full">
           {limitedItems.map((item) => (
@@ -99,42 +98,44 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               key={item.id}
               className="relative flex-none w-full h-full overflow-hidden"
             >
-              {/* Background Image */}
               <img
                 src={getImageUrl(item.backdrop_path, "original")}
                 alt={item.title || item.name}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover mt-8" // Adjust margin-top to move image down
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              {/* Content */}
-              <div className="absolute bottom-8 left-4 right-4 sm:left-8 sm:right-8 text-white">
-                <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold line-clamp-2">
-                  {item.title || item.name}
-                </h2>
-                <p className="text-sm sm:text-base lg:text-lg mt-2 line-clamp-3">
-                  {item.overview}
-                </p>
-                <div className="flex gap-4 mt-4">
-                  <Button
-                    size="sm"
-                    className="bg-netflix-red hover:bg-netflix-red/90 text-sm sm:text-base"
-                    onClick={() =>
-                      navigate(`/${item.media_type || "movie"}/${item.id}`)
-                    }
-                  >
-                    <Play className="w-4 h-4 sm:w-5 sm:h-5" />
-                    Watch Now
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-white text-white text-sm sm:text-base hover:bg-white/10"
-                    onClick={() => handleAddToWatchlist(item)}
-                  >
-                    <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                    Add to Watchlist
-                  </Button>
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8">
+                <div className="container mx-auto">
+                  <div className="max-w-2xl space-y-2 md:space-y-4">
+                    <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
+                      {item.title || item.name}
+                    </h2>
+                    <p className="line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200">
+                      {item.overview}
+                    </p>
+                    <div className="flex flex-wrap gap-2 md:gap-4">
+                      <Button
+                        size="sm"
+                        className="gap-1 md:gap-2 bg-netflix-red hover:bg-netflix-red/90 text-xs md:text-base"
+                        onClick={() =>
+                          navigate(`/${item.media_type || "movie"}/${item.id}`)
+                        }
+                      >
+                        <Play className="h-4 w-4" />
+                        Watch Now
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 md:h-10 font-semibold flex items-center justify-center hover:bg-white/20"
+                        onClick={() => handleAddToWatchlist(item)}
+                      >
+                        <Plus className="h-4 w-4 md:h-5 md:w-5" />
+                        Add to Watchlist
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -143,11 +144,16 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
       </div>
 
       {/* Navigation Dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+      <div
+        className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20 sm:bottom-4 md:bottom-3"
+        style={{
+          zIndex: 9999,
+        }}
+      >
         {limitedItems.map((_, index) => (
           <button
             key={index}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+            className={`w-1 h-1 rounded-full transition-all duration-300 ${
               index === selectedIndex
                 ? "bg-white scale-125"
                 : "bg-white/50 hover:bg-white/75"
