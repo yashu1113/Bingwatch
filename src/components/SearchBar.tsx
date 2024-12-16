@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 
-export const SearchBar = () => {
+export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
@@ -12,6 +12,7 @@ export const SearchBar = () => {
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
       setQuery('');
+      onSearch?.();
     }
   };
 
@@ -22,7 +23,7 @@ export const SearchBar = () => {
         placeholder="Search movies, TV shows..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full pl-12 pr-4 py-4 md:py-6 text-base md:text-lg rounded-xl border-2 focus:border-netflix-red"
+        className="w-full pl-12 pr-4 py-4 md:py-6 text-base md:text-lg rounded-xl border-2 focus:border-netflix-red bg-black/50"
       />
       <Search className="absolute left-4 top-1/2 h-5 w-5 md:h-6 md:w-6 -translate-y-1/2 text-gray-400" />
     </form>

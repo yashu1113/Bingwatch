@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { search } from '@/services/tmdb';
 import { MediaGrid } from '@/components/MediaGrid';
-import { SearchBar } from '@/components/SearchBar';
 import { NotFound } from '@/components/NotFound';
 
 const Search = () => {
@@ -18,7 +17,7 @@ const Search = () => {
   const hasNoResults = !isLoading && data?.results.length === 0;
 
   return (
-    <div className="min-h-screen bg-netflix-black text-white">
+    <div className="min-h-screen bg-netflix-black text-white pt-20">
       <main className="container py-8 px-4 md:px-8">
         <h2 className="mb-6 text-2xl font-bold sm:text-3xl">
           Search Results for "{query}"

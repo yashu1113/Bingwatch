@@ -9,6 +9,7 @@ export const Navigation = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const { watchlist } = useWatchlist();
 
   useEffect(() => {
@@ -22,6 +23,18 @@ export const Navigation = () => {
 
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const toggleSearch = () => {
+    setIsSearchVisible(!isSearchVisible);
+    if (!isSearchVisible) {
+      setTimeout(() => {
+        const searchInput = document.querySelector('input[type="search"]');
+        if (searchInput instanceof HTMLInputElement) {
+          searchInput.focus();
+        }
+      }, 100);
+    }
   };
 
   return (
@@ -65,6 +78,18 @@ export const Navigation = () => {
           </div>
         </div>
 
+        {/* Mobile Search Overlay */}
+        <div
+          className={cn(
+            "fixed inset-x-0 top-0 bg-netflix-black/95 backdrop-blur transition-transform duration-300 md:hidden",
+            isSearchVisible ? "translate-y-0" : "-translate-y-full"
+          )}
+        >
+          <div className="container p-4">
+            <SearchBar onSearch={() => setIsSearchVisible(false)} />
+          </div>
+        </div>
+
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="absolute left-0 right-0 top-16 bg-netflix-black/95 px-4 py-4 backdrop-blur md:hidden">
@@ -85,9 +110,6 @@ export const Navigation = () => {
                   </span>
                 )}
               </NavLink>
-              <div className="pt-2">
-                <SearchBar />
-              </div>
             </div>
           </div>
         )}
@@ -100,10 +122,16 @@ export const Navigation = () => {
             <Home size={20} />
             <span className="text-xs">Home</span>
           </NavLink>
-          <NavLink to="/search" active={isActive('/search')} className="flex flex-col items-center gap-1">
+          <button
+            onClick={toggleSearch}
+            className={cn(
+              "flex flex-col items-center gap-1 text-white/60 transition-colors",
+              isSearchVisible && "text-white"
+            )}
+          >
             <Search size={20} />
             <span className="text-xs">Search</span>
-          </NavLink>
+          </button>
           <NavLink to="/movies" active={isActive('/movies')} className="flex flex-col items-center gap-1">
             <List size={20} />
             <span className="text-xs">Browse</span>
