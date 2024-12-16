@@ -22,15 +22,25 @@ export const IndianSection = () => {
   };
 
   return (
-    <section className="space-y-6 px-4 sm:px-8 md:px-12">
-      <div className="flex items-center justify-between">
+    <section className="space-y-6 px-4 sm:px-8 md:px-12 mt-8 md:mt-12">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h2 className="text-2xl sm:text-3xl font-bold">Indian Entertainment</h2>
-        <Tabs defaultValue="movie" onValueChange={(value) => setMediaType(value as 'movie' | 'tv')}>
-          <TabsList className="flex justify-center w-full space-x-4 sm:space-x-6 md:space-x-8">
-            <TabsTrigger value="movie" className="text-sm sm:text-base font-medium">
+        <Tabs 
+          defaultValue="movie" 
+          onValueChange={(value) => setMediaType(value as 'movie' | 'tv')}
+          className="w-full md:w-auto"
+        >
+          <TabsList className="grid w-full grid-cols-2 md:w-auto md:flex md:space-x-4">
+            <TabsTrigger 
+              value="movie" 
+              className="text-sm sm:text-base font-medium px-4 py-2"
+            >
               Movies
             </TabsTrigger>
-            <TabsTrigger value="tv" className="text-sm sm:text-base font-medium">
+            <TabsTrigger 
+              value="tv" 
+              className="text-sm sm:text-base font-medium px-4 py-2"
+            >
               TV Shows
             </TabsTrigger>
           </TabsList>
@@ -50,12 +60,12 @@ export const IndianSection = () => {
         <>
           <MediaGrid items={data?.results?.map(item => ({ ...item, media_type: mediaType })) || []} />
           {data?.total_pages && page < data.total_pages && (
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center mt-8 px-4">
               <Button
                 onClick={handleLoadMore}
                 disabled={isFetching}
                 variant="outline"
-                className="w-full sm:w-auto hover:unset"
+                className="w-full sm:w-auto min-h-[44px] text-base"
               >
                 {isFetching ? 'Loading...' : 'Load More'}
               </Button>
