@@ -60,7 +60,7 @@ export const DetailHeader = ({
         alt={title}
         className="rounded-lg shadow-lg w-full"
       />
-      <div className="space-y-4">
+      <div className="flex flex-col space-y-4">
         <h1 className="text-2xl md:text-4xl font-bold">{title}</h1>
         <p className="text-base md:text-lg text-gray-400">{overview}</p>
         <div className="flex flex-wrap gap-2">
@@ -78,7 +78,7 @@ export const DetailHeader = ({
           <p>Rating: ★ {voteAverage?.toFixed(1)}</p>
           {runtime && <p>Runtime: {runtime} minutes</p>}
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 mt-auto">
           {trailer && (
             <Button
               onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}

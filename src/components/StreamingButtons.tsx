@@ -37,7 +37,7 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-gray-400 mt-4">
+      <div className="flex items-center gap-2 text-gray-400 mt-6">
         <Loader2 className="h-4 w-4 animate-spin" />
         Loading streaming platforms...
       </div>
@@ -48,14 +48,14 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
 
   if (!streamingProviders.length) {
     return (
-      <p className="text-gray-400 italic mt-4">
+      <p className="text-gray-400 italic mt-6">
         Not available on streaming platforms in India
       </p>
     );
   }
 
   return (
-    <div className="flex flex-wrap gap-3 mt-4">
+    <div className="flex flex-wrap gap-3 mt-6 w-full">
       {streamingProviders.map((provider) => {
         const providerColor = getProviderColor(provider.provider_name);
         return (
