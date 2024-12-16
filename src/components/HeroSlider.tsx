@@ -101,17 +101,17 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               <img
                 src={getImageUrl(item.backdrop_path, "original")}
                 alt={item.title || item.name}
-                className="h-full w-full object-cover" // Removed mt-8
+                className="h-full w-full object-cover"
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8">
                 <div className="container mx-auto">
-                  <div className="max-w-2xl space-y-2 md:space-y-4">
-                    <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
+                  <div className="space-y-2 md:space-y-4">
+                    <h2 className="text-lg md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
                       {item.title || item.name}
                     </h2>
-                    <p className="line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200">
+                    <p className="line-clamp-3 text-xs md:text-sm lg:text-base text-gray-200">
                       {item.overview}
                     </p>
                     <div className="flex flex-wrap gap-2 md:gap-4">
@@ -122,7 +122,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                           navigate(`/${item.media_type || "movie"}/${item.id}`)
                         }
                       >
-                        <Play className="h-4 w-4" />
+                        <Play className="h-4 w-4 md:h-5 md:w-5" />
                         Watch Now
                       </Button>
                       <Button
@@ -153,7 +153,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         {limitedItems.map((_, index) => (
           <button
             key={index}
-            className={`w-1 h-1 rounded-full transition-all duration-300 ${
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
               index === selectedIndex
                 ? "bg-white scale-125"
                 : "bg-white/50 hover:bg-white/75"
