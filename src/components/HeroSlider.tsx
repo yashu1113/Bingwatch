@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Play, Plus } from "lucide-react";
@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { getImageUrl } from "@/services/tmdb";
 import useEmblaCarousel from "embla-carousel-react";
+import { Skeleton } from "./ui/skeleton";
 
 interface HeroSliderProps {
   items: Array<{
@@ -33,6 +34,19 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
+
+  useEffect(() => {
+    setImagesLoaded(new Array(items.length).fill(false));
+  }, [items.length]);
+
+  const handleImageLoad = useCallback((index: number) => {
+    setImagesLoaded(prev => {
+      const newState = [...prev];
+      newState[index] = true;
+      return newState;
+    });
+  }, []);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -42,24 +56,21 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     };
 
     emblaApi.on("select", onSelect);
-    
-    return () => {
-      emblaApi.off("select", onSelect);
-    };
+    return () => emblaApi.off("select", onSelect);
   }, [emblaApi]);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || isHovered) return;
 
-    const autoScroll = () => {
-      if (!isHovered) emblaApi.scrollNext();
-    };
+    const intervalId = setInterval(() => {
+      if (document.hidden) return;
+      emblaApi.scrollNext();
+    }, 5000);
 
-    const intervalId = setInterval(autoScroll, 3000);
     return () => clearInterval(intervalId);
   }, [emblaApi, isHovered]);
 
-  const handleAddToWatchlist = (item: HeroSliderProps["items"][0]) => {
+  const handleAddToWatchlist = useCallback((item: HeroSliderProps["items"][0]) => {
     const mediaItem = {
       id: item.id,
       title: item.title || item.name || "",
@@ -81,7 +92,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
       title: "Added to Watchlist",
       description: "Successfully added to your watchlist",
     });
-  };
+  }, [addToWatchlist, isInWatchlist, toast]);
 
   const limitedItems = items.slice(0, 5);
 
@@ -93,16 +104,22 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     >
       <div ref={emblaRef} className="w-full h-full overflow-hidden">
         <div className="flex h-full w-full">
-          {limitedItems.map((item) => (
+          {limitedItems.map((item, index) => (
             <div
               key={item.id}
               className="relative flex-none w-full h-full overflow-hidden"
             >
+              {!imagesLoaded[index] && (
+                <Skeleton className="absolute inset-0 w-full h-full" />
+              )}
               <img
                 src={getImageUrl(item.backdrop_path, "original")}
                 alt={item.title || item.name}
-                className="h-full w-full object-cover mt-8" // Adjust margin-top to move image down
+                className={`h-full w-full object-cover transition-opacity duration-300 ${
+                  imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
+                }`}
                 loading="lazy"
+                onLoad={() => handleImageLoad(index)}
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8">
@@ -143,13 +160,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         </div>
       </div>
 
-      {/* Navigation Dots */}
-      <div
-        className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20 sm:bottom-4 md:bottom-3"
-        style={{
-          zIndex: 9999,
-        }}
-      >
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20 sm:bottom-4 md:bottom-3">
         {limitedItems.map((_, index) => (
           <button
             key={index}

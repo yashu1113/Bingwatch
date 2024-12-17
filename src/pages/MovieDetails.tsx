@@ -6,6 +6,7 @@ import { DetailHeader } from '@/components/details/DetailHeader';
 import { VideoSection } from '@/components/details/VideoSection';
 import { StreamingButtons } from '@/components/StreamingButtons';
 import { useToast } from '@/hooks/use-toast';
+import { LoadingGrid } from '@/components/LoadingGrid';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,9 @@ const MovieDetails = () => {
     queryKey: ['movie', id],
     queryFn: () => getDetails('movie', Number(id)),
     enabled: !!id,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    retry: 3,
+    retryDelay: 1000,
     meta: {
       onError: () => {
         toast({
@@ -31,10 +35,7 @@ const MovieDetails = () => {
   if (isLoading) {
     return (
       <div className="container py-20 md:py-24">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-1/3 bg-gray-800 rounded" />
-          <div className="h-96 bg-gray-800 rounded" />
-        </div>
+        <LoadingGrid count={1} className="max-w-4xl mx-auto" />
       </div>
     );
   }
@@ -44,6 +45,7 @@ const MovieDetails = () => {
       <div className="container py-20 md:py-24">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold">Movie not found</h1>
+          <p className="mt-2 text-gray-400">Please try again later</p>
         </div>
       </div>
     );
@@ -84,7 +86,8 @@ const MovieDetails = () => {
               items={movie.similar.results.map(item => ({
                 ...item,
                 media_type: 'movie'
-              }))} 
+              }))}
+              isLoading={isLoading}
             />
           </section>
         )}
@@ -96,7 +99,8 @@ const MovieDetails = () => {
               items={movie.recommendations.results.map(item => ({
                 ...item,
                 media_type: 'movie'
-              }))} 
+              }))}
+              isLoading={isLoading}
             />
           </section>
         )}
