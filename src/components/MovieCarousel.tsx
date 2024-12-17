@@ -37,6 +37,7 @@ export const MovieCarousel = ({ items, autoPlay = false, isLoading = false }: Mo
   useEffect(() => {
     if (autoPlay && emblaApi) {
       const intervalId = setInterval(() => {
+        if (document.hidden) return;
         emblaApi.scrollNext();
       }, 5000);
 
@@ -48,8 +49,22 @@ export const MovieCarousel = ({ items, autoPlay = false, isLoading = false }: Mo
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="aspect-[2/3] w-full rounded-lg" />
+          <div key={i} className="space-y-4">
+            <Skeleton className="aspect-[2/3] w-full rounded-lg" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          </div>
         ))}
+      </div>
+    );
+  }
+
+  if (!items?.length) {
+    return (
+      <div className="text-center py-8 text-gray-400">
+        No items available at the moment
       </div>
     );
   }

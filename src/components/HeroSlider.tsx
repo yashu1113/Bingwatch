@@ -56,7 +56,9 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     };
 
     emblaApi.on("select", onSelect);
-    return () => emblaApi.off("select", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
   }, [emblaApi]);
 
   useEffect(() => {
@@ -95,6 +97,14 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   }, [addToWatchlist, isInWatchlist, toast]);
 
   const limitedItems = items.slice(0, 5);
+
+  if (!items.length) {
+    return (
+      <div className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen">
+        <Skeleton className="w-full h-full" />
+      </div>
+    );
+  }
 
   return (
     <div
