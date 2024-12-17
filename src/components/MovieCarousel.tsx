@@ -9,6 +9,7 @@ import {
 import { MediaCard } from "./MediaCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import useEmblaCarousel from 'embla-carousel-react';
+import { Skeleton } from "./ui/skeleton";
 
 interface MovieCarouselProps {
   items: Array<{
@@ -22,9 +23,10 @@ interface MovieCarouselProps {
     vote_average?: number;
   }>;
   autoPlay?: boolean;
+  isLoading?: boolean;
 }
 
-export const MovieCarousel = ({ items, autoPlay = false }: MovieCarouselProps) => {
+export const MovieCarousel = ({ items, autoPlay = false, isLoading = false }: MovieCarouselProps) => {
   const isMobile = useIsMobile();
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
@@ -36,11 +38,21 @@ export const MovieCarousel = ({ items, autoPlay = false }: MovieCarouselProps) =
     if (autoPlay && emblaApi) {
       const intervalId = setInterval(() => {
         emblaApi.scrollNext();
-      }, 5000); // Change slide every 5 seconds
+      }, 5000);
 
       return () => clearInterval(intervalId);
     }
   }, [emblaApi, autoPlay]);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="aspect-[2/3] w-full rounded-lg" />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <Carousel

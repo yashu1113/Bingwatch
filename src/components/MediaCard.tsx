@@ -2,9 +2,11 @@ import { Link } from 'react-router-dom';
 import { getImageUrl } from '@/services/tmdb';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ImageIcon } from 'lucide-react';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface MediaCardProps {
   id: number;
@@ -28,6 +30,8 @@ export const MediaCard = ({
   const isMobile = useIsMobile();
   const { removeFromWatchlist } = useWatchlist();
   const { toast } = useToast();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,13 +47,27 @@ export const MediaCard = ({
       to={`/${mediaType}/${id}`}
       className="group relative overflow-hidden rounded-lg transition-transform hover:scale-105 touch-manipulation w-full"
     >
-      <div className="aspect-[2/3] w-full">
-        <img
-          src={getImageUrl(posterPath, 'w500')}
-          alt={title}
-          className="h-full w-full object-cover"
-          loading="lazy"
-        />
+      <div className="aspect-[2/3] w-full bg-gray-900 relative">
+        {!imageLoaded && !imageError && (
+          <Skeleton className="absolute inset-0 w-full h-full" />
+        )}
+        {imageError ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+            <ImageIcon className="h-12 w-12 text-gray-400" />
+          </div>
+        ) : (
+          <img
+            src={getImageUrl(posterPath, 'w500')}
+            alt={title}
+            className={cn(
+              "h-full w-full object-cover transition-opacity duration-300",
+              !imageLoaded && "opacity-0"
+            )}
+            loading="lazy"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+          />
+        )}
       </div>
       {showDeleteButton && (
         <button
