@@ -5,7 +5,7 @@ import { Play, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { getImageUrl } from "@/services/tmdb";
-import useEmblaCarousel from "embla-carousel-react";
+import useEmblaCarousel, { type EmblaCarouselType } from "embla-carousel-react";
 import { Skeleton } from "./ui/skeleton";
 
 interface HeroSliderProps {
@@ -56,8 +56,11 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     };
 
     emblaApi.on("select", onSelect);
+    
     return () => {
-      emblaApi.off("select", onSelect);
+      if (emblaApi) {
+        emblaApi.off("select", onSelect);
+      }
     };
   }, [emblaApi]);
 
