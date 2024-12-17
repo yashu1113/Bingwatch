@@ -13,6 +13,7 @@ import Watchlist from "./pages/Watchlist";
 import GenrePage from "./pages/GenrePage";
 import { Navigation } from "./components/Navigation";
 import { WatchlistProvider } from "./contexts/WatchlistContext";
+import { LoadingScreen } from "./components/LoadingScreen";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,6 +31,7 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <WatchlistProvider>
           <TooltipProvider>
+            <LoadingScreen />
             <Toaster />
             <Sonner />
             <div className="min-h-screen bg-netflix-black pb-16 md:pb-0">
