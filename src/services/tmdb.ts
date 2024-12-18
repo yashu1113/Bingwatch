@@ -4,19 +4,21 @@ const TMDB_API_KEY = 'cde27df6ea720efcd90be8ecd0400f61';
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
-// Create axios instance with enhanced configuration
+// Create axios instance with enhanced configuration for mobile networks
 export const tmdbApi = axios.create({
   baseURL: BASE_URL,
   params: {
     api_key: TMDB_API_KEY,
   },
-  timeout: 15000, // Increased timeout to 15 seconds
+  timeout: 30000, // Increased timeout to 30 seconds for slower mobile networks
   headers: {
     'Accept': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
   },
 });
 
-// Enhanced error handling and retry logic
+// Enhanced error handling and retry logic with detailed logging
 tmdbApi.interceptors.response.use(
   response => response,
   async error => {
@@ -25,32 +27,51 @@ tmdbApi.interceptors.response.use(
     // Track retry attempts
     const retryCount = config._retryCount || 0;
     
-    // Only retry on network errors or 5xx server errors
-    if ((error.code === 'ECONNABORTED' || !response || response.status >= 500) && retryCount < 3) {
+    // Log detailed error information for debugging
+    console.error('API Request Failed:', {
+      url: config.url,
+      method: config.method,
+      status: response?.status,
+      statusText: response?.statusText,
+      error: error.message,
+      retryCount,
+      networkType: navigator.connection?.type || 'unknown',
+      effectiveType: navigator.connection?.effectiveType || 'unknown'
+    });
+    
+    // Only retry on network errors, timeouts, or 5xx server errors
+    if ((error.code === 'ECONNABORTED' || 
+         error.message.includes('timeout') || 
+         !response || 
+         response.status >= 500) && 
+        retryCount < 3) {
+      
       config._retryCount = retryCount + 1;
       
-      // Exponential backoff delay
-      const delay = Math.min(1000 * (2 ** retryCount), 5000);
+      // Exponential backoff delay with jitter
+      const delay = Math.min(1000 * (2 ** retryCount) + Math.random() * 1000, 8000);
+      
+      console.log(`Retrying request (attempt ${retryCount + 1}/3) after ${delay}ms delay`);
       
       await new Promise(resolve => setTimeout(resolve, delay));
+      
+      // Clear any cached headers that might be causing issues
+      if (config.headers) {
+        delete config.headers['If-None-Match'];
+        delete config.headers['If-Modified-Since'];
+      }
       
       // Retry the request
       return tmdbApi(config);
     }
     
-    // Handle rate limiting
+    // Handle rate limiting with proper retry-after header
     if (response?.status === 429) {
-      const retryAfter = response.headers['retry-after'] || 2;
+      const retryAfter = parseInt(response.headers['retry-after']) || 2;
+      console.log(`Rate limited. Retrying after ${retryAfter} seconds`);
       await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
       return tmdbApi(config);
     }
-
-    console.error('API Error:', {
-      url: config.url,
-      method: config.method,
-      status: response?.status,
-      error: error.message
-    });
 
     return Promise.reject(error);
   }
@@ -58,11 +79,12 @@ tmdbApi.interceptors.response.use(
 
 export const getImageUrl = (path: string, size: string = 'original') => {
   if (!path) return '/placeholder.svg';
-  // Use smaller image sizes for mobile devices
-  if (window.innerWidth < 768 && size === 'original') {
-    size = 'w780';
-  } else if (window.innerWidth < 480 && size === 'w500') {
-    size = 'w342';
+  // Use smaller image sizes for mobile devices and slower connections
+  if (navigator.connection?.saveData || 
+      navigator.connection?.effectiveType === '2g' || 
+      navigator.connection?.effectiveType === '3g') {
+    if (size === 'original') size = 'w780';
+    else if (size === 'w500') size = 'w342';
   }
   return `${IMAGE_BASE_URL}/${size}${path}`;
 };
