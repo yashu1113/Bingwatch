@@ -118,6 +118,9 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
       
       if (trailer) {
         setIsPlaying(true);
+        toast({
+          title: `Now Playing: ${item.title || item.name} Trailer`,
+        });
       }
     }, 3000);
   }, [autoplayTrailers]);
@@ -252,29 +255,27 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         ))}
       </div>
 
-      {/* Video Controls */}
-      {isPlaying && (
-        <div className="absolute top-4 right-4 space-x-2 z-30">
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-black/50 hover:bg-black/70 border-white/50"
-            onClick={toggleMute}
-          >
-            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-          </Button>
-        </div>
-      )}
-
       {/* Autoplay Toggle */}
-      <Button
-        size="sm"
-        variant="outline"
-        className="absolute top-4 left-4 z-30 bg-black/50 hover:bg-black/70 border-white/50"
-        onClick={toggleAutoplay}
-      >
-        {autoplayTrailers ? 'Disable Autoplay' : 'Enable Autoplay'}
-      </Button>
+      <div className="absolute top-4 right-4">
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 font-semibold flex items-center justify-center"
+          onClick={toggleAutoplay}
+        >
+          {autoplayTrailers ? (
+            <>
+              <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
+              Autoplay On
+            </>
+          ) : (
+            <>
+              <VolumeX className="h-4 w-4 md:h-5 md:w-5" />
+              Autoplay Off
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 };
