@@ -1,12 +1,13 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Play, Plus } from "lucide-react";
+import { Play, Plus, Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { getImageUrl } from "@/services/tmdb";
-import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
+import useEmblaCarousel from "embla-carousel-react";
 import { Skeleton } from "./ui/skeleton";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 interface HeroSliderProps {
   items: Array<{
@@ -35,6 +36,11 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [autoplayTrailers, setAutoplayTrailers] = useLocalStorage("autoplayTrailers", true);
+  const hoverTimerRef = useRef<NodeJS.Timeout>();
+  const videoRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     setImagesLoaded(new Array(items.length).fill(false));
@@ -53,6 +59,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
     const onSelect = () => {
       setSelectedIndex(emblaApi.selectedScrollSnap());
+      setIsPlaying(false);
     };
 
     emblaApi.on("select", onSelect);
@@ -99,6 +106,40 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     });
   }, [addToWatchlist, isInWatchlist, toast]);
 
+  const handleSlideHover = useCallback((item: HeroSliderProps["items"][0]) => {
+    if (!autoplayTrailers) return;
+    
+    clearTimeout(hoverTimerRef.current);
+    
+    hoverTimerRef.current = setTimeout(() => {
+      const trailer = item.videos?.results.find(
+        video => video.type.toLowerCase() === "trailer"
+      );
+      
+      if (trailer) {
+        setIsPlaying(true);
+      }
+    }, 3000);
+  }, [autoplayTrailers]);
+
+  const handleSlideLeave = useCallback(() => {
+    clearTimeout(hoverTimerRef.current);
+    setIsPlaying(false);
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    setIsMuted(prev => !prev);
+  }, []);
+
+  const toggleAutoplay = useCallback(() => {
+    setAutoplayTrailers(prev => !prev);
+    setIsPlaying(false);
+    toast({
+      title: `Autoplay ${!autoplayTrailers ? 'Enabled' : 'Disabled'}`,
+      description: `Trailer autoplay has been ${!autoplayTrailers ? 'enabled' : 'disabled'}`,
+    });
+  }, [autoplayTrailers, setAutoplayTrailers, toast]);
+
   const limitedItems = items.slice(0, 5);
 
   if (!items.length) {
@@ -109,11 +150,19 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     );
   }
 
+  const currentItem = limitedItems[selectedIndex];
+  const trailer = currentItem.videos?.results.find(
+    video => video.type.toLowerCase() === "trailer"
+  );
+
   return (
     <div
       className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        handleSlideLeave();
+      }}
     >
       <div ref={emblaRef} className="w-full h-full overflow-hidden">
         <div className="flex h-full w-full">
@@ -121,19 +170,33 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
             <div
               key={item.id}
               className="relative flex-none w-full h-full overflow-hidden"
+              onMouseEnter={() => handleSlideHover(item)}
+              onMouseLeave={handleSlideLeave}
             >
               {!imagesLoaded[index] && (
                 <Skeleton className="absolute inset-0 w-full h-full" />
               )}
-              <img
-                src={getImageUrl(item.backdrop_path, "original")}
-                alt={item.title || item.name}
-                className={`h-full w-full object-cover transition-opacity duration-300 ${
-                  imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
-                }`}
-                loading="lazy"
-                onLoad={() => handleImageLoad(index)}
-              />
+              {isPlaying && selectedIndex === index && trailer ? (
+                <div className="absolute inset-0 w-full h-full bg-black">
+                  <iframe
+                    ref={videoRef}
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&modestbranding=1`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <img
+                  src={getImageUrl(item.backdrop_path, "original")}
+                  alt={item.title || item.name}
+                  className={`h-full w-full object-cover transition-opacity duration-300 ${
+                    imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  loading="lazy"
+                  onLoad={() => handleImageLoad(index)}
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8">
                 <div className="container mx-auto">
@@ -173,6 +236,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         </div>
       </div>
 
+      {/* Slider Controls */}
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20 sm:bottom-4 md:bottom-3">
         {limitedItems.map((_, index) => (
           <button
@@ -187,6 +251,30 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
           />
         ))}
       </div>
+
+      {/* Video Controls */}
+      {isPlaying && (
+        <div className="absolute top-4 right-4 space-x-2 z-30">
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-black/50 hover:bg-black/70 border-white/50"
+            onClick={toggleMute}
+          >
+            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          </Button>
+        </div>
+      )}
+
+      {/* Autoplay Toggle */}
+      <Button
+        size="sm"
+        variant="outline"
+        className="absolute top-4 left-4 z-30 bg-black/50 hover:bg-black/70 border-white/50"
+        onClick={toggleAutoplay}
+      >
+        {autoplayTrailers ? 'Disable Autoplay' : 'Enable Autoplay'}
+      </Button>
     </div>
   );
 };
