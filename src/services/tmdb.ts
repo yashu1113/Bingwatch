@@ -4,30 +4,54 @@ const TMDB_API_KEY = 'cde27df6ea720efcd90be8ecd0400f61';
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
+// Create axios instance with enhanced configuration
 export const tmdbApi = axios.create({
   baseURL: BASE_URL,
   params: {
     api_key: TMDB_API_KEY,
   },
-  timeout: 10000, // 10 second timeout
+  timeout: 15000, // Increased timeout to 15 seconds
   headers: {
     'Accept': 'application/json',
   },
 });
 
-// Add response interceptor for error handling
+// Enhanced error handling and retry logic
 tmdbApi.interceptors.response.use(
   response => response,
-  error => {
-    console.error('API Error:', error);
-    if (error.response?.status === 429) {
-      // Rate limit exceeded, retry after a delay
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve(tmdbApi(error.config));
-        }, 2000);
-      });
+  async error => {
+    const { config, response } = error;
+    
+    // Track retry attempts
+    const retryCount = config._retryCount || 0;
+    
+    // Only retry on network errors or 5xx server errors
+    if ((error.code === 'ECONNABORTED' || !response || response.status >= 500) && retryCount < 3) {
+      config._retryCount = retryCount + 1;
+      
+      // Exponential backoff delay
+      const delay = Math.min(1000 * (2 ** retryCount), 5000);
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+      // Retry the request
+      return tmdbApi(config);
     }
+    
+    // Handle rate limiting
+    if (response?.status === 429) {
+      const retryAfter = response.headers['retry-after'] || 2;
+      await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+      return tmdbApi(config);
+    }
+
+    console.error('API Error:', {
+      url: config.url,
+      method: config.method,
+      status: response?.status,
+      error: error.message
+    });
+
     return Promise.reject(error);
   }
 );
