@@ -15,42 +15,22 @@ export const tmdbApi = axios.create({
   },
 });
 
-// Enhanced error handling and retry logic
 tmdbApi.interceptors.response.use(
   response => response,
   async error => {
-    const { config, response } = error;
-    const retryCount = config._retryCount || 0;
-    
-    console.error('API Request Failed:', {
-      url: config.url,
-      method: config.method,
-      status: response?.status,
-      statusText: response?.statusText,
-      error: error.message,
-      retryCount,
-    });
-    
-    // Only retry on network errors or 5xx server errors
-    if ((error.code === 'ECONNABORTED' || 
-         error.message.includes('timeout') || 
-         !response || 
-         response.status >= 500) && 
-        retryCount < 3) {
-      
-      config._retryCount = retryCount + 1;
-      const delay = Math.min(1000 * (2 ** retryCount) + Math.random() * 1000, 8000);
-      
-      await new Promise(resolve => setTimeout(resolve, delay));
-      
-      return tmdbApi(config);
+    if (error.response?.status === 404) {
+      console.error('Resource not found:', error.config.url);
+      return Promise.reject(new Error('Resource not found'));
     }
     
-    // Handle rate limiting
-    if (response?.status === 429) {
-      const retryAfter = parseInt(response.headers['retry-after']) || 2;
-      await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
-      return tmdbApi(config);
+    const retryCount = error.config._retryCount || 0;
+    
+    if (retryCount < 3 && (error.code === 'ECONNABORTED' || !error.response || error.response.status >= 500)) {
+      error.config._retryCount = retryCount + 1;
+      const delay = Math.min(1000 * (2 ** retryCount), 10000);
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return tmdbApi(error.config);
     }
 
     return Promise.reject(error);
@@ -59,8 +39,6 @@ tmdbApi.interceptors.response.use(
 
 export const getImageUrl = (path: string, size: string = 'original') => {
   if (!path) return '/placeholder.svg';
-  if (size === 'original') size = 'w780';
-  else if (size === 'w500') size = 'w342';
   return `${IMAGE_BASE_URL}/${size}${path}`;
 };
 

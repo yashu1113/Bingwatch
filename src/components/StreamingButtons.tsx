@@ -24,15 +24,7 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
   });
 
   const handleStreamingClick = (url: string) => {
-    const newWindow = window.open(url, '_blank');
-    if (newWindow) {
-      try {
-        const targetOrigin = new URL(url).origin;
-        newWindow.postMessage({ type: 'STREAMING_PROVIDER_OPENED' }, targetOrigin);
-      } catch (error) {
-        console.warn('Failed to send postMessage:', error);
-      }
-    }
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   if (isLoading) {
