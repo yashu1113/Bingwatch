@@ -18,6 +18,8 @@ export const tmdbApi = axios.create({
 tmdbApi.interceptors.response.use(
   response => response,
   async error => {
+    console.error('TMDB API Error:', error);
+    
     if (error.response?.status === 404) {
       console.error('Resource not found:', error.config.url);
       return Promise.reject(new Error('Resource not found'));
