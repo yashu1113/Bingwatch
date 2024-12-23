@@ -21,11 +21,11 @@ tmdbApi.interceptors.response.use(
     console.error('TMDB API Error:', error);
     
     if (error.response?.status === 404) {
-      console.error('Resource not found:', error.config.url);
+      console.error('Resource not found:', error.config?.url);
       return Promise.reject(new Error('Resource not found'));
     }
     
-    const retryCount = error.config._retryCount || 0;
+    const retryCount = error.config?._retryCount || 0;
     
     if (retryCount < 3 && (error.code === 'ECONNABORTED' || !error.response || error.response.status >= 500)) {
       error.config._retryCount = retryCount + 1;
