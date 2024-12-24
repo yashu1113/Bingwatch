@@ -1,281 +1,64 @@
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Play, Plus, Volume2, VolumeX } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useWatchlist } from "@/contexts/WatchlistContext";
-import { getImageUrl } from "@/services/tmdb";
-import useEmblaCarousel from "embla-carousel-react";
-import { Skeleton } from "./ui/skeleton";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import React, { useState } from 'react';
+import { getImageUrl } from '../utils/imageUrl';
 
-interface HeroSliderProps {
-  items: Array<{
-    id: number;
-    title?: string;
-    name?: string;
-    overview: string;
-    backdrop_path: string;
-    media_type?: "movie" | "tv";
-    release_date?: string;
-    first_air_date?: string;
-    videos?: {
-      results: Array<{
-        key: string;
-        type: string;
-      }>;
-    };
-  }>;
-}
+const HeroSlider = ({ items, trailers }) => {
+  const [imagesLoaded, setImagesLoaded] = useState([]);
 
-export const HeroSlider = ({ items }: HeroSliderProps) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { addToWatchlist, isInWatchlist } = useWatchlist();
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-  const [autoplayTrailers, setAutoplayTrailers] = useLocalStorage("autoplayTrailers", true);
-  const hoverTimerRef = useRef<NodeJS.Timeout>();
-  const videoRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    setImagesLoaded(new Array(items.length).fill(false));
-  }, [items.length]);
-
-  const handleImageLoad = useCallback((index: number) => {
-    setImagesLoaded(prev => {
-      const newState = [...prev];
-      newState[index] = true;
-      return newState;
+  const handleImageLoad = (index) => {
+    setImagesLoaded((prevState) => {
+      const updatedState = [...prevState];
+      updatedState[index] = true;
+      return updatedState;
     });
-  }, []);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-
-    const onSelect = () => {
-      setSelectedIndex(emblaApi.selectedScrollSnap());
-      setIsPlaying(false);
-    };
-
-    emblaApi.on("select", onSelect);
-    
-    return () => {
-      if (emblaApi) {
-        emblaApi.off("select", onSelect);
-      }
-    };
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi || isHovered) return;
-
-    const intervalId = setInterval(() => {
-      if (document.hidden) return;
-      emblaApi.scrollNext();
-    }, 5000);
-
-    return () => clearInterval(intervalId);
-  }, [emblaApi, isHovered]);
-
-  const handleAddToWatchlist = useCallback((item: HeroSliderProps["items"][0]) => {
-    const mediaItem = {
-      id: item.id,
-      title: item.title || item.name || "",
-      mediaType: item.media_type || "movie",
-      posterPath: item.backdrop_path,
-      releaseDate: item.release_date || item.first_air_date,
-    };
-
-    if (isInWatchlist(item.id)) {
-      toast({
-        title: "Already in Watchlist",
-        description: "This title is already in your watchlist",
-      });
-      return;
-    }
-
-    addToWatchlist(mediaItem);
-    toast({
-      title: "Added to Watchlist",
-      description: "Successfully added to your watchlist",
-    });
-  }, [addToWatchlist, isInWatchlist, toast]);
-
-  const handleSlideHover = useCallback((item: HeroSliderProps["items"][0]) => {
-    if (!autoplayTrailers) return;
-    
-    clearTimeout(hoverTimerRef.current);
-    
-    hoverTimerRef.current = setTimeout(() => {
-      const trailer = item.videos?.results.find(
-        video => video.type.toLowerCase() === "trailer"
-      );
-      
-      if (trailer) {
-        setIsPlaying(true);
-        toast({
-          title: `Now Playing: ${item.title || item.name} Trailer`,
-        });
-      }
-    }, 3000);
-  }, [autoplayTrailers]);
-
-  const handleSlideLeave = useCallback(() => {
-    clearTimeout(hoverTimerRef.current);
-    setIsPlaying(false);
-  }, []);
-
-  const toggleMute = useCallback(() => {
-    setIsMuted(prev => !prev);
-  }, []);
-
-  const toggleAutoplay = useCallback(() => {
-    setAutoplayTrailers(prev => !prev);
-    setIsPlaying(false);
-    toast({
-      title: `Autoplay ${!autoplayTrailers ? 'Enabled' : 'Disabled'}`,
-      description: `Trailer autoplay has been ${!autoplayTrailers ? 'enabled' : 'disabled'}`,
-    });
-  }, [autoplayTrailers, setAutoplayTrailers, toast]);
-
-  const limitedItems = items.slice(0, 5);
-
-  if (!items.length) {
-    return (
-      <div className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen">
-        <Skeleton className="w-full h-full" />
-      </div>
-    );
-  }
-
-  const currentItem = limitedItems[selectedIndex];
-  const trailer = currentItem.videos?.results.find(
-    video => video.type.toLowerCase() === "trailer"
-  );
+  };
 
   return (
-    <div
-      className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen overflow-hidden"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        handleSlideLeave();
-      }}
-    >
-      <div ref={emblaRef} className="w-full h-full overflow-hidden">
-        <div className="flex h-full w-full">
-          {limitedItems.map((item, index) => (
-            <div
-              key={item.id}
-              className="relative flex-none w-full h-full overflow-hidden"
-              onMouseEnter={() => handleSlideHover(item)}
-              onMouseLeave={handleSlideLeave}
-            >
-              {!imagesLoaded[index] && (
-                <Skeleton className="absolute inset-0 w-full h-full" />
-              )}
-              {isPlaying && selectedIndex === index && trailer ? (
-                <div className="absolute inset-0 w-full h-full bg-black">
-                  <iframe
-                    ref={videoRef}
-                    className="w-full h-full"
-                    src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&modestbranding=1`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              ) : (
-                <img
-                  src={getImageUrl(item.backdrop_path, "original")}
-                  alt={item.title || item.name}
-                  className={`h-full w-full object-cover object-center transition-opacity duration-300 ${
-                    imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
-                  }`}
-                  loading="lazy"
-                  onLoad={() => handleImageLoad(index)}
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8">
-                <div className="container mx-auto">
-                  <div className="max-w-2xl space-y-2 md:space-y-4">
-                    <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
-                      {item.title || item.name}
-                    </h2>
-                    <p className="line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200">
-                      {item.overview}
-                    </p>
-                    <div className="flex flex-wrap gap-2 md:gap-4">
-                      <Button
-                        size="sm"
-                        className="gap-1 md:gap-2 bg-netflix-red hover:bg-netflix-red/90 text-xs md:text-base"
-                        onClick={() =>
-                          navigate(`/${item.media_type || "movie"}/${item.id}`)
-                        }
-                      >
-                        <Play className="h-4 w-4" />
-                        Watch Now
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 md:h-10 font-semibold flex items-center justify-center hover:bg-[...]
-                        onClick={() => handleAddToWatchlist(item)}
-                      >
-                        <Plus className="h-4 w-4 md:h-5 md:w-5" />
-                        Add to Watchlist
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Slider Controls */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20 sm:bottom-4 md:bottom-3">
-        {limitedItems.map((_, index) => (
-          <button
+    <div className="relative w-full overflow-hidden" style={{ height: 'calc(50vh)' }}>
+      {/* Dynamic container height for responsiveness */}
+      <div className="md:h-[70vh] lg:h-[90vh]">
+        {items.map((item, index) => (
+          <div
             key={index}
-            className={`w-1 h-1 rounded-full transition-all duration-300 ${
-              index === selectedIndex
-                ? "bg-white scale-125"
-                : "bg-white/50 hover:bg-white/75"
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              index === 0 ? 'opacity-100' : 'opacity-0'
             }`}
-            onClick={() => emblaApi?.scrollTo(index)}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+          >
+            {/* Image element */}
+            <img
+              src={getImageUrl(item.backdrop_path, 'original')}
+              alt={item.title || item.name}
+              className={`h-full w-full object-cover object-center transition-opacity duration-300 ${
+                imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{
+                objectFit: 'cover',
+                height: '100%',
+                width: '100%',
+              }}
+              loading="lazy"
+              onLoad={() => handleImageLoad(index)}
+            />
 
-      {/* Autoplay Toggle */}
-      <div className="absolute top-4 right-4">
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 font-semibold flex items-center justify-center"
-          onClick={toggleAutoplay}
-        >
-          {autoplayTrailers ? (
-            <>
-              <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
-              Autoplay On
-            </>
-          ) : (
-            <>
-              <VolumeX className="h-4 w-4 md:h-5 md:w-5" />
-              Autoplay Off
-            </>
-          )}
-        </Button>
+            {/* Trailer (if available) */}
+            {trailers && trailers[index]?.key && (
+              <div className="absolute inset-0 flex justify-center items-center">
+                <iframe
+                  src={`https://www.youtube.com/embed/${trailers[index]?.key}`}
+                  title="Trailer"
+                  allowFullScreen
+                  className="w-full h-full object-contain"
+                  style={{
+                    aspectRatio: '16/9',
+                    maxHeight: '70%',
+                  }}
+                ></iframe>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
 };
+
+export default HeroSlider;
