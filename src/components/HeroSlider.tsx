@@ -193,7 +193,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 <img
                   src={getImageUrl(item.backdrop_path, "original")}
                   alt={item.title || item.name}
-                  className={`h-full w-full object-cover transition-opacity duration-300 ${
+                  className={`h-full w-full object-cover object-center transition-opacity duration-300 ${
                     imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
                   }`}
                   loading="lazy"
@@ -224,7 +224,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 md:h-10 font-semibold flex items-center justify-center hover:bg-white/20"
+                        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 md:h-10 font-semibold flex items-center justify-center hover:bg-[...]
                         onClick={() => handleAddToWatchlist(item)}
                       >
                         <Plus className="h-4 w-4 md:h-5 md:w-5" />
