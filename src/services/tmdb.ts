@@ -18,8 +18,19 @@ export const tmdbApi = axios.create({
 tmdbApi.interceptors.response.use(
   response => response,
   async error => {
-    console.error('TMDB API Error:', error);
+    // Log the full error for debugging
+    console.error('TMDB API Error:', {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      url: error.config?.url,
+    });
     
+    if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+      console.error('Network error detected. Retrying request...');
+      return Promise.reject(new Error('Network error. Please check your internet connection.'));
+    }
+
     if (error.response?.status === 404) {
       console.error('Resource not found:', error.config?.url);
       return Promise.reject(new Error('Resource not found'));
