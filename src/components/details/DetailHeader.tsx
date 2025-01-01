@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Check, Play } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useToast } from "@/hooks/use-toast";
+import { StreamingButtons } from "@/components/StreamingButtons";
 
 interface DetailHeaderProps {
   id: number;
@@ -78,32 +79,35 @@ export const DetailHeader = ({
           <p>Rating: ★ {voteAverage?.toFixed(1)}</p>
           {runtime && <p>Runtime: {runtime} minutes</p>}
         </div>
-        <div className="flex flex-wrap gap-3 mt-auto">
-          {trailer && (
-            <Button
-              onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
-              className="bg-netflix-red hover:bg-netflix-red/90"
-            >
-              <Play className="mr-2 h-4 w-4" />
-              Watch Trailer
-            </Button>
-          )}
-          <Button
-            onClick={handleWatchlistClick}
-            variant={isInWatchlist(id) ? "secondary" : "default"}
-          >
-            {isInWatchlist(id) ? (
-              <>
-                <Check className="mr-2 h-4 w-4" />
-                In Watchlist
-              </>
-            ) : (
-              <>
-                <Plus className="mr-2 h-4 w-4" />
-                Add to Watchlist
-              </>
+        <div className="flex flex-col space-y-4 mt-auto">
+          <div className="flex flex-wrap gap-3">
+            {trailer && (
+              <Button
+                onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
+                className="bg-netflix-red hover:bg-netflix-red/90"
+              >
+                <Play className="mr-2 h-4 w-4" />
+                Watch Trailer
+              </Button>
             )}
-          </Button>
+            <Button
+              onClick={handleWatchlistClick}
+              variant={isInWatchlist(id) ? "secondary" : "default"}
+            >
+              {isInWatchlist(id) ? (
+                <>
+                  <Check className="mr-2 h-4 w-4" />
+                  In Watchlist
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add to Watchlist
+                </>
+              )}
+            </Button>
+          </div>
+          <StreamingButtons mediaType={mediaType} id={id} />
         </div>
       </div>
     </div>
