@@ -123,7 +123,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         });
       }
     }, 3000);
-  }, [autoplayTrailers]);
+  }, [autoplayTrailers, toast]);
 
   const handleSlideLeave = useCallback(() => {
     clearTimeout(hoverTimerRef.current);
