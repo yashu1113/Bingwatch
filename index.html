@@ -8,6 +8,27 @@
     <meta name="author" content="Default" />
     <!-- Add the default global favicon -->
     <link rel="icon" href="https://www.example.com/favicon.ico" />
+    <!-- Add base tag for proper routing -->
+    <base href="/" />
+    <!-- Add meta refresh for handling 404s -->
+    <script>
+      // Single Page Apps for GitHub Pages/Netlify/Vercel
+      // MIT License: https://github.com/rafgraph/spa-github-pages/blob/gh-pages/LICENSE
+      // This script checks to see if a redirect is present in the query string,
+      // converts it back into the correct url and adds it to the
+      // browser's history using window.history.replaceState(...),
+      // which won't cause the browser to attempt to load the new url.
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
   </head>
 
   <body>
