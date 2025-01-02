@@ -24,7 +24,9 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
   });
 
   const handleStreamingClick = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    // Ensure the URL is properly formatted
+    const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
+    window.open(formattedUrl, '_blank', 'noopener,noreferrer');
   };
 
   if (isLoading) {
@@ -50,13 +52,18 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
     <div className="flex flex-wrap gap-2 w-full">
       {streamingProviders.map((provider) => {
         const providerClass = getProviderColor(provider.provider_name);
+        const providerUrl = providers.results.IN.link;
+        
+        // Ensure we have a valid URL before creating the button
+        if (!providerUrl) return null;
+        
         return (
           <Button
             key={provider.provider_id}
             variant="outline"
             className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
               ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black`}
-            onClick={() => handleStreamingClick(providers.results.IN.link)}
+            onClick={() => handleStreamingClick(providerUrl)}
             aria-label={`Watch on ${provider.provider_name}`}
           >
             <img
