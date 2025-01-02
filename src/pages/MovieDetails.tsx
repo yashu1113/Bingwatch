@@ -4,7 +4,6 @@ import { getDetails } from '@/services/tmdb';
 import { MovieCarousel } from '@/components/MovieCarousel';
 import { DetailHeader } from '@/components/details/DetailHeader';
 import { VideoSection } from '@/components/details/VideoSection';
-import { StreamingButtons } from '@/components/StreamingButtons';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingGrid } from '@/components/LoadingGrid';
 
@@ -74,8 +73,6 @@ const MovieDetails = () => {
           trailer={trailer}
           mediaType="movie"
         />
-
-        <StreamingButtons mediaType="movie" id={movie.id} />
 
         <VideoSection videos={videos} />
 
