@@ -1,7 +1,4 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Play, Plus, Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { getImageUrl } from "@/services/tmdb";
@@ -9,6 +6,9 @@ import useEmblaCarousel from "embla-carousel-react";
 import { Skeleton } from "./ui/skeleton";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useNetworkQuality } from "@/hooks/use-network-quality";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { HeroControls } from "./hero/HeroControls";
+import { HeroSlideContent } from "./hero/HeroSlideContent";
 
 interface HeroSliderProps {
   items: Array<{
@@ -30,7 +30,6 @@ interface HeroSliderProps {
 }
 
 export const HeroSlider = ({ items }: HeroSliderProps) => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const { addToWatchlist, isInWatchlist } = useWatchlist();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
@@ -43,6 +42,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   const hoverTimerRef = useRef<NodeJS.Timeout>();
   const videoRef = useRef<HTMLIFrameElement>(null);
   const networkQuality = useNetworkQuality();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setImagesLoaded(new Array(items.length).fill(false));
@@ -111,18 +111,18 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   const getVideoQuality = useCallback(() => {
     switch (networkQuality) {
       case 'low':
-        return 'small'; // 320x240
+        return 'small';
       case 'medium':
-        return 'medium'; // 640x360
+        return 'medium';
       default:
-        return 'large'; // 853x480
+        return 'large';
     }
   }, [networkQuality]);
 
   const shouldAutoplayOnNetwork = useCallback(() => {
-    if (networkQuality === 'low') return false;
+    if (networkQuality === 'low' || isMobile) return false;
     return autoplayTrailers;
-  }, [networkQuality, autoplayTrailers]);
+  }, [networkQuality, autoplayTrailers, isMobile]);
 
   const handleSlideHover = useCallback((item: HeroSliderProps["items"][0]) => {
     if (!shouldAutoplayOnNetwork()) {
@@ -160,15 +160,6 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     setIsMuted(prev => !prev);
   }, []);
 
-  const toggleAutoplay = useCallback(() => {
-    setAutoplayTrailers(prev => !prev);
-    setIsPlaying(false);
-    toast({
-      title: `Autoplay ${!autoplayTrailers ? 'Enabled' : 'Disabled'}`,
-      description: `Trailer autoplay has been ${!autoplayTrailers ? 'enabled' : 'disabled'}`,
-    });
-  }, [autoplayTrailers, setAutoplayTrailers, toast]);
-
   const limitedItems = items.slice(0, 5);
 
   if (!items.length) {
@@ -187,10 +178,12 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   return (
     <div
       className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen overflow-hidden"
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => {
-        setIsHovered(false);
-        handleSlideLeave();
+        if (!isMobile) {
+          setIsHovered(false);
+          handleSlideLeave();
+        }
       }}
     >
       <div ref={emblaRef} className="w-full h-full overflow-hidden">
@@ -199,8 +192,8 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
             <div
               key={item.id}
               className="relative flex-none w-full h-full overflow-hidden"
-              onMouseEnter={() => handleSlideHover(item)}
-              onMouseLeave={handleSlideLeave}
+              onMouseEnter={() => !isMobile && handleSlideHover(item)}
+              onMouseLeave={() => !isMobile && handleSlideLeave()}
             >
               {!imagesLoaded[index] && (
                 <Skeleton className="absolute inset-0 w-full h-full" />
@@ -227,39 +220,13 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8">
-                <div className="container mx-auto">
-                  <div className="max-w-2xl space-y-2 md:space-y-4">
-                    <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
-                      {item.title || item.name}
-                    </h2>
-                    <p className="line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200">
-                      {item.overview}
-                    </p>
-                    <div className="flex flex-wrap gap-2 md:gap-4">
-                      <Button
-                        size="sm"
-                        className="gap-1 md:gap-2 bg-netflix-red hover:bg-netflix-red/90 text-xs md:text-base"
-                        onClick={() =>
-                          navigate(`/${item.media_type || "movie"}/${item.id}`)
-                        }
-                      >
-                        <Play className="h-4 w-4" />
-                        Watch Now
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 md:h-10 font-semibold flex items-center justify-center hover:bg-white/20"
-                        onClick={() => handleAddToWatchlist(item)}
-                      >
-                        <Plus className="h-4 w-4 md:h-5 md:w-5" />
-                        Add to Watchlist
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <HeroSlideContent
+                title={item.title || item.name || ""}
+                overview={item.overview}
+                mediaType={item.media_type || "movie"}
+                id={item.id}
+                onAddToWatchlist={() => handleAddToWatchlist(item)}
+              />
             </div>
           ))}
         </div>
@@ -281,27 +248,13 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         ))}
       </div>
 
-      {/* Autoplay Toggle */}
-      <div className="absolute top-4 right-4">
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 font-semibold flex items-center justify-center"
-          onClick={toggleAutoplay}
-        >
-          {autoplayTrailers ? (
-            <>
-              <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
-              Autoplay On
-            </>
-          ) : (
-            <>
-              <VolumeX className="h-4 w-4 md:h-5 md:w-5" />
-              Autoplay Off
-            </>
-          )}
-        </Button>
-      </div>
+      {/* Autoplay Controls */}
+      {!isMobile && (
+        <HeroControls
+          autoplayTrailers={autoplayTrailers}
+          setAutoplayTrailers={setAutoplayTrailers}
+        />
+      )}
     </div>
   );
 };
