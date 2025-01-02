@@ -8,6 +8,7 @@ import { getImageUrl } from "@/services/tmdb";
 import useEmblaCarousel from "embla-carousel-react";
 import { Skeleton } from "./ui/skeleton";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useNetworkQuality } from "@/hooks/use-network-quality";
 
 interface HeroSliderProps {
   items: Array<{
@@ -41,6 +42,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   const [autoplayTrailers, setAutoplayTrailers] = useLocalStorage("autoplayTrailers", true);
   const hoverTimerRef = useRef<NodeJS.Timeout>();
   const videoRef = useRef<HTMLIFrameElement>(null);
+  const networkQuality = useNetworkQuality();
 
   useEffect(() => {
     setImagesLoaded(new Array(items.length).fill(false));
@@ -106,8 +108,32 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
     });
   }, [addToWatchlist, isInWatchlist, toast]);
 
+  const getVideoQuality = useCallback(() => {
+    switch (networkQuality) {
+      case 'low':
+        return 'small'; // 320x240
+      case 'medium':
+        return 'medium'; // 640x360
+      default:
+        return 'large'; // 853x480
+    }
+  }, [networkQuality]);
+
+  const shouldAutoplayOnNetwork = useCallback(() => {
+    if (networkQuality === 'low') return false;
+    return autoplayTrailers;
+  }, [networkQuality, autoplayTrailers]);
+
   const handleSlideHover = useCallback((item: HeroSliderProps["items"][0]) => {
-    if (!autoplayTrailers) return;
+    if (!shouldAutoplayOnNetwork()) {
+      if (networkQuality === 'low') {
+        toast({
+          title: "Video playback limited",
+          description: "Trailer autoplay is disabled due to network conditions",
+        });
+      }
+      return;
+    }
     
     clearTimeout(hoverTimerRef.current);
     
@@ -123,7 +149,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         });
       }
     }, 3000);
-  }, [autoplayTrailers, toast]);
+  }, [shouldAutoplayOnNetwork, networkQuality, toast]);
 
   const handleSlideLeave = useCallback(() => {
     clearTimeout(hoverTimerRef.current);
@@ -179,12 +205,12 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               {!imagesLoaded[index] && (
                 <Skeleton className="absolute inset-0 w-full h-full" />
               )}
-              {isPlaying && selectedIndex === index && trailer ? (
+              {isPlaying && trailer ? (
                 <div className="absolute inset-0 w-full h-full bg-black">
                   <iframe
                     ref={videoRef}
                     className="w-full h-full"
-                    src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&modestbranding=1`}
+                    src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&modestbranding=1&vq=${getVideoQuality()}`}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
