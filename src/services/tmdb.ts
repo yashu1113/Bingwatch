@@ -9,7 +9,7 @@ export const tmdbApi = axios.create({
   params: {
     api_key: TMDB_API_KEY,
   },
-  timeout: 30000,
+  timeout: 10000, // Reduced timeout for slower networks
   headers: {
     'Accept': 'application/json',
   },
@@ -18,7 +18,6 @@ export const tmdbApi = axios.create({
 tmdbApi.interceptors.response.use(
   response => response,
   async error => {
-    // Log the full error for debugging
     console.error('TMDB API Error:', {
       message: error.message,
       code: error.code,
@@ -27,7 +26,12 @@ tmdbApi.interceptors.response.use(
     });
     
     if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
-      console.error('Network error detected. Retrying request...');
+      console.error('Network error detected. Retrying request with increased timeout...');
+      if (error.config && !error.config._retry) {
+        error.config._retry = true;
+        error.config.timeout = 30000; // Increase timeout for retry
+        return tmdbApi(error.config);
+      }
       return Promise.reject(new Error('Network error. Please check your internet connection.'));
     }
 
@@ -37,11 +41,13 @@ tmdbApi.interceptors.response.use(
     }
     
     const retryCount = error.config?._retryCount || 0;
+    const maxRetries = 3;
     
-    if (retryCount < 3 && (error.code === 'ECONNABORTED' || !error.response || error.response.status >= 500)) {
+    if (retryCount < maxRetries && (error.code === 'ECONNABORTED' || !error.response || error.response.status >= 500)) {
       error.config._retryCount = retryCount + 1;
       const delay = Math.min(1000 * (2 ** retryCount), 10000);
       
+      console.log(`Retry attempt ${retryCount + 1} of ${maxRetries} after ${delay}ms`);
       await new Promise(resolve => setTimeout(resolve, delay));
       return tmdbApi(error.config);
     }

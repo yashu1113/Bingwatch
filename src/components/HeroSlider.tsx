@@ -39,6 +39,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [autoplayTrailers, setAutoplayTrailers] = useLocalStorage("autoplayTrailers", true);
+  const [imageLoadErrors, setImageLoadErrors] = useState<boolean[]>([]);
   const hoverTimerRef = useRef<NodeJS.Timeout>();
   const videoRef = useRef<HTMLIFrameElement>(null);
   const networkQuality = useNetworkQuality();
@@ -46,6 +47,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   useEffect(() => {
     setImagesLoaded(new Array(items.length).fill(false));
+    setImageLoadErrors(new Array(items.length).fill(false));
   }, [items.length]);
 
   const handleImageLoad = useCallback((index: number) => {
@@ -55,6 +57,20 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
       return newState;
     });
   }, []);
+
+  const handleImageError = useCallback((index: number) => {
+    console.error(`Failed to load image at index ${index}`);
+    setImageLoadErrors(prev => {
+      const newState = [...prev];
+      newState[index] = true;
+      return newState;
+    });
+    toast({
+      title: "Image Load Error",
+      description: "Failed to load some images. Please check your connection.",
+      variant: "destructive",
+    });
+  }, [toast]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -195,10 +211,14 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               onMouseEnter={() => !isMobile && handleSlideHover(item)}
               onMouseLeave={() => !isMobile && handleSlideLeave()}
             >
-              {!imagesLoaded[index] && (
+              {!imagesLoaded[index] && !imageLoadErrors[index] && (
                 <Skeleton className="absolute inset-0 w-full h-full" />
               )}
-              {isPlaying && trailer ? (
+              {imageLoadErrors[index] ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                  <p className="text-white text-center">Failed to load image</p>
+                </div>
+              ) : isPlaying && trailer ? (
                 <div className="absolute inset-0 w-full h-full bg-black">
                   <iframe
                     ref={videoRef}
@@ -210,13 +230,14 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 </div>
               ) : (
                 <img
-                  src={getImageUrl(item.backdrop_path, "original")}
+                  src={getImageUrl(item.backdrop_path, networkQuality === 'low' ? 'w780' : 'original')}
                   alt={item.title || item.name}
                   className={`h-full w-full object-contain md:object-cover object-center transition-opacity duration-300 ${
                     imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
                   }`}
                   loading="lazy"
                   onLoad={() => handleImageLoad(index)}
+                  onError={() => handleImageError(index)}
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
