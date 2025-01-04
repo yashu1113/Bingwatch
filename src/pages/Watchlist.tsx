@@ -30,6 +30,7 @@ const Watchlist = () => {
             media_type: item.mediaType,
             showDeleteButton: true,
           }))}
+          showDeleteButton={true}
         />
       )}
     </main>

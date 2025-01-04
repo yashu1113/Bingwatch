@@ -15,9 +15,10 @@ interface Media {
 interface MediaGridProps {
   items: Media[];
   isLoading?: boolean;
+  showDeleteButton?: boolean;
 }
 
-export const MediaGrid = ({ items, isLoading }: MediaGridProps) => {
+export const MediaGrid = ({ items, isLoading, showDeleteButton }: MediaGridProps) => {
   if (isLoading) {
     return <LoadingGrid />;
   }
@@ -41,6 +42,7 @@ export const MediaGrid = ({ items, isLoading }: MediaGridProps) => {
           mediaType={item.media_type}
           releaseDate={item.release_date || item.first_air_date}
           voteAverage={item.vote_average}
+          showDeleteButton={showDeleteButton}
         />
       ))}
     </div>
