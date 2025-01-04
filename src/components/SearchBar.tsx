@@ -57,9 +57,9 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
 
   const handleSuggestionClick = (suggestion: SearchResult) => {
     const title = suggestion.title || suggestion.name;
-    setQuery(title || '');
-    setShowSuggestions(false);
     navigate(`/search?q=${encodeURIComponent(title || '')}`);
+    setQuery('');
+    setShowSuggestions(false);
     onSearch?.();
   };
 
@@ -93,17 +93,13 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
           <div className="p-2 text-sm text-gray-400">
             Did you mean...
           </div>
-          {suggestions.map(({ item, score }) => (
+          {suggestions.map(({ item }) => (
             <button
               key={item.id}
               onClick={() => handleSuggestionClick(item)}
-              className="w-full px-4 py-2 text-left text-white hover:bg-gray-800 transition-colors
-                flex items-center justify-between"
+              className="w-full px-4 py-2 text-left text-white hover:bg-gray-800 transition-colors"
             >
               <span>{item.title || item.name}</span>
-              <span className="text-sm text-gray-400">
-                {Math.round((1 - (score || 0)) * 100)}% match
-              </span>
             </button>
           ))}
         </div>
