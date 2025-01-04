@@ -7,6 +7,12 @@ import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface MediaCardProps {
   id: number;
@@ -42,6 +48,28 @@ export const MediaCard = ({
     });
   };
 
+  const DeleteButton = () => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={handleDelete}
+            className={cn(
+              "absolute right-2 top-2 z-10 rounded-full bg-black/80 p-2.5 text-white transition-all hover:bg-black/90",
+              isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            )}
+            aria-label={`Remove ${title} from watchlist`}
+          >
+            <Trash2 className="h-5 w-5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Remove from Watchlist</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+
   return (
     <Link
       to={`/${mediaType}/${id}`}
@@ -69,18 +97,7 @@ export const MediaCard = ({
           />
         )}
       </div>
-      {showDeleteButton && (
-        <button
-          onClick={handleDelete}
-          className={cn(
-            "absolute right-2 top-2 z-10 rounded-full bg-black/80 p-2 text-white transition-opacity",
-            isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-          )}
-          aria-label={`Remove ${title} from watchlist`}
-        >
-          <Trash2 size={20} />
-        </button>
-      )}
+      {showDeleteButton && <DeleteButton />}
       <div 
         className={cn(
           "absolute inset-0 bg-gradient-to-t from-black/80 to-transparent",
