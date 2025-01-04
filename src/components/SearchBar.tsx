@@ -15,6 +15,12 @@ interface SearchResult {
   popularity: number;
 }
 
+interface FuseResult<T> {
+  item: T;
+  refIndex: number;
+  score: number;
+}
+
 export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
   const [query, setQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -34,8 +40,8 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
   });
 
   const suggestions = debouncedQuery
-    ? fuse.search(debouncedQuery)
-      .sort((a, b) => (b.item.popularity || 0) - (a.item.popularity || 0))
+    ? (fuse.search(debouncedQuery) as FuseResult<SearchResult>[])
+      .sort((a, b) => b.item.popularity - a.item.popularity)
       .slice(0, 5)
     : [];
 
