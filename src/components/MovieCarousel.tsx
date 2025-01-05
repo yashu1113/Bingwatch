@@ -21,12 +21,14 @@ interface MovieCarouselProps {
     release_date?: string;
     first_air_date?: string;
     vote_average?: number;
+    CustomActions?: React.ComponentType;
   }>;
   autoPlay?: boolean;
   isLoading?: boolean;
+  showCustomActions?: boolean;
 }
 
-export const MovieCarousel = ({ items, autoPlay = false, isLoading = false }: MovieCarouselProps) => {
+export const MovieCarousel = ({ items, autoPlay = false, isLoading = false, showCustomActions = false }: MovieCarouselProps) => {
   const isMobile = useIsMobile();
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
@@ -88,6 +90,7 @@ export const MovieCarousel = ({ items, autoPlay = false, isLoading = false }: Mo
               mediaType={item.media_type || 'movie'}
               releaseDate={item.release_date || item.first_air_date}
               voteAverage={item.vote_average}
+              CustomActions={showCustomActions ? item.CustomActions : undefined}
             />
           </CarouselItem>
         ))}
