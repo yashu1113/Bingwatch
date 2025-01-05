@@ -207,7 +207,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
           {limitedItems.map((item, index) => (
             <div
               key={item.id}
-              className="relative flex-none w-full h-full overflow-hidden"
+              className="relative flex-none w-full h-full"
               onMouseEnter={() => !isMobile && handleSlideHover(item)}
               onMouseLeave={() => !isMobile && handleSlideLeave()}
             >
@@ -232,7 +232,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 <img
                   src={getImageUrl(item.backdrop_path, networkQuality === 'low' ? 'w780' : 'original')}
                   alt={item.title || item.name}
-                  className={`h-full w-full object-contain md:object-cover object-center transition-opacity duration-300 ${
+                  className={`h-full w-full object-cover transition-opacity duration-300 ${
                     imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
                   }`}
                   loading="lazy"

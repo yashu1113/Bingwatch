@@ -3,6 +3,7 @@ import { Plus, Check, Play } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useToast } from "@/hooks/use-toast";
 import { StreamingButtons } from "@/components/StreamingButtons";
+import { cn } from "@/lib/utils";
 
 interface DetailHeaderProps {
   id: number;
@@ -15,6 +16,7 @@ interface DetailHeaderProps {
   runtime?: number;
   trailer?: { key: string; };
   mediaType: 'movie' | 'tv';
+  isInTheaters?: boolean;
 }
 
 export const DetailHeader = ({
@@ -28,6 +30,7 @@ export const DetailHeader = ({
   runtime,
   trailer,
   mediaType,
+  isInTheaters,
 }: DetailHeaderProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
@@ -56,11 +59,18 @@ export const DetailHeader = ({
 
   return (
     <div className="grid gap-6 md:gap-8 md:grid-cols-[300px,1fr]">
-      <img
-        src={`https://image.tmdb.org/t/p/w500${posterPath}`}
-        alt={title}
-        className="rounded-lg shadow-lg w-full"
-      />
+      <div className="relative">
+        <img
+          src={`https://image.tmdb.org/t/p/w500${posterPath}`}
+          alt={title}
+          className="rounded-lg shadow-lg w-full"
+        />
+        {isInTheaters && (
+          <div className="absolute top-4 right-4 bg-[#F4A261] text-white px-3 py-1 rounded-full text-sm font-medium">
+            Now Playing in Theaters
+          </div>
+        )}
+      </div>
       <div className="flex flex-col space-y-4">
         <h1 className="text-2xl md:text-4xl font-bold">{title}</h1>
         <p className="text-base md:text-lg text-gray-400">{overview}</p>
@@ -92,7 +102,12 @@ export const DetailHeader = ({
             )}
             <Button
               onClick={handleWatchlistClick}
-              variant={isInWatchlist(id) ? "secondary" : "default"}
+              className={cn(
+                "transition-colors",
+                isInWatchlist(id)
+                  ? "bg-[#00B894] hover:bg-[#00B894]/90"
+                  : "bg-[#3A86FF] hover:bg-[#3A86FF]/90"
+              )}
             >
               {isInWatchlist(id) ? (
                 <>
