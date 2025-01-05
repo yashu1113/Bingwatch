@@ -8,6 +8,7 @@ interface HeroSlideContentProps {
   mediaType: string;
   id: number;
   onAddToWatchlist: () => void;
+  isMobile: boolean;
 }
 
 export const HeroSlideContent = ({ 
@@ -15,7 +16,8 @@ export const HeroSlideContent = ({
   overview, 
   mediaType, 
   id, 
-  onAddToWatchlist 
+  onAddToWatchlist,
+  isMobile
 }: HeroSlideContentProps) => {
   const navigate = useNavigate();
 
