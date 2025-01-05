@@ -96,6 +96,20 @@ export const getMoviesByGenre = async (genreId: number) => {
   }
 };
 
+export const getUpcomingMovies = async () => {
+  try {
+    const response = await tmdbApi.get('/movie/upcoming', {
+      params: {
+        region: 'IN',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching upcoming movies:', error);
+    throw error;
+  }
+};
+
 export const search = async (query: string) => {
   try {
     const response = await tmdbApi.get('/search/multi', {

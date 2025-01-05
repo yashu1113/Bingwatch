@@ -22,6 +22,7 @@ interface MediaCardProps {
   releaseDate?: string;
   voteAverage?: number;
   showDeleteButton?: boolean;
+  CustomActions?: React.ComponentType;
 }
 
 export const MediaCard = ({
@@ -32,6 +33,7 @@ export const MediaCard = ({
   releaseDate,
   voteAverage,
   showDeleteButton = false,
+  CustomActions,
 }: MediaCardProps) => {
   const isMobile = useIsMobile();
   const { removeFromWatchlist } = useWatchlist();
@@ -104,7 +106,7 @@ export const MediaCard = ({
           isMobile ? "opacity-100" : "opacity-0 transition-opacity group-hover:opacity-100"
         )}
       >
-        <div className="absolute bottom-0 p-4 text-white">
+        <div className="absolute bottom-0 p-4 text-white w-full">
           <h3 className="text-lg font-bold line-clamp-2">{title}</h3>
           {releaseDate && (
             <p className="text-sm opacity-80">
@@ -117,6 +119,7 @@ export const MediaCard = ({
               <span className="text-sm">{voteAverage.toFixed(1)}</span>
             </div>
           )}
+          {CustomActions && <CustomActions />}
         </div>
       </div>
     </Link>

@@ -5,6 +5,7 @@ import { HeroSlider } from '@/components/HeroSlider';
 import { TrendingSlider } from '@/components/TrendingSlider';
 import { GenreCarousel } from '@/components/GenreCarousel';
 import { IndianSection } from '@/components/IndianSection';
+import { UpcomingMovies } from '@/components/UpcomingMovies';
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -49,6 +50,8 @@ const Index = () => {
           <h2 className="text-3xl font-bold">Trending Now</h2>
           <TrendingSlider />
         </section>
+
+        <UpcomingMovies />
 
         <IndianSection />
 
