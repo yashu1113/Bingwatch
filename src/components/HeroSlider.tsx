@@ -1,15 +1,14 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useWatchlist } from "@/contexts/WatchlistContext";
+import { getImageUrl } from "@/services/tmdb";
 import useEmblaCarousel from "embla-carousel-react";
+import { Skeleton } from "./ui/skeleton";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useNetworkQuality } from "@/hooks/use-network-quality";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeroControls } from "./hero/HeroControls";
 import { HeroSlideContent } from "./hero/HeroSlideContent";
-import { HeroImage } from "./hero/HeroImage";
-import { HeroVideo } from "./hero/HeroVideo";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface HeroSliderProps {
   items: Array<{
@@ -181,7 +180,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   if (!items.length) {
     return (
-      <div className="relative w-full h-[40vh] md:h-[70vh] lg:h-screen">
+      <div className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen">
         <Skeleton className="w-full h-full" />
       </div>
     );
@@ -194,7 +193,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   return (
     <div
-      className="relative w-full h-[40vh] md:h-[70vh] lg:h-screen overflow-hidden"
+      className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen overflow-hidden"
       onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => {
         if (!isMobile) {
@@ -212,20 +211,31 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               onMouseEnter={() => !isMobile && handleSlideHover(item)}
               onMouseLeave={() => !isMobile && handleSlideLeave()}
             >
-              {isPlaying && trailer ? (
-                <HeroVideo
-                  ref={videoRef}
-                  videoKey={trailer.key}
-                  isMuted={isMuted}
-                  quality={getVideoQuality()}
-                />
+              {!imagesLoaded[index] && !imageLoadErrors[index] && (
+                <Skeleton className="absolute inset-0 w-full h-full" />
+              )}
+              {imageLoadErrors[index] ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                  <p className="text-white text-center">Failed to load image</p>
+                </div>
+              ) : isPlaying && trailer ? (
+                <div className="absolute inset-0 w-full h-full bg-black">
+                  <iframe
+                    ref={videoRef}
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&modestbranding=1&vq=${getVideoQuality()}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
               ) : (
-                <HeroImage
-                  imagePath={item.backdrop_path}
-                  title={item.title || item.name || ""}
-                  networkQuality={networkQuality}
-                  isLoaded={imagesLoaded[index]}
-                  hasError={imageLoadErrors[index]}
+                <img
+                  src={getImageUrl(item.backdrop_path, networkQuality === 'low' ? 'w780' : 'original')}
+                  alt={item.title || item.name}
+                  className={`h-full w-full object-contain md:object-cover object-center transition-opacity duration-300 ${
+                    imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  loading="lazy"
                   onLoad={() => handleImageLoad(index)}
                   onError={() => handleImageError(index)}
                 />
@@ -237,7 +247,6 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 mediaType={item.media_type || "movie"}
                 id={item.id}
                 onAddToWatchlist={() => handleAddToWatchlist(item)}
-                isMobile={isMobile}
               />
             </div>
           ))}
@@ -245,11 +254,11 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
       </div>
 
       {/* Slider Controls */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20 sm:bottom-4 md:bottom-3">
         {limitedItems.map((_, index) => (
           <button
             key={index}
-            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+            className={`w-1 h-1 rounded-full transition-all duration-300 ${
               index === selectedIndex
                 ? "bg-white scale-125"
                 : "bg-white/50 hover:bg-white/75"
@@ -265,9 +274,6 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         <HeroControls
           autoplayTrailers={autoplayTrailers}
           setAutoplayTrailers={setAutoplayTrailers}
-          isMuted={isMuted}
-          toggleMute={toggleMute}
-          isPlaying={isPlaying}
         />
       )}
     </div>

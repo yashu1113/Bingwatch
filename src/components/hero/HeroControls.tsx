@@ -5,18 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 interface HeroControlsProps {
   autoplayTrailers: boolean;
   setAutoplayTrailers: (value: boolean) => void;
-  isMuted: boolean;
-  toggleMute: () => void;
-  isPlaying: boolean;
 }
 
-export const HeroControls = ({ 
-  autoplayTrailers, 
-  setAutoplayTrailers,
-  isMuted,
-  toggleMute,
-  isPlaying 
-}: HeroControlsProps) => {
+export const HeroControls = ({ autoplayTrailers, setAutoplayTrailers }: HeroControlsProps) => {
   const { toast } = useToast();
 
   const toggleAutoplay = () => {
