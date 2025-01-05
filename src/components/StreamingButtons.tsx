@@ -24,7 +24,6 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
   });
 
   const handleStreamingClick = (url: string) => {
-    // Ensure the URL is properly formatted
     const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
     window.open(formattedUrl, '_blank', 'noopener,noreferrer');
   };
@@ -39,43 +38,80 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
   }
 
   const streamingProviders = providers?.results?.IN?.flatrate || [];
+  const rentalProviders = providers?.results?.IN?.rent || [];
+  const providerUrl = providers?.results?.IN?.link;
 
-  if (!streamingProviders.length) {
+  if (!streamingProviders.length && !rentalProviders.length) {
     return (
       <p className="text-gray-400 italic">
-        Not available on streaming platforms in India
+        Not available on streaming or rental platforms in India
       </p>
     );
   }
 
   return (
-    <div className="flex flex-wrap gap-2 w-full">
-      {streamingProviders.map((provider) => {
-        const providerClass = getProviderColor(provider.provider_name);
-        const providerUrl = providers.results.IN.link;
-        
-        // Ensure we have a valid URL before creating the button
-        if (!providerUrl) return null;
-        
-        return (
-          <Button
-            key={provider.provider_id}
-            variant="outline"
-            className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
-              ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black`}
-            onClick={() => handleStreamingClick(providerUrl)}
-            aria-label={`Watch on ${provider.provider_name}`}
-          >
-            <img
-              src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-              alt={provider.provider_name}
-              className="h-5 w-5 rounded"
-              loading="lazy"
-            />
-            {provider.provider_name}
-          </Button>
-        );
-      })}
+    <div className="space-y-4">
+      {streamingProviders.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium mb-2">Stream on:</h4>
+          <div className="flex flex-wrap gap-2">
+            {streamingProviders.map((provider) => {
+              const providerClass = getProviderColor(provider.provider_name);
+              if (!providerUrl) return null;
+              
+              return (
+                <Button
+                  key={provider.provider_id}
+                  variant="outline"
+                  className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
+                    ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black`}
+                  onClick={() => handleStreamingClick(providerUrl)}
+                  aria-label={`Watch on ${provider.provider_name}`}
+                >
+                  <img
+                    src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                    alt={provider.provider_name}
+                    className="h-5 w-5 rounded"
+                    loading="lazy"
+                  />
+                  {provider.provider_name}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {rentalProviders.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium mb-2">Rent on:</h4>
+          <div className="flex flex-wrap gap-2">
+            {rentalProviders.map((provider) => {
+              const providerClass = getProviderColor(provider.provider_name);
+              if (!providerUrl) return null;
+              
+              return (
+                <Button
+                  key={provider.provider_id}
+                  variant="outline"
+                  className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
+                    ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black`}
+                  onClick={() => handleStreamingClick(providerUrl)}
+                  aria-label={`Rent on ${provider.provider_name}`}
+                >
+                  <img
+                    src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                    alt={provider.provider_name}
+                    className="h-5 w-5 rounded"
+                    loading="lazy"
+                  />
+                  {provider.provider_name}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
