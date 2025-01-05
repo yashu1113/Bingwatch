@@ -56,6 +56,16 @@ tmdbApi.interceptors.response.use(
   }
 );
 
+export const getNowPlayingMovies = async () => {
+  try {
+    const response = await tmdbApi.get('/movie/now_playing');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching now playing movies:', error);
+    throw error;
+  }
+};
+
 export const getImageUrl = (path: string, size: string = 'original') => {
   if (!path) return '/placeholder.svg';
   return `${IMAGE_BASE_URL}/${size}${path}`;
@@ -127,12 +137,22 @@ export const search = async (query: string) => {
 
 export const getDetails = async (mediaType: 'movie' | 'tv', id: number) => {
   try {
-    const response = await tmdbApi.get(`/${mediaType}/${id}`, {
-      params: {
-        append_to_response: 'videos,credits,similar,recommendations',
-      },
-    });
-    return response.data;
+    const [detailsResponse, nowPlayingResponse] = await Promise.all([
+      tmdbApi.get(`/${mediaType}/${id}`, {
+        params: {
+          append_to_response: 'videos,credits,similar,recommendations',
+        },
+      }),
+      mediaType === 'movie' ? tmdbApi.get('/movie/now_playing') : Promise.resolve({ data: { results: [] } }),
+    ]);
+
+    const isInTheaters = mediaType === 'movie' && 
+      nowPlayingResponse.data.results.some((movie: { id: number }) => movie.id === id);
+
+    return {
+      ...detailsResponse.data,
+      isInTheaters,
+    };
   } catch (error) {
     console.error('Error fetching details:', error);
     throw error;

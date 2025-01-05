@@ -72,6 +72,7 @@ const MovieDetails = () => {
           runtime={movie.runtime}
           trailer={trailer}
           mediaType="movie"
+          isInTheaters={movie.isInTheaters}
         />
 
         <VideoSection videos={videos} />
