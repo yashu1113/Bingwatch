@@ -4,6 +4,7 @@ import { getIndianContent } from '@/services/tmdb';
 import { MediaGrid } from '@/components/MediaGrid';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ChevronRight } from "lucide-react";
 
 export const IndianSection = () => {
   const [mediaType, setMediaType] = useState<'movie' | 'tv'>('movie');
@@ -24,7 +25,12 @@ export const IndianSection = () => {
   return (
     <section className="space-y-6 px-4 sm:px-8 md:px-12 mt-8 md:mt-12">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h2 className="text-2xl sm:text-3xl font-bold">Indian Entertainment</h2>
+        <div className="flex justify-between items-center w-full">
+          <h2 className="text-2xl sm:text-3xl font-bold">Indian Entertainment</h2>
+          <button className="hidden md:flex items-center gap-1 px-4 py-1.5 text-sm font-medium text-white bg-netflix-black rounded-full">
+            See all <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
         <Tabs 
           defaultValue="movie" 
           onValueChange={(value) => setMediaType(value as 'movie' | 'tv')}
@@ -64,9 +70,7 @@ export const IndianSection = () => {
               <Button
                 onClick={handleLoadMore}
                 disabled={isFetching}
-                className="w-full sm:w-auto px-8 py-2 bg-netflix-red text-white rounded-md font-medium 
-                          transition-none hover:bg-netflix-red focus:ring-2 focus:ring-netflix-red/50 
-                          disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-netflix-black text-white rounded-full hover:bg-netflix-black/90 transition-colors"
               >
                 {isFetching ? 'Loading...' : 'Load More'}
               </Button>
