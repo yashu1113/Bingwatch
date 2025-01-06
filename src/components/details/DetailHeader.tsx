@@ -65,11 +65,6 @@ export const DetailHeader = ({
           alt={title}
           className="rounded-lg shadow-lg w-full"
         />
-        {isInTheaters && (
-          <div className="absolute top-4 right-4 bg-[#F4A261] text-white px-3 py-1 rounded-full text-sm font-medium">
-            Now Playing in Theaters
-          </div>
-        )}
       </div>
       <div className="flex flex-col space-y-4">
         <h1 className="text-2xl md:text-4xl font-bold">{title}</h1>
@@ -122,7 +117,7 @@ export const DetailHeader = ({
               )}
             </Button>
           </div>
-          <StreamingButtons mediaType={mediaType} id={id} />
+          <StreamingButtons mediaType={mediaType} id={id} isInTheaters={isInTheaters} />
         </div>
       </div>
     </div>

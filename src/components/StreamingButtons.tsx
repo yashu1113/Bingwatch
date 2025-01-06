@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
   id: number;
+  isInTheaters?: boolean;
 }
 
 const getProviderColor = (providerName: string): string => {
@@ -17,7 +18,7 @@ const getProviderColor = (providerName: string): string => {
   return 'bg-gray-600 hover:bg-gray-700 border-gray-700';
 };
 
-export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
+export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButtonsProps) => {
   const { data: providers, isLoading } = useQuery({
     queryKey: ['watch-providers', mediaType, id],
     queryFn: () => getWatchProviders(mediaType, id),
@@ -40,6 +41,15 @@ export const StreamingButtons = ({ mediaType, id }: StreamingButtonsProps) => {
   const streamingProviders = providers?.results?.IN?.flatrate || [];
   const rentalProviders = providers?.results?.IN?.rent || [];
   const providerUrl = providers?.results?.IN?.link;
+
+  // Show theater badge only if there are no streaming or rental providers
+  if (isInTheaters && !streamingProviders.length && !rentalProviders.length) {
+    return (
+      <div className="inline-flex items-center px-3 py-1.5 bg-[#F4A261] text-white rounded-lg font-medium">
+        Now Playing in Theaters
+      </div>
+    );
+  }
 
   if (!streamingProviders.length && !rentalProviders.length) {
     return (
