@@ -69,6 +69,7 @@ const TVShowDetails = () => {
           voteAverage={show.vote_average}
           trailer={trailer}
           mediaType="tv"
+          cast={show.credits?.cast}
         />
 
         <VideoSection videos={videos} />

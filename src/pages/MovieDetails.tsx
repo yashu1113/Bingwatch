@@ -16,7 +16,7 @@ const MovieDetails = () => {
     queryKey: ['movie', id],
     queryFn: () => getDetails('movie', Number(id)),
     enabled: !!id,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 1000 * 60 * 5,
     retry: 3,
     retryDelay: 1000,
     meta: {
@@ -73,6 +73,7 @@ const MovieDetails = () => {
           trailer={trailer}
           mediaType="movie"
           isInTheaters={movie.isInTheaters}
+          cast={movie.credits?.cast}
         />
 
         <VideoSection videos={videos} />
