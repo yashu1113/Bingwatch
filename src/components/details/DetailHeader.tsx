@@ -3,6 +3,7 @@ import { Plus, Check, Play } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useToast } from "@/hooks/use-toast";
 import { StreamingButtons } from "@/components/StreamingButtons";
+import { LanguageSection } from "@/components/details/LanguageSection";
 import { cn } from "@/lib/utils";
 
 interface DetailHeaderProps {
@@ -17,6 +18,7 @@ interface DetailHeaderProps {
   trailer?: { key: string; };
   mediaType: 'movie' | 'tv';
   isInTheaters?: boolean;
+  spokenLanguages?: { english_name: string; name: string; iso_639_1: string; }[];
 }
 
 export const DetailHeader = ({
@@ -31,6 +33,7 @@ export const DetailHeader = ({
   trailer,
   mediaType,
   isInTheaters,
+  spokenLanguages,
 }: DetailHeaderProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
@@ -69,6 +72,7 @@ export const DetailHeader = ({
       <div className="flex flex-col space-y-4">
         <h1 className="text-2xl md:text-4xl font-bold">{title}</h1>
         <p className="text-base md:text-lg text-gray-400">{overview}</p>
+        <LanguageSection spokenLanguages={spokenLanguages} />
         <div className="flex flex-wrap gap-2">
           {genres?.map((genre) => (
             <span
