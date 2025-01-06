@@ -9,7 +9,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { ChevronRight } from "lucide-react";
 
 export const GenreCarousel = () => {
   const { data: genres, isLoading } = useQuery({
@@ -52,11 +51,6 @@ export const GenreCarousel = () => {
         <CarouselPrevious className="hidden md:flex" />
         <CarouselNext className="hidden md:flex" />
       </Carousel>
-      <div className="absolute right-0 top-[-3rem] hidden md:flex items-center gap-2">
-        <button className="flex items-center gap-1 px-4 py-1.5 text-sm font-medium text-white bg-netflix-black rounded-full">
-          See all <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
     </div>
   );
 };

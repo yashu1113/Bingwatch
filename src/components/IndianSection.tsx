@@ -4,7 +4,6 @@ import { getIndianContent } from '@/services/tmdb';
 import { MediaGrid } from '@/components/MediaGrid';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronRight } from "lucide-react";
 
 export const IndianSection = () => {
   const [mediaType, setMediaType] = useState<'movie' | 'tv'>('movie');
@@ -27,9 +26,6 @@ export const IndianSection = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex justify-between items-center w-full">
           <h2 className="text-2xl sm:text-3xl font-bold">Indian Entertainment</h2>
-          <button className="hidden md:flex items-center gap-1 px-4 py-1.5 text-sm font-medium text-white bg-netflix-black rounded-full">
-            See all <ChevronRight className="w-4 h-4" />
-          </button>
         </div>
         <Tabs 
           defaultValue="movie" 
