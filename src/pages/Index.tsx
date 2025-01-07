@@ -6,6 +6,7 @@ import { TrendingSlider } from '@/components/TrendingSlider';
 import { GenreCarousel } from '@/components/GenreCarousel';
 import { IndianSection } from '@/components/IndianSection';
 import { UpcomingMovies } from '@/components/UpcomingMovies';
+import { ChevronRight } from 'lucide-react';
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -32,6 +33,8 @@ const Index = () => {
     name: genre.name,
   }));
 
+  const buttonClass = "hidden md:flex items-center gap-1 px-4 py-1.5 text-sm font-medium text-white bg-netflix-black rounded-full";
+
   return (
     <div className="min-h-screen bg-netflix-black text-white">
       <div className="-mt-16">
@@ -42,21 +45,44 @@ const Index = () => {
       
       <main className="container space-y-12 py-8">
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold">Genres</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-3xl font-bold">Genres</h2>
+            <button className={buttonClass}>
+              See all <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
           <GenreCarousel />
         </section>
 
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold">Trending Now</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-3xl font-bold">Trending Now</h2>
+            <button className={buttonClass}>
+              See all <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
           <TrendingSlider />
         </section>
 
-        <UpcomingMovies />
+        <section className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-3xl font-bold">Coming Soon</h2>
+            <button className={buttonClass}>
+              See all <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          <UpcomingMovies />
+        </section>
 
         <IndianSection />
 
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold">Top Rated</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-3xl font-bold">Top Rated</h2>
+            <button className={buttonClass}>
+              See all <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
           {topRatedLoading ? (
             <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
           ) : (
@@ -66,7 +92,12 @@ const Index = () => {
 
         {genreQueries.map((query, index) => (
           <section key={index} className="space-y-6">
-            <h2 className="text-3xl font-bold">{query.name} Movies</h2>
+            <div className="flex justify-between items-center">
+              <h2 className="text-3xl font-bold">{query.name} Movies</h2>
+              <button className={buttonClass}>
+                See all <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
             {query.isLoading ? (
               <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
             ) : (
