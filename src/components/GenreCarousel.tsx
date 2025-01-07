@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getGenres } from '@/services/tmdb';
 import { GenreCard } from './GenreCard';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import {
   Carousel,
   CarouselContent,
@@ -48,8 +49,12 @@ export const GenreCarousel = () => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex" />
-        <CarouselNext className="hidden md:flex" />
+        <CarouselPrevious className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/30 border-0 text-white">
+          <ArrowLeft className="h-4 w-4" />
+        </CarouselPrevious>
+        <CarouselNext className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/30 border-0 text-white">
+          <ArrowRight className="h-4 w-4" />
+        </CarouselNext>
       </Carousel>
     </div>
   );
