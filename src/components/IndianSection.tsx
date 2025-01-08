@@ -35,13 +35,13 @@ export const IndianSection = () => {
           <TabsList className="grid w-full grid-cols-2 md:w-auto md:flex md:space-x-4">
             <TabsTrigger 
               value="movie" 
-              className="text-sm sm:text-base font-medium px-4 py-2"
+              className="text-base font-bold px-6 py-3 bg-black/50 text-white shadow-lg"
             >
               Movies
             </TabsTrigger>
             <TabsTrigger 
               value="tv" 
-              className="text-sm sm:text-base font-medium px-4 py-2"
+              className="text-base font-bold px-6 py-3 bg-black/50 text-white shadow-lg"
             >
               TV Shows
             </TabsTrigger>
@@ -66,7 +66,7 @@ export const IndianSection = () => {
               <Button
                 onClick={handleLoadMore}
                 disabled={isFetching}
-                className="px-6 py-2 bg-netflix-black text-white rounded-full hover:bg-netflix-black/90 transition-colors"
+                className="px-8 py-3 bg-black/50 text-white text-lg font-bold rounded-lg shadow-lg disabled:opacity-50"
               >
                 {isFetching ? 'Loading...' : 'Load More'}
               </Button>

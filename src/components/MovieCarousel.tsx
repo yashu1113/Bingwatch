@@ -95,8 +95,8 @@ export const MovieCarousel = ({ items, autoPlay = false, isLoading = false, show
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/30 border-0 text-white" />
-      <CarouselNext className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/30 border-0 text-white" />
+      <CarouselPrevious className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/50 border-0 text-white font-bold text-lg w-12 h-12 shadow-lg" />
+      <CarouselNext className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/50 border-0 text-white font-bold text-lg w-12 h-12 shadow-lg" />
     </Carousel>
   );
 };
