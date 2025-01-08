@@ -12,7 +12,7 @@ export const TrendingSlider = () => {
   const { data: trendingData, isLoading, error } = useQuery({
     queryKey: ['trending', 'all', 'week'],
     queryFn: () => getTrending('all', 'week'),
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 1000 * 60 * 5,
     retry: 3,
     retryDelay: 1000,
   });
@@ -47,16 +47,26 @@ export const TrendingSlider = () => {
           }}
           className="w-full"
         >
-          {trendingData?.results.slice(0, 10).map((item) => (
+          {trendingData?.results.slice(0, 10).map((item, index) => (
             <SwiperSlide key={item.id}>
-              <MediaCard
-                id={item.id}
-                title={item.title || item.name || ''}
-                posterPath={item.poster_path}
-                mediaType={item.media_type || 'movie'}
-                releaseDate={item.release_date || item.first_air_date}
-                voteAverage={item.vote_average}
-              />
+              <div className="relative">
+                <div className="absolute top-0 left-0 z-10 w-12 h-12 flex items-center justify-center">
+                  <span className="text-4xl font-bold text-white drop-shadow-lg" style={{
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                    WebkitTextStroke: '1px rgba(0,0,0,0.3)',
+                  }}>
+                    {index + 1}
+                  </span>
+                </div>
+                <MediaCard
+                  id={item.id}
+                  title={item.title || item.name || ''}
+                  posterPath={item.poster_path}
+                  mediaType={item.media_type || 'movie'}
+                  releaseDate={item.release_date || item.first_air_date}
+                  voteAverage={item.vote_average}
+                />
+              </div>
             </SwiperSlide>
           ))}
         </Swiper>
