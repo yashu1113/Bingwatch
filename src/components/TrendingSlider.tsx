@@ -50,15 +50,22 @@ export const TrendingSlider = () => {
           {trendingData?.results.slice(0, 10).map((item, index) => (
             <SwiperSlide key={item.id}>
               <div className="relative">
-                <div className="absolute top-0 left-0 z-10 w-24 h-24 flex items-center justify-center">
+                <div 
+                  className="absolute -top-2 -left-4 z-10 w-32 h-32 flex items-center justify-center pointer-events-none"
+                  style={{
+                    transform: 'translateX(-10%)',
+                  }}
+                >
                   <span 
-                    className="text-[120px] font-bold text-white opacity-90 leading-none"
+                    className="text-[180px] font-bold leading-none select-none"
                     style={{
-                      background: 'linear-gradient(90deg, rgba(255,255,255,0.4) 0%, transparent 100%)',
+                      background: 'linear-gradient(90deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.1) 100%)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
-                      textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-                      filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.5))',
+                      textShadow: '0 0 8px rgba(255,255,255,0.2)',
+                      filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))',
+                      fontFamily: 'Arial, sans-serif',
+                      fontWeight: 900,
                     }}
                   >
                     {index + 1}
