@@ -21,6 +21,11 @@ export const Navigation = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Add effect to hide search bar when route changes
+  useEffect(() => {
+    setIsSearchVisible(false);
+  }, [location.pathname]);
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -118,7 +123,12 @@ export const Navigation = () => {
       {/* Mobile Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-netflix-black/95 backdrop-blur md:hidden">
         <div className="container flex h-16 items-center justify-around px-4">
-          <NavLink to="/" active={isActive('/')} className="flex flex-col items-center gap-1">
+          <NavLink 
+            to="/" 
+            active={isActive('/')} 
+            className="flex flex-col items-center gap-1"
+            onClick={() => setIsSearchVisible(false)}
+          >
             <Home size={20} />
             <span className="text-xs">Home</span>
           </NavLink>
@@ -132,11 +142,21 @@ export const Navigation = () => {
             <Search size={20} />
             <span className="text-xs">Search</span>
           </button>
-          <NavLink to="/movies" active={isActive('/movies')} className="flex flex-col items-center gap-1">
+          <NavLink 
+            to="/movies" 
+            active={isActive('/movies')} 
+            className="flex flex-col items-center gap-1"
+            onClick={() => setIsSearchVisible(false)}
+          >
             <List size={20} />
             <span className="text-xs">Browse</span>
           </NavLink>
-          <NavLink to="/watchlist" active={isActive('/watchlist')} className="flex flex-col items-center gap-1">
+          <NavLink 
+            to="/watchlist" 
+            active={isActive('/watchlist')} 
+            className="flex flex-col items-center gap-1"
+            onClick={() => setIsSearchVisible(false)}
+          >
             <div className="relative">
               <List size={20} />
               {watchlist.length > 0 && (
