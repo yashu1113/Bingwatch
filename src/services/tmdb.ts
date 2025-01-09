@@ -106,6 +106,21 @@ export const getMoviesByGenre = async (genreId: number) => {
   }
 };
 
+export const getTVShowsByGenre = async (genreId: number) => {
+  try {
+    const response = await tmdbApi.get('/discover/tv', {
+      params: {
+        with_genres: genreId,
+        sort_by: 'popularity.desc',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching TV shows by genre:', error);
+    throw error;
+  }
+};
+
 export const getUpcomingMovies = async () => {
   try {
     const response = await tmdbApi.get('/movie/upcoming', {
