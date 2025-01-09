@@ -45,7 +45,8 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
   const hasStreamingOptions = streamingProviders.length > 0 || rentalProviders.length > 0;
 
   // Only show theater badge if there are no streaming/rental options AND the movie is in theaters
-  if (isInTheaters && !hasStreamingOptions) {
+  // AND we're not showing any streaming providers
+  if (!hasStreamingOptions && isInTheaters && !providers?.results?.IN) {
     return (
       <div className="inline-flex items-center px-3 py-1.5 bg-[#F4A261] text-white rounded-lg font-medium">
         Now Playing in Theaters
