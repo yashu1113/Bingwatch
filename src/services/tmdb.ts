@@ -112,6 +112,10 @@ export const getTVShowsByGenre = async (genreId: number) => {
       params: {
         with_genres: genreId,
         sort_by: 'popularity.desc',
+        include_null_first_air_dates: false,
+        'vote_count.gte': 10,
+        with_status: 0,
+        with_type: 0,
       },
     });
     return response.data;

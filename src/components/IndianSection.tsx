@@ -67,7 +67,7 @@ export const IndianSection = () => {
                 onClick={handleLoadMore}
                 disabled={isFetching}
                 variant="outline"
-                className="px-8 py-2 text-base font-semibold rounded-full hover:bg-white hover:text-black transition-colors duration-300"
+                className="px-8 py-2 text-base font-semibold rounded-full bg-white/10 text-white"
               >
                 {isFetching ? 'Loading...' : 'Load More'}
               </Button>
