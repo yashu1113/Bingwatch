@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsFetching, useIsMutating } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 
 export const LoadingScreen = () => {
   const [show, setShow] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
+  const location = useLocation();
+  
+  // Check if current route is a detail page
+  const isDetailPage = /^\/(movie|tv)\/\d+/.test(location.pathname);
   
   // Track all ongoing queries and mutations, excluding specific pages
   const isFetching = useIsFetching({
@@ -20,30 +25,27 @@ export const LoadingScreen = () => {
   });
   
   const isMutating = useIsMutating();
-  const isLoading = isFetching > 0 || isMutating > 0;
+  const isLoading = (isFetching > 0 || isMutating > 0) && !isDetailPage;
 
   useEffect(() => {
     const hasVisited = localStorage.getItem("hasVisitedBefore");
     
     if (hasVisited) {
-      // If user has visited before, only show loader when there are active requests
       setShow(isLoading);
       return;
     }
 
-    // First visit behavior remains the same
     const timer = setTimeout(() => {
       setFadeOut(true);
       setTimeout(() => {
         setShow(false);
         localStorage.setItem("hasVisitedBefore", "true");
-      }, 500); // Wait for fade out animation
-    }, 2000); // Show loader for 2 seconds minimum on first visit
+      }, 500);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [isLoading]);
 
-  // Show loading screen when there are active requests
   useEffect(() => {
     if (localStorage.getItem("hasVisitedBefore")) {
       setShow(isLoading);
