@@ -1,29 +1,49 @@
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsFetching, useIsMutating } from "@tanstack/react-query";
 
 export const LoadingScreen = () => {
   const [show, setShow] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
+  
+  // Track all ongoing queries and mutations
+  const isFetching = useIsFetching();
+  const isMutating = useIsMutating();
+  const isLoading = isFetching > 0 || isMutating > 0;
 
   useEffect(() => {
     const hasVisited = localStorage.getItem("hasVisitedBefore");
     
     if (hasVisited) {
-      setShow(false);
+      // If user has visited before, only show loader when there are active requests
+      setShow(isLoading);
       return;
     }
 
+    // First visit behavior remains the same
     const timer = setTimeout(() => {
       setFadeOut(true);
       setTimeout(() => {
         setShow(false);
         localStorage.setItem("hasVisitedBefore", "true");
       }, 500); // Wait for fade out animation
-    }, 2000); // Show loader for 2 seconds minimum
+    }, 2000); // Show loader for 2 seconds minimum on first visit
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isLoading]);
+
+  // Show loading screen when there are active requests
+  useEffect(() => {
+    if (localStorage.getItem("hasVisitedBefore")) {
+      setShow(isLoading);
+      if (!isLoading) {
+        setFadeOut(true);
+      } else {
+        setFadeOut(false);
+      }
+    }
+  }, [isLoading]);
 
   if (!show) return null;
 
