@@ -7,8 +7,18 @@ export const LoadingScreen = () => {
   const [show, setShow] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   
-  // Track all ongoing queries and mutations
-  const isFetching = useIsFetching();
+  // Track all ongoing queries and mutations, excluding specific pages
+  const isFetching = useIsFetching({
+    predicate: (query) => {
+      // Don't show loader for movie details, show details, and genre pages
+      const excludedKeys = ['movie', 'tv', 'movies/genre', 'tv/genre'];
+      return !excludedKeys.some(key => 
+        query.queryKey[0] === key || 
+        (Array.isArray(query.queryKey[0]) && query.queryKey[0].includes(key))
+      );
+    }
+  });
+  
   const isMutating = useIsMutating();
   const isLoading = isFetching > 0 || isMutating > 0;
 
