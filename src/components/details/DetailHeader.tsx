@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Plus, Check, Play, Star } from "lucide-react";
+import { Plus, Check, Play } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useToast } from "@/hooks/use-toast";
 import { StreamingButtons } from "@/components/StreamingButtons";
 import { CastSection } from "@/components/details/CastSection";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 
 interface DetailHeaderProps {
   id: number;
@@ -38,8 +37,6 @@ export const DetailHeader = ({
 }: DetailHeaderProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
-  const [userRating, setUserRating] = useState<number | null>(null);
-  const [isHovering, setIsHovering] = useState<number | null>(null);
 
   const handleWatchlistClick = () => {
     const inWatchlist = isInWatchlist(id);
@@ -61,14 +58,6 @@ export const DetailHeader = ({
         description: `${title} has been added to your watchlist`,
       });
     }
-  };
-
-  const handleRate = (rating: number) => {
-    setUserRating(rating);
-    toast({
-      title: "Rating Submitted",
-      description: `You rated ${title} ${rating} stars`,
-    });
   };
 
   return (
@@ -96,32 +85,7 @@ export const DetailHeader = ({
           </div>
           <div className="space-y-2">
             <p>{releaseDate && `Release Date: ${releaseDate}`}</p>
-            <div className="flex items-center gap-2">
-              <span>Rating:</span>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((rating) => (
-                  <button
-                    key={rating}
-                    onClick={() => handleRate(rating)}
-                    onMouseEnter={() => setIsHovering(rating)}
-                    onMouseLeave={() => setIsHovering(null)}
-                    className="p-1 transition-transform hover:scale-110"
-                  >
-                    <Star 
-                      className={cn(
-                        "h-5 w-5 transition-colors",
-                        (isHovering && rating <= isHovering) || (userRating && rating <= userRating)
-                          ? "text-yellow-400 fill-yellow-400"
-                          : "text-gray-400"
-                      )}
-                    />
-                  </button>
-                ))}
-              </div>
-              <span className="text-sm">
-                ({userRating || voteAverage?.toFixed(1)})
-              </span>
-            </div>
+            <p>Rating: ★ {voteAverage?.toFixed(1)}</p>
             {runtime && <p>Runtime: {runtime} minutes</p>}
             {isInTheaters && (
               <span className="inline-flex items-center px-3 py-1 bg-[#F4A261] text-white rounded-lg text-sm font-medium">

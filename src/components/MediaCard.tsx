@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { getImageUrl } from '@/services/tmdb';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { Trash2, ImageIcon, Star } from 'lucide-react';
+import { Trash2, ImageIcon } from 'lucide-react';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
@@ -40,8 +40,6 @@ export const MediaCard = ({
   const { toast } = useToast();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [userRating, setUserRating] = useState<number | null>(null);
-  const [isRating, setIsRating] = useState(false);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -49,15 +47,6 @@ export const MediaCard = ({
     toast({
       title: "Removed from Watchlist",
       description: `${title} has been removed from your watchlist`,
-    });
-  };
-
-  const handleRate = (e: React.MouseEvent, rating: number) => {
-    e.preventDefault();
-    setUserRating(rating);
-    toast({
-      title: "Rating Submitted",
-      description: `You rated ${title} ${rating} stars`,
     });
   };
 
@@ -81,30 +70,6 @@ export const MediaCard = ({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  );
-
-  const RatingStars = () => (
-    <div 
-      className={cn(
-        "absolute bottom-20 left-0 right-0 flex justify-center gap-1 z-20",
-        isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-      )}
-      onMouseEnter={() => setIsRating(true)}
-      onMouseLeave={() => setIsRating(false)}
-    >
-      {[1, 2, 3, 4, 5].map((rating) => (
-        <button
-          key={rating}
-          onClick={(e) => handleRate(e, rating)}
-          className={cn(
-            "p-1 transition-transform hover:scale-125",
-            (userRating && rating <= userRating) ? "text-yellow-400" : "text-white"
-          )}
-        >
-          <Star className="h-6 w-6 fill-current" />
-        </button>
-      ))}
-    </div>
   );
 
   return (
@@ -135,11 +100,10 @@ export const MediaCard = ({
         )}
       </div>
       {showDeleteButton && <DeleteButton />}
-      <RatingStars />
       <div 
         className={cn(
           "absolute inset-0 bg-gradient-to-t from-black/80 to-transparent",
-          isMobile || isRating ? "opacity-100" : "opacity-0 transition-opacity group-hover:opacity-100"
+          isMobile ? "opacity-100" : "opacity-0 transition-opacity group-hover:opacity-100"
         )}
       >
         <div className="absolute bottom-0 p-4 text-white w-full">
@@ -151,7 +115,7 @@ export const MediaCard = ({
           )}
           <div className="mt-1 flex items-center gap-1">
             <span className="text-sm">★</span>
-            <span className="text-sm">{userRating || voteAverage?.toFixed(1)}</span>
+            <span className="text-sm">{voteAverage?.toFixed(1)}</span>
           </div>
           {CustomActions && <CustomActions />}
         </div>
