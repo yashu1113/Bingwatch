@@ -1,100 +1,217 @@
-import { BASE_URL, IMAGE_BASE_URL } from '@/config';
-import type { Movie, TVShow, MediaType, TimeWindow } from '@/types';
+import axios from 'axios';
 
-interface SearchFilters {
-  genre?: string;
-  year?: string;
-  rating?: number;
-  sort?: string;
-}
+const TMDB_API_KEY = 'cde27df6ea720efcd90be8ecd0400f61';
+const BASE_URL = 'https://api.themoviedb.org/3';
+const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
-export const search = async (query: string, filters?: SearchFilters) => {
-  const params = new URLSearchParams({
-    api_key: import.meta.env.VITE_TMDB_API_KEY,
-    query,
-    include_adult: 'false',
-    language: 'en-US',
-    page: '1',
-  });
+export const tmdbApi = axios.create({
+  baseURL: BASE_URL,
+  params: {
+    api_key: TMDB_API_KEY,
+  },
+  timeout: 10000, // Reduced timeout for slower networks
+  headers: {
+    'Accept': 'application/json',
+  },
+});
 
-  if (filters?.genre) {
-    params.append('with_genres', filters.genre);
+tmdbApi.interceptors.response.use(
+  response => response,
+  async error => {
+    console.error('TMDB API Error:', {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      url: error.config?.url,
+    });
+    
+    if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+      console.error('Network error detected. Retrying request with increased timeout...');
+      if (error.config && !error.config._retry) {
+        error.config._retry = true;
+        error.config.timeout = 30000; // Increase timeout for retry
+        return tmdbApi(error.config);
+      }
+      return Promise.reject(new Error('Network error. Please check your internet connection.'));
+    }
+
+    if (error.response?.status === 404) {
+      console.error('Resource not found:', error.config?.url);
+      return Promise.reject(new Error('Resource not found'));
+    }
+    
+    const retryCount = error.config?._retryCount || 0;
+    const maxRetries = 3;
+    
+    if (retryCount < maxRetries && (error.code === 'ECONNABORTED' || !error.response || error.response.status >= 500)) {
+      error.config._retryCount = retryCount + 1;
+      const delay = Math.min(1000 * (2 ** retryCount), 10000);
+      
+      console.log(`Retry attempt ${retryCount + 1} of ${maxRetries} after ${delay}ms`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return tmdbApi(error.config);
+    }
+
+    return Promise.reject(error);
   }
-  if (filters?.year) {
-    params.append('year', filters.year);
+);
+
+export const getNowPlayingMovies = async () => {
+  try {
+    const response = await tmdbApi.get('/movie/now_playing');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching now playing movies:', error);
+    throw error;
   }
-  if (filters?.sort) {
-    params.append('sort_by', filters.sort);
-  }
-
-  const response = await fetch(`${BASE_URL}/search/multi?${params.toString()}`);
-  return response.json();
-};
-
-export const getGenres = async (type: 'movie' | 'tv') => {
-  const response = await fetch(
-    `${BASE_URL}/genre/${type}/list?api_key=${import.meta.env.VITE_TMDB_API_KEY}&language=en-US`
-  );
-  return response.json();
-};
-
-export const getTrending = async (mediaType: MediaType, timeWindow: TimeWindow) => {
-  const response = await fetch(
-    `${BASE_URL}/trending/${mediaType}/${timeWindow}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
-  );
-  return response.json();
-};
-
-export const getTopRated = async (type: 'movie' | 'tv' = 'movie') => {
-  const response = await fetch(
-    `${BASE_URL}/${type}/top_rated?api_key=${import.meta.env.VITE_TMDB_API_KEY}&language=en-US&page=1`
-  );
-  return response.json();
-};
-
-export const getMoviesByGenre = async (genreId: number) => {
-  const response = await fetch(
-    `${BASE_URL}/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${genreId}&language=en-US&page=1`
-  );
-  return response.json();
-};
-
-export const getTVShowsByGenre = async (genreId: number) => {
-  const response = await fetch(
-    `${BASE_URL}/discover/tv?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${genreId}&language=en-US&page=1`
-  );
-  return response.json();
-};
-
-export const getDetails = async (type: 'movie' | 'tv', id: number) => {
-  const response = await fetch(
-    `${BASE_URL}/${type}/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}&language=en-US&append_to_response=videos,similar,recommendations,credits`
-  );
-  return response.json();
-};
-
-export const getWatchProviders = async (type: 'movie' | 'tv', id: number) => {
-  const response = await fetch(
-    `${BASE_URL}/${type}/${id}/watch/providers?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
-  );
-  return response.json();
-};
-
-export const getUpcomingMovies = async () => {
-  const response = await fetch(
-    `${BASE_URL}/movie/upcoming?api_key=${import.meta.env.VITE_TMDB_API_KEY}&language=en-US&page=1&region=IN`
-  );
-  return response.json();
-};
-
-export const getIndianContent = async () => {
-  const response = await fetch(
-    `${BASE_URL}/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_origin_country=IN&language=en-US&page=1`
-  );
-  return response.json();
 };
 
 export const getImageUrl = (path: string, size: string = 'original') => {
-  if (!path) return null;
+  if (!path) return '/placeholder.svg';
   return `${IMAGE_BASE_URL}/${size}${path}`;
+};
+
+export const getTrending = async (mediaType: 'all' | 'movie' | 'tv' = 'all', timeWindow: 'day' | 'week' = 'week') => {
+  try {
+    const response = await tmdbApi.get(`/trending/${mediaType}/${timeWindow}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching trending:', error);
+    throw error;
+  }
+};
+
+export const getTopRated = async (type: 'movie' | 'tv' = 'movie') => {
+  try {
+    const response = await tmdbApi.get(`/${type}/top_rated`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching top rated:', error);
+    throw error;
+  }
+};
+
+export const getMoviesByGenre = async (genreId: number) => {
+  try {
+    const response = await tmdbApi.get('/discover/movie', {
+      params: {
+        with_genres: genreId,
+        sort_by: 'popularity.desc',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching movies by genre:', error);
+    throw error;
+  }
+};
+
+export const getTVShowsByGenre = async (genreId: number) => {
+  try {
+    const response = await tmdbApi.get('/discover/tv', {
+      params: {
+        with_genres: genreId,
+        sort_by: 'popularity.desc',
+        include_null_first_air_dates: false,
+        'vote_count.gte': 10,
+        with_status: 0,
+        with_type: 0,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching TV shows by genre:', error);
+    throw error;
+  }
+};
+
+export const getUpcomingMovies = async () => {
+  try {
+    const response = await tmdbApi.get('/movie/upcoming', {
+      params: {
+        region: 'IN',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching upcoming movies:', error);
+    throw error;
+  }
+};
+
+export const search = async (query: string) => {
+  try {
+    const response = await tmdbApi.get('/search/multi', {
+      params: {
+        query,
+        include_adult: false,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching:', error);
+    throw error;
+  }
+};
+
+export const getDetails = async (mediaType: 'movie' | 'tv', id: number) => {
+  try {
+    const [detailsResponse, nowPlayingResponse] = await Promise.all([
+      tmdbApi.get(`/${mediaType}/${id}`, {
+        params: {
+          append_to_response: 'videos,credits,similar,recommendations',
+        },
+      }),
+      mediaType === 'movie' ? tmdbApi.get('/movie/now_playing') : Promise.resolve({ data: { results: [] } }),
+    ]);
+
+    const isInTheaters = mediaType === 'movie' && 
+      nowPlayingResponse.data.results.some((movie: { id: number }) => movie.id === id);
+
+    return {
+      ...detailsResponse.data,
+      isInTheaters,
+    };
+  } catch (error) {
+    console.error('Error fetching details:', error);
+    throw error;
+  }
+};
+
+export const getGenres = async (type: 'movie' | 'tv' = 'movie') => {
+  try {
+    const response = await tmdbApi.get(`/genre/${type}/list`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching genres:', error);
+    throw error;
+  }
+};
+
+export const getIndianContent = async (mediaType: 'movie' | 'tv' = 'movie', page: number = 1) => {
+  try {
+    const response = await tmdbApi.get(`/discover/${mediaType}`, {
+      params: {
+        with_original_language: 'hi|ta|te|ml|bn',
+        region: 'IN',
+        sort_by: 'popularity.desc',
+        page,
+        include_adult: false,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Indian content:', error);
+    throw error;
+  }
+};
+
+export const getWatchProviders = async (mediaType: 'movie' | 'tv', id: number) => {
+  try {
+    const response = await tmdbApi.get(`/${mediaType}/${id}/watch/providers`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching watch providers:', error);
+    throw error;
+  }
 };
