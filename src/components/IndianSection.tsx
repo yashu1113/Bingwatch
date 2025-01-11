@@ -11,7 +11,7 @@ export const IndianSection = () => {
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['indian-content', mediaType, page],
-    queryFn: () => getIndianContent(mediaType, page),
+    queryFn: () => getIndianContent(),
     placeholderData: (previousData) => previousData,
   });
 
