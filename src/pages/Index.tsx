@@ -7,7 +7,6 @@ import { GenreCarousel } from '@/components/GenreCarousel';
 import { IndianSection } from '@/components/IndianSection';
 import { UpcomingMovies } from '@/components/UpcomingMovies';
 import { HighlightsSection } from '@/components/HighlightsSection';
-import { NetflixTrending } from '@/components/NetflixTrending';
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -54,8 +53,6 @@ const Index = () => {
           <h2 className="text-3xl font-bold">Trending Now</h2>
           <TrendingSlider />
         </section>
-
-        <NetflixTrending />
 
         <UpcomingMovies />
 
