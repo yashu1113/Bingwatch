@@ -7,6 +7,7 @@ import { GenreCarousel } from '@/components/GenreCarousel';
 import { IndianSection } from '@/components/IndianSection';
 import { UpcomingMovies } from '@/components/UpcomingMovies';
 import { HighlightsSection } from '@/components/HighlightsSection';
+import { NetflixTopRated } from '@/components/NetflixTopRated';
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -43,6 +44,8 @@ const Index = () => {
       
       <main className="container space-y-12 py-8">
         <HighlightsSection />
+        
+        <NetflixTopRated />
 
         <section className="space-y-6">
           <h2 className="text-3xl font-bold">Genres</h2>
