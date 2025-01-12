@@ -27,7 +27,7 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
   const debouncedQuery = useDebounce(query, 300);
   const navigate = useNavigate();
 
-  const { data: searchResults } = useQuery({
+  const { data: searchResults, isFetching } = useQuery({
     queryKey: ['search', debouncedQuery],
     queryFn: () => search(debouncedQuery),
     enabled: debouncedQuery.length > 0,
@@ -64,8 +64,8 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
   };
 
   useEffect(() => {
-    setShowSuggestions(debouncedQuery.length > 0);
-  }, [debouncedQuery]);
+    setShowSuggestions(debouncedQuery.length > 0 && !isFetching);
+  }, [debouncedQuery, isFetching]);
 
   return (
     <div className="relative w-full max-w-[90vw] md:max-w-2xl">
@@ -88,7 +88,7 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
         <Search className="absolute left-4 top-1/2 h-5 w-5 md:h-6 md:w-6 -translate-y-1/2 text-gray-400" />
       </form>
 
-      {showSuggestions && suggestions.length > 0 && (
+      {showSuggestions && suggestions.length > 0 && !isFetching && (
         <div className="absolute z-50 w-full mt-2 bg-black/95 border border-gray-700 rounded-lg shadow-xl">
           <div className="p-2 text-sm text-gray-400">
             Did you mean...
