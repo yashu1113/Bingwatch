@@ -31,6 +31,8 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
     queryKey: ['search', debouncedQuery],
     queryFn: () => search(debouncedQuery),
     enabled: debouncedQuery.length > 0,
+    staleTime: 1000 * 60 * 5, // Cache results for 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   const fuse = new Fuse(searchResults?.results || [], {
@@ -64,8 +66,9 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
   };
 
   useEffect(() => {
-    setShowSuggestions(debouncedQuery.length > 0 && !isFetching);
-  }, [debouncedQuery, isFetching]);
+    const shouldShowSuggestions = debouncedQuery.length > 0 && !isFetching && searchResults?.results?.length > 0;
+    setShowSuggestions(shouldShowSuggestions);
+  }, [debouncedQuery, isFetching, searchResults]);
 
   return (
     <div className="relative w-full max-w-[90vw] md:max-w-2xl">
@@ -88,7 +91,7 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
         <Search className="absolute left-4 top-1/2 h-5 w-5 md:h-6 md:w-6 -translate-y-1/2 text-gray-400" />
       </form>
 
-      {showSuggestions && suggestions.length > 0 && !isFetching && (
+      {showSuggestions && suggestions.length > 0 && (
         <div className="absolute z-50 w-full mt-2 bg-black/95 border border-gray-700 rounded-lg shadow-xl">
           <div className="p-2 text-sm text-gray-400">
             Did you mean...
