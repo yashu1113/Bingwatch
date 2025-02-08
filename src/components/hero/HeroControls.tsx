@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX } from "lucide-react";
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast";
 
 interface HeroControlsProps {
   autoplayTrailers: boolean;
