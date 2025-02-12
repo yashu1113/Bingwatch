@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -20,22 +19,21 @@ export const HeroControls = ({ autoplayTrailers, setAutoplayTrailers }: HeroCont
   };
 
   return (
-    <div className="absolute top-8 right-8 z-10">
+    <div className="absolute top-4 right-4">
       <Button
-        size="lg"
+        size="sm"
         variant="outline"
-        className="gap-2 border-white/30 text-white bg-black/20 backdrop-blur-sm hover:bg-black/40 border-2 rounded-lg
-          font-semibold flex items-center justify-center transition-all duration-300"
+        className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 font-semibold flex items-center justify-center"
         onClick={toggleAutoplay}
       >
         {autoplayTrailers ? (
           <>
-            <Volume2 className="h-5 w-5" />
+            <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
             Autoplay On
           </>
         ) : (
           <>
-            <VolumeX className="h-5 w-5" />
+            <VolumeX className="h-4 w-4 md:h-5 md:w-5" />
             Autoplay Off
           </>
         )}
