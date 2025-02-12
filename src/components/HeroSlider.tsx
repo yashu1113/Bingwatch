@@ -193,7 +193,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   return (
     <div
-      className="relative w-full h-[75vh] lg:h-[85vh] overflow-hidden bg-netflix-black"
+      className="relative w-full h-[65vh] md:h-[75vh] lg:h-[85vh] overflow-hidden bg-black"
       onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => {
         if (!isMobile) {
@@ -212,11 +212,13 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               onMouseLeave={() => !isMobile && handleSlideLeave()}
             >
               {!imagesLoaded[index] && !imageLoadErrors[index] && (
-                <div className="absolute inset-0 bg-neutral-900 animate-pulse" />
+                <div className="absolute inset-0 bg-neutral-900">
+                  <div className="w-full h-full animate-pulse bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900" />
+                </div>
               )}
               {imageLoadErrors[index] ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-neutral-900">
-                  <p className="text-white text-center">Failed to load image</p>
+                  <p className="text-white text-center text-lg">Failed to load image</p>
                 </div>
               ) : isPlaying && trailer ? (
                 <div className="absolute inset-0 w-full h-full bg-black">
@@ -232,10 +234,10 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 <img
                   src={getImageUrl(item.backdrop_path, networkQuality === 'low' ? 'w1280' : 'original')}
                   alt={item.title || item.name}
-                  className={`h-full w-full object-cover transition-opacity duration-500 ${
+                  className={`h-full w-full object-cover transition-opacity duration-700 ${
                     imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
                   }`}
-                  loading="lazy"
+                  loading={index === 0 ? "eager" : "lazy"}
                   onLoad={() => handleImageLoad(index)}
                   onError={() => handleImageError(index)}
                 />
@@ -254,28 +256,39 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
       </div>
 
       {/* Thumbnail Preview Slider */}
-      <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 z-20">
+      <div className="absolute bottom-0 left-0 right-0 px-4 pb-6 z-20">
         <div className="container mx-auto">
-          <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar px-2">
             {limitedItems.map((item, index) => (
               <button
                 key={item.id}
                 onClick={() => emblaApi?.scrollTo(index)}
-                className={`relative flex-none transition-all duration-300 ${
+                className={`relative flex-none transition-all duration-300 rounded-lg overflow-hidden ${
                   index === selectedIndex
-                    ? "opacity-100 scale-110 border-2 border-white"
-                    : "opacity-70 hover:opacity-100"
+                    ? "opacity-100 scale-110 ring-2 ring-white shadow-lg"
+                    : "opacity-60 hover:opacity-90 hover:scale-105"
                 }`}
-                style={{ width: '200px', aspectRatio: '16/9' }}
+                style={{ width: '280px', aspectRatio: '16/9' }}
               >
-                <img
-                  src={getImageUrl(item.backdrop_path, 'w300')}
-                  alt={item.title || item.name}
-                  className="w-full h-full object-cover rounded"
-                />
-                <div className={`absolute inset-0 bg-black/40 rounded ${
-                  index === selectedIndex ? 'opacity-0' : 'opacity-50'
-                }`} />
+                {!imagesLoaded[index] ? (
+                  <div className="w-full h-full bg-neutral-800 animate-pulse" />
+                ) : (
+                  <>
+                    <img
+                      src={getImageUrl(item.backdrop_path, 'w780')}
+                      alt={item.title || item.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className={`absolute inset-0 bg-black/30 transition-opacity duration-300 ${
+                      index === selectedIndex ? 'opacity-0' : 'opacity-100'
+                    }`} />
+                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                      <p className="text-white text-sm font-medium truncate">
+                        {item.title || item.name}
+                      </p>
+                    </div>
+                  </>
+                )}
               </button>
             ))}
           </div>
