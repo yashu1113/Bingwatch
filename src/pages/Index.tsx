@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { getTrending, getTopRated, getMoviesByGenre } from '@/services/tmdb';
 import { MovieCarousel } from '@/components/MovieCarousel';
@@ -7,6 +8,7 @@ import { GenreCarousel } from '@/components/GenreCarousel';
 import { IndianSection } from '@/components/IndianSection';
 import { UpcomingMovies } from '@/components/UpcomingMovies';
 import { HighlightsSection } from '@/components/HighlightsSection';
+import { WatchlistRecommendations } from '@/components/WatchlistRecommendations';
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -77,6 +79,8 @@ const Index = () => {
             )}
           </section>
         ))}
+
+        <WatchlistRecommendations />
       </main>
     </div>
   );
