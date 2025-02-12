@@ -47,6 +47,17 @@
     --input: 0 0% 14.9%;
     --ring: 0 72.2% 50.6%;
   }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
 }
 
 @layer base {
@@ -90,6 +101,3 @@
 .streaming-jio {
   @apply bg-streaming-jio text-white border-streaming-jio;
 }
-
-
-

@@ -193,7 +193,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   return (
     <div
-      className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen overflow-hidden"
+      className="relative w-full h-[75vh] lg:h-[85vh] overflow-hidden bg-netflix-black"
       onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => {
         if (!isMobile) {
@@ -212,10 +212,10 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               onMouseLeave={() => !isMobile && handleSlideLeave()}
             >
               {!imagesLoaded[index] && !imageLoadErrors[index] && (
-                <Skeleton className="absolute inset-0 w-full h-full" />
+                <div className="absolute inset-0 bg-neutral-900 animate-pulse" />
               )}
               {imageLoadErrors[index] ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                <div className="absolute inset-0 flex items-center justify-center bg-neutral-900">
                   <p className="text-white text-center">Failed to load image</p>
                 </div>
               ) : isPlaying && trailer ? (
@@ -230,9 +230,9 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 </div>
               ) : (
                 <img
-                  src={getImageUrl(item.backdrop_path, networkQuality === 'low' ? 'w780' : 'original')}
+                  src={getImageUrl(item.backdrop_path, networkQuality === 'low' ? 'w1280' : 'original')}
                   alt={item.title || item.name}
-                  className={`h-full w-full object-cover transition-opacity duration-300 ${
+                  className={`h-full w-full object-cover transition-opacity duration-500 ${
                     imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
                   }`}
                   loading="lazy"
@@ -240,7 +240,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                   onError={() => handleImageError(index)}
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <HeroSlideContent
                 title={item.title || item.name || ""}
                 overview={item.overview}
@@ -253,20 +253,33 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         </div>
       </div>
 
-      {/* Slider Controls */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20 sm:bottom-4 md:bottom-3">
-        {limitedItems.map((_, index) => (
-          <button
-            key={index}
-            className={`w-1 h-1 rounded-full transition-all duration-300 ${
-              index === selectedIndex
-                ? "bg-white scale-125"
-                : "bg-white/50 hover:bg-white/75"
-            }`}
-            onClick={() => emblaApi?.scrollTo(index)}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+      {/* Thumbnail Preview Slider */}
+      <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 z-20">
+        <div className="container mx-auto">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar">
+            {limitedItems.map((item, index) => (
+              <button
+                key={item.id}
+                onClick={() => emblaApi?.scrollTo(index)}
+                className={`relative flex-none transition-all duration-300 ${
+                  index === selectedIndex
+                    ? "opacity-100 scale-110 border-2 border-white"
+                    : "opacity-70 hover:opacity-100"
+                }`}
+                style={{ width: '200px', aspectRatio: '16/9' }}
+              >
+                <img
+                  src={getImageUrl(item.backdrop_path, 'w300')}
+                  alt={item.title || item.name}
+                  className="w-full h-full object-cover rounded"
+                />
+                <div className={`absolute inset-0 bg-black/40 rounded ${
+                  index === selectedIndex ? 'opacity-0' : 'opacity-50'
+                }`} />
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Autoplay Controls */}
