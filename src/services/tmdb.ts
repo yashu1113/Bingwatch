@@ -215,3 +215,13 @@ export const getWatchProviders = async (mediaType: 'movie' | 'tv', id: number) =
     throw error;
   }
 };
+
+export const getRecommendations = async (id: number, mediaType: 'movie' | 'tv') => {
+  try {
+    const response = await tmdbApi.get(`/${mediaType}/${id}/recommendations`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching recommendations:', error);
+    throw error;
+  }
+};
