@@ -193,11 +193,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
 
   return (
     <div
-      className={`relative w-full overflow-hidden bg-black ${
-        isMobile 
-          ? 'h-[50vh]' 
-          : 'h-[75vh] lg:h-[85vh]'
-      }`}
+      className="relative w-full h-[50vh] md:h-[70vh] lg:h-screen overflow-hidden"
       onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => {
         if (!isMobile) {
@@ -216,13 +212,11 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
               onMouseLeave={() => !isMobile && handleSlideLeave()}
             >
               {!imagesLoaded[index] && !imageLoadErrors[index] && (
-                <div className="absolute inset-0">
-                  <div className="w-full h-full animate-pulse bg-neutral-900" />
-                </div>
+                <Skeleton className="absolute inset-0 w-full h-full" />
               )}
               {imageLoadErrors[index] ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-neutral-900">
-                  <p className="text-white text-center text-lg">Failed to load image</p>
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                  <p className="text-white text-center">Failed to load image</p>
                 </div>
               ) : isPlaying && trailer ? (
                 <div className="absolute inset-0 w-full h-full bg-black">
@@ -236,17 +230,17 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 </div>
               ) : (
                 <img
-                  src={getImageUrl(item.backdrop_path, networkQuality === 'low' ? 'w1280' : 'original')}
+                  src={getImageUrl(item.backdrop_path, networkQuality === 'low' ? 'w780' : 'original')}
                   alt={item.title || item.name}
-                  className={`h-full w-full object-cover transition-opacity duration-500 ${
+                  className={`h-full w-full object-cover transition-opacity duration-300 ${
                     imagesLoaded[index] ? 'opacity-100' : 'opacity-0'
                   }`}
-                  loading={index === 0 ? "eager" : "lazy"}
+                  loading="lazy"
                   onLoad={() => handleImageLoad(index)}
                   onError={() => handleImageError(index)}
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
               <HeroSlideContent
                 title={item.title || item.name || ""}
                 overview={item.overview}
@@ -259,65 +253,21 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
         </div>
       </div>
 
-      {/* Mobile Dots Navigation */}
-      {isMobile && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-          {limitedItems.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => emblaApi?.scrollTo(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === selectedIndex
-                  ? "bg-white w-6"
-                  : "bg-white/50"
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Desktop Thumbnail Preview Slider */}
-      {!isMobile && (
-        <div className="absolute bottom-0 left-0 right-0 px-4 pb-6 z-20">
-          <div className="container mx-auto">
-            <div className="flex gap-3 overflow-x-auto no-scrollbar px-2">
-              {limitedItems.map((item, index) => (
-                <button
-                  key={item.id}
-                  onClick={() => emblaApi?.scrollTo(index)}
-                  className={`relative flex-none transition-all duration-300 rounded-lg overflow-hidden ${
-                    index === selectedIndex
-                      ? "opacity-100 scale-110 ring-2 ring-white shadow-lg"
-                      : "opacity-60 hover:opacity-90 hover:scale-105"
-                  }`}
-                  style={{ width: '240px', aspectRatio: '16/9' }}
-                >
-                  {!imagesLoaded[index] ? (
-                    <div className="w-full h-full bg-neutral-800 animate-pulse" />
-                  ) : (
-                    <>
-                      <img
-                        src={getImageUrl(item.backdrop_path, 'w780')}
-                        alt={item.title || item.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className={`absolute inset-0 bg-black/30 transition-opacity duration-300 ${
-                        index === selectedIndex ? 'opacity-0' : 'opacity-100'
-                      }`} />
-                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-                        <p className="text-white text-sm font-medium truncate">
-                          {item.title || item.name}
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Slider Controls */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20 sm:bottom-4 md:bottom-3">
+        {limitedItems.map((_, index) => (
+          <button
+            key={index}
+            className={`w-1 h-1 rounded-full transition-all duration-300 ${
+              index === selectedIndex
+                ? "bg-white scale-125"
+                : "bg-white/50 hover:bg-white/75"
+            }`}
+            onClick={() => emblaApi?.scrollTo(index)}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
 
       {/* Autoplay Controls */}
       {!isMobile && (
