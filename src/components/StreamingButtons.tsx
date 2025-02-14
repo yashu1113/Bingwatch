@@ -30,7 +30,7 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingBut
     queryKey: ['watch-providers', mediaType, id],
     queryFn: () => getWatchProviders(mediaType, id),
     staleTime: 1000 * 60 * 30, // Consider data fresh for 30 minutes
-    cacheTime: 1000 * 60 * 60, // Keep in cache for 1 hour
+    gcTime: 1000 * 60 * 60, // Keep in cache for 1 hour (renamed from cacheTime)
     refetchOnWindowFocus: false, // Disable automatic refetch on window focus
     refetchInterval: 1000 * 60 * 60 * 6, // Refetch every 6 hours
   });
