@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
 import { Loader2 } from "lucide-react";
+import { memo } from "react";
 
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
@@ -24,14 +25,14 @@ const getProviderColor = (providerName: string): string => {
   return 'bg-gray-600 hover:bg-gray-700 border-gray-700';
 };
 
-export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButtonsProps) => {
+const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingButtonsProps) => {
   const { data: providers, isLoading } = useQuery({
     queryKey: ['watch-providers', mediaType, id],
     queryFn: () => getWatchProviders(mediaType, id),
-    // Refresh data every 6 hours to check for new streaming providers
-    refetchInterval: 1000 * 60 * 60 * 6,
-    // Refetch on window focus to get latest streaming info
-    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 30, // Consider data fresh for 30 minutes
+    cacheTime: 1000 * 60 * 60, // Keep in cache for 1 hour
+    refetchOnWindowFocus: false, // Disable automatic refetch on window focus
+    refetchInterval: 1000 * 60 * 60 * 6, // Refetch every 6 hours
   });
 
   const handleStreamingClick = (url: string) => {
@@ -50,10 +51,9 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
 
   const streamingProviders = providers?.results?.IN?.flatrate || [];
   const rentalProviders = providers?.results?.IN?.rent || [];
-  const buyProviders = providers?.results?.IN?.buy || [];
   const providerUrl = providers?.results?.IN?.link;
 
-  const hasStreamingOptions = streamingProviders.length > 0 || rentalProviders.length > 0 || buyProviders.length > 0;
+  const hasStreamingOptions = streamingProviders.length > 0 || rentalProviders.length > 0;
 
   if (!hasStreamingOptions && isInTheaters && !providers?.results?.IN) {
     return (
@@ -71,42 +71,45 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
     );
   }
 
+  const renderProviderButton = (provider: any, type: 'stream' | 'rent') => {
+    const providerClass = getProviderColor(provider.provider_name);
+    if (!providerUrl) return null;
+    
+    const displayName = provider.provider_name.toLowerCase().includes('hotstar') || 
+                      provider.provider_name.toLowerCase().includes('jio') 
+                      ? 'JioStar' 
+                      : provider.provider_name;
+    
+    return (
+      <Button
+        key={provider.provider_id}
+        variant="outline"
+        className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
+          ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
+          transition-all duration-200 hover:scale-105`}
+        onClick={() => handleStreamingClick(providerUrl)}
+        aria-label={`${type === 'stream' ? 'Watch' : 'Rent'} on ${displayName}`}
+      >
+        <img
+          src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+          alt={displayName}
+          className="h-5 w-5 rounded"
+          loading="lazy"
+          width="20"
+          height="20"
+        />
+        {displayName}
+      </Button>
+    );
+  };
+
   return (
     <div className="space-y-4">
       {streamingProviders.length > 0 && (
         <div>
           <h4 className="text-sm font-medium mb-2">Stream on:</h4>
           <div className="flex flex-wrap gap-2">
-            {streamingProviders.map((provider) => {
-              const providerClass = getProviderColor(provider.provider_name);
-              if (!providerUrl) return null;
-              
-              // Handle merged platforms (JioStar)
-              const displayName = provider.provider_name.toLowerCase().includes('hotstar') || 
-                                provider.provider_name.toLowerCase().includes('jio') 
-                                ? 'JioStar' 
-                                : provider.provider_name;
-              
-              return (
-                <Button
-                  key={provider.provider_id}
-                  variant="outline"
-                  className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
-                    ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
-                    transition-all duration-200 hover:scale-105`}
-                  onClick={() => handleStreamingClick(providerUrl)}
-                  aria-label={`Watch on ${displayName}`}
-                >
-                  <img
-                    src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                    alt={displayName}
-                    className="h-5 w-5 rounded"
-                    loading="lazy"
-                  />
-                  {displayName}
-                </Button>
-              );
-            })}
+            {streamingProviders.map(provider => renderProviderButton(provider, 'stream'))}
           </div>
         </div>
       )}
@@ -115,75 +118,13 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
         <div>
           <h4 className="text-sm font-medium mb-2">Rent on:</h4>
           <div className="flex flex-wrap gap-2">
-            {rentalProviders.map((provider) => {
-              const providerClass = getProviderColor(provider.provider_name);
-              if (!providerUrl) return null;
-              
-              const displayName = provider.provider_name.toLowerCase().includes('hotstar') || 
-                                provider.provider_name.toLowerCase().includes('jio') 
-                                ? 'JioStar' 
-                                : provider.provider_name;
-              
-              return (
-                <Button
-                  key={provider.provider_id}
-                  variant="outline"
-                  className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
-                    ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
-                    transition-all duration-200 hover:scale-105`}
-                  onClick={() => handleStreamingClick(providerUrl)}
-                  aria-label={`Rent on ${displayName}`}
-                >
-                  <img
-                    src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                    alt={displayName}
-                    className="h-5 w-5 rounded"
-                    loading="lazy"
-                  />
-                  {displayName}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {buyProviders.length > 0 && (
-        <div>
-          <h4 className="text-sm font-medium mb-2">Buy on:</h4>
-          <div className="flex flex-wrap gap-2">
-            {buyProviders.map((provider) => {
-              const providerClass = getProviderColor(provider.provider_name);
-              if (!providerUrl) return null;
-              
-              const displayName = provider.provider_name.toLowerCase().includes('hotstar') || 
-                                provider.provider_name.toLowerCase().includes('jio') 
-                                ? 'JioStar' 
-                                : provider.provider_name;
-              
-              return (
-                <Button
-                  key={provider.provider_id}
-                  variant="outline"
-                  className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
-                    ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
-                    transition-all duration-200 hover:scale-105`}
-                  onClick={() => handleStreamingClick(providerUrl)}
-                  aria-label={`Buy on ${displayName}`}
-                >
-                  <img
-                    src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                    alt={displayName}
-                    className="h-5 w-5 rounded"
-                    loading="lazy"
-                  />
-                  {displayName}
-                </Button>
-              );
-            })}
+            {rentalProviders.map(provider => renderProviderButton(provider, 'rent'))}
           </div>
         </div>
       )}
     </div>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+export const StreamingButtons = memo(StreamingButtonsComponent);
