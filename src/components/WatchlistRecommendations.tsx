@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getRecommendations } from '@/services/tmdb';
 
 export const WatchlistRecommendations = () => {
-  const { watchlist } = useWatchlist();
+  const { watchlist, isInWatchlist } = useWatchlist();
 
   const { data: recommendations, isLoading } = useQuery({
     queryKey: ['watchlist-recommendations', watchlist[0]?.id],
@@ -13,7 +13,16 @@ export const WatchlistRecommendations = () => {
     enabled: watchlist.length > 0,
   });
 
-  if (watchlist.length === 0 || !recommendations?.results?.length) {
+  if (watchlist.length === 0) {
+    return null;
+  }
+
+  // Filter out items that are already in the watchlist
+  const filteredRecommendations = recommendations?.results?.filter(
+    item => !isInWatchlist(item.id)
+  );
+
+  if (!filteredRecommendations?.length) {
     return null;
   }
 
@@ -24,7 +33,7 @@ export const WatchlistRecommendations = () => {
         <div className="animate-pulse rounded-lg bg-gray-800 h-[300px]" />
       ) : (
         <MovieCarousel 
-          items={recommendations.results.map(item => ({
+          items={filteredRecommendations.map(item => ({
             ...item,
             media_type: watchlist[0]?.mediaType
           }))} 
