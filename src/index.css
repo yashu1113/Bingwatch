@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,13 +84,6 @@
   @apply bg-streaming-prime text-white border-streaming-prime;
 }
 
-.streaming-hotstar {
-  @apply bg-streaming-hotstar text-white border-streaming-hotstar;
+.streaming-jiostar {
+  @apply bg-streaming-jiostar text-white border-streaming-jiostar;
 }
-
-.streaming-jio {
-  @apply bg-streaming-jio text-white border-streaming-jio;
-}
-
-
-
