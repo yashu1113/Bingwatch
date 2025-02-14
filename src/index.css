@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -86,4 +85,24 @@
 
 .streaming-jiostar {
   @apply bg-streaming-jiostar text-white border-streaming-jiostar;
+}
+
+.streaming-zee {
+  @apply bg-streaming-zee text-white border-streaming-zee;
+}
+
+.streaming-mxplayer {
+  @apply bg-streaming-mxplayer text-white border-streaming-mxplayer;
+}
+
+.streaming-sonyliv {
+  @apply bg-streaming-sonyliv text-white border-streaming-sonyliv;
+}
+
+.streaming-voot {
+  @apply bg-streaming-voot text-white border-streaming-voot;
+}
+
+.streaming-aha {
+  @apply bg-streaming-aha text-white border-streaming-aha;
 }

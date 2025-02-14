@@ -12,10 +12,15 @@ interface StreamingButtonsProps {
 
 const getProviderColor = (providerName: string): string => {
   const name = providerName.toLowerCase();
-  // Update to use JioStar instead of separate Hotstar and Jio
+  // Common Indian OTT platforms
   if (name.includes('netflix')) return 'streaming-netflix';
   if (name.includes('prime')) return 'streaming-prime';
   if (name.includes('hotstar') || name.includes('jio')) return 'streaming-jiostar';
+  if (name.includes('zee')) return 'streaming-zee';
+  if (name.includes('mxplayer')) return 'streaming-mxplayer';
+  if (name.includes('sonyliv')) return 'streaming-sonyliv';
+  if (name.includes('voot')) return 'streaming-voot';
+  if (name.includes('aha')) return 'streaming-aha';
   return 'bg-gray-600 hover:bg-gray-700 border-gray-700';
 };
 
@@ -23,6 +28,10 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
   const { data: providers, isLoading } = useQuery({
     queryKey: ['watch-providers', mediaType, id],
     queryFn: () => getWatchProviders(mediaType, id),
+    // Refresh data every 6 hours to check for new streaming providers
+    refetchInterval: 1000 * 60 * 60 * 6,
+    // Refetch on window focus to get latest streaming info
+    refetchOnWindowFocus: true,
   });
 
   const handleStreamingClick = (url: string) => {
@@ -41,9 +50,10 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
 
   const streamingProviders = providers?.results?.IN?.flatrate || [];
   const rentalProviders = providers?.results?.IN?.rent || [];
+  const buyProviders = providers?.results?.IN?.buy || [];
   const providerUrl = providers?.results?.IN?.link;
 
-  const hasStreamingOptions = streamingProviders.length > 0 || rentalProviders.length > 0;
+  const hasStreamingOptions = streamingProviders.length > 0 || rentalProviders.length > 0 || buyProviders.length > 0;
 
   if (!hasStreamingOptions && isInTheaters && !providers?.results?.IN) {
     return (
@@ -71,7 +81,7 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
               const providerClass = getProviderColor(provider.provider_name);
               if (!providerUrl) return null;
               
-              // Rename Hotstar/Jio to JioStar in the display
+              // Handle merged platforms (JioStar)
               const displayName = provider.provider_name.toLowerCase().includes('hotstar') || 
                                 provider.provider_name.toLowerCase().includes('jio') 
                                 ? 'JioStar' 
@@ -82,7 +92,8 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
                   key={provider.provider_id}
                   variant="outline"
                   className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
-                    ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black`}
+                    ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
+                    transition-all duration-200 hover:scale-105`}
                   onClick={() => handleStreamingClick(providerUrl)}
                   aria-label={`Watch on ${displayName}`}
                 >
@@ -108,7 +119,6 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
               const providerClass = getProviderColor(provider.provider_name);
               if (!providerUrl) return null;
               
-              // Rename Hotstar/Jio to JioStar in the display
               const displayName = provider.provider_name.toLowerCase().includes('hotstar') || 
                                 provider.provider_name.toLowerCase().includes('jio') 
                                 ? 'JioStar' 
@@ -119,9 +129,47 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
                   key={provider.provider_id}
                   variant="outline"
                   className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
-                    ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black`}
+                    ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
+                    transition-all duration-200 hover:scale-105`}
                   onClick={() => handleStreamingClick(providerUrl)}
                   aria-label={`Rent on ${displayName}`}
+                >
+                  <img
+                    src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                    alt={displayName}
+                    className="h-5 w-5 rounded"
+                    loading="lazy"
+                  />
+                  {displayName}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {buyProviders.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium mb-2">Buy on:</h4>
+          <div className="flex flex-wrap gap-2">
+            {buyProviders.map((provider) => {
+              const providerClass = getProviderColor(provider.provider_name);
+              if (!providerUrl) return null;
+              
+              const displayName = provider.provider_name.toLowerCase().includes('hotstar') || 
+                                provider.provider_name.toLowerCase().includes('jio') 
+                                ? 'JioStar' 
+                                : provider.provider_name;
+              
+              return (
+                <Button
+                  key={provider.provider_id}
+                  variant="outline"
+                  className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
+                    ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
+                    transition-all duration-200 hover:scale-105`}
+                  onClick={() => handleStreamingClick(providerUrl)}
+                  aria-label={`Buy on ${displayName}`}
                 >
                   <img
                     src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}

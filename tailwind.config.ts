@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -27,7 +26,12 @@ export default {
         streaming: {
           netflix: "#E50914",
           prime: "#00A8E1",
-          jiostar: "#0D47A1", // New merged platform color
+          jiostar: "#0D47A1",
+          zee: "#6A0DAD",
+          mxplayer: "#FF5722",
+          sonyliv: "#9C27B0",
+          voot: "#2196F3",
+          aha: "#F44336",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
