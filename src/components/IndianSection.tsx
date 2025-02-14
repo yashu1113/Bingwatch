@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getIndianContent } from '@/services/tmdb';
@@ -43,7 +44,7 @@ export const IndianSection = () => {
               value="tv" 
               className="text-base font-bold px-6 py-3 bg-black/50 text-white shadow-lg"
             >
-              TV Shows
+              Web Series
             </TabsTrigger>
           </TabsList>
         </Tabs>

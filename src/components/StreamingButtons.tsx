@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
@@ -11,10 +12,10 @@ interface StreamingButtonsProps {
 
 const getProviderColor = (providerName: string): string => {
   const name = providerName.toLowerCase();
+  // Update to use JioStar instead of separate Hotstar and Jio
   if (name.includes('netflix')) return 'streaming-netflix';
   if (name.includes('prime')) return 'streaming-prime';
-  if (name.includes('hotstar')) return 'streaming-hotstar';
-  if (name.includes('jio')) return 'streaming-jio';
+  if (name.includes('hotstar') || name.includes('jio')) return 'streaming-jiostar';
   return 'bg-gray-600 hover:bg-gray-700 border-gray-700';
 };
 
@@ -44,8 +45,6 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
 
   const hasStreamingOptions = streamingProviders.length > 0 || rentalProviders.length > 0;
 
-  // Only show theater badge if there are no streaming/rental options AND the movie is in theaters
-  // AND we're not showing any streaming providers
   if (!hasStreamingOptions && isInTheaters && !providers?.results?.IN) {
     return (
       <div className="inline-flex items-center px-3 py-1.5 bg-[#F4A261] text-white rounded-lg font-medium">
@@ -72,6 +71,12 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
               const providerClass = getProviderColor(provider.provider_name);
               if (!providerUrl) return null;
               
+              // Rename Hotstar/Jio to JioStar in the display
+              const displayName = provider.provider_name.toLowerCase().includes('hotstar') || 
+                                provider.provider_name.toLowerCase().includes('jio') 
+                                ? 'JioStar' 
+                                : provider.provider_name;
+              
               return (
                 <Button
                   key={provider.provider_id}
@@ -79,15 +84,15 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
                   className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
                     ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black`}
                   onClick={() => handleStreamingClick(providerUrl)}
-                  aria-label={`Watch on ${provider.provider_name}`}
+                  aria-label={`Watch on ${displayName}`}
                 >
                   <img
                     src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                    alt={provider.provider_name}
+                    alt={displayName}
                     className="h-5 w-5 rounded"
                     loading="lazy"
                   />
-                  {provider.provider_name}
+                  {displayName}
                 </Button>
               );
             })}
@@ -103,6 +108,12 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
               const providerClass = getProviderColor(provider.provider_name);
               if (!providerUrl) return null;
               
+              // Rename Hotstar/Jio to JioStar in the display
+              const displayName = provider.provider_name.toLowerCase().includes('hotstar') || 
+                                provider.provider_name.toLowerCase().includes('jio') 
+                                ? 'JioStar' 
+                                : provider.provider_name;
+              
               return (
                 <Button
                   key={provider.provider_id}
@@ -110,15 +121,15 @@ export const StreamingButtons = ({ mediaType, id, isInTheaters }: StreamingButto
                   className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg
                     ${providerClass} focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black`}
                   onClick={() => handleStreamingClick(providerUrl)}
-                  aria-label={`Rent on ${provider.provider_name}`}
+                  aria-label={`Rent on ${displayName}`}
                 >
                   <img
                     src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                    alt={provider.provider_name}
+                    alt={displayName}
                     className="h-5 w-5 rounded"
                     loading="lazy"
                   />
-                  {provider.provider_name}
+                  {displayName}
                 </Button>
               );
             })}
