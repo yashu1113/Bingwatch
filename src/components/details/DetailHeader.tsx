@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Plus, Check, Play } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
@@ -20,6 +21,17 @@ interface DetailHeaderProps {
   isInTheaters?: boolean;
   cast?: { id: number; name: string; character: string; profile_path: string | null; }[];
 }
+
+const formatRuntime = (minutes?: number): string => {
+  if (!minutes) return 'N/A';
+  
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  
+  if (hours === 0) return `${remainingMinutes}m`;
+  if (remainingMinutes === 0) return `${hours}h`;
+  return `${hours}h ${remainingMinutes}m`;
+};
 
 export const DetailHeader = ({
   id,
@@ -86,7 +98,9 @@ export const DetailHeader = ({
           <div className="space-y-2">
             <p>{releaseDate && `Release Date: ${releaseDate}`}</p>
             <p>Rating: ★ {voteAverage?.toFixed(1)}</p>
-            {runtime && <p>Runtime: {runtime} minutes</p>}
+            {mediaType === 'movie' && runtime && (
+              <p>Runtime: {formatRuntime(runtime)}</p>
+            )}
             {isInTheaters && (
               <span className="inline-flex items-center px-3 py-1 bg-[#F4A261] text-white rounded-lg text-sm font-medium">
                 Now Playing in Theaters
