@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getGenres } from '@/services/tmdb';
@@ -10,12 +11,15 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const GenreCarousel = () => {
   const { data: genres, isLoading } = useQuery({
     queryKey: ['genres', 'movie'],
     queryFn: () => getGenres('movie'),
   });
+
+  const isMobile = useIsMobile();
 
   if (isLoading) {
     return (
@@ -30,6 +34,20 @@ export const GenreCarousel = () => {
     );
   }
 
+  // Show grid layout on mobile devices
+  if (isMobile) {
+    return (
+      <div className="grid grid-cols-2 gap-3">
+        {genres?.genres.map((genre) => (
+          <div key={genre.id} className="mb-2">
+            <GenreCard id={genre.id} name={genre.name} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Show carousel on larger screens
   return (
     <div className="relative">
       <Carousel
