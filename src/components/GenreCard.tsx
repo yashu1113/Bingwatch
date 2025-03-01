@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+
 // Map of genre names to their corresponding background images
 const genreBackgrounds: Record<string, string> = {
   Thriller: "/public/Thriller bg.jpg",  // Updated to use local image
