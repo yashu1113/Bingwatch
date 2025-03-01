@@ -23,6 +23,25 @@ const genreBackgrounds: Record<string, string> = {
   default: "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&q=80&w=400"
 };
 
+// Color gradients for each genre to match with the backgrounds
+const genreGradients: Record<string, string> = {
+  Thriller: "linear-gradient(to bottom right, rgba(20, 30, 48, 0.85), rgba(36, 59, 85, 0.9))",
+  Action: "linear-gradient(to bottom right, rgba(211, 87, 60, 0.85), rgba(169, 57, 53, 0.9))",
+  Comedy: "linear-gradient(to bottom right, rgba(255, 167, 38, 0.85), rgba(251, 140, 0, 0.9))",
+  Horror: "linear-gradient(to bottom right, rgba(33, 33, 33, 0.85), rgba(66, 66, 66, 0.9))",
+  Romance: "linear-gradient(to bottom right, rgba(233, 30, 99, 0.85), rgba(156, 39, 176, 0.9))",
+  Crime: "linear-gradient(to bottom right, rgba(38, 50, 56, 0.85), rgba(55, 71, 79, 0.9))",
+  Drama: "linear-gradient(to bottom right, rgba(49, 27, 146, 0.85), rgba(26, 35, 126, 0.9))",
+  Documentary: "linear-gradient(to bottom right, rgba(1, 87, 155, 0.85), rgba(2, 119, 189, 0.9))",
+  "Sci-Fi & Fantasy": "linear-gradient(to bottom right, rgba(13, 71, 161, 0.85), rgba(21, 101, 192, 0.9))",
+  Animation: "linear-gradient(to bottom right, rgba(0, 150, 136, 0.85), rgba(0, 121, 107, 0.9))",
+  Family: "linear-gradient(to bottom right, rgba(124, 179, 66, 0.85), rgba(104, 159, 56, 0.9))",
+  Adventure: "linear-gradient(to bottom right, rgba(255, 111, 0, 0.85), rgba(230, 81, 0, 0.9))",
+  Mystery: "linear-gradient(to bottom right, rgba(74, 20, 140, 0.85), rgba(49, 27, 146, 0.9))",
+  // Default gradient for any other genres
+  default: "linear-gradient(to bottom right, rgba(109, 40, 217, 0.85), rgba(91, 33, 182, 0.9))"
+};
+
 interface GenreCardProps {
   id: number;
   name: string;
@@ -37,8 +56,9 @@ export const GenreCard = ({ id, name, className }: GenreCardProps) => {
     navigate(`/genre/${id}`);
   };
 
-  // Get the background image for this genre, or use the default
+  // Get the background image and gradient for this genre, or use defaults
   const backgroundImage = genreBackgrounds[name] || genreBackgrounds.default;
+  const gradient = genreGradients[name] || genreGradients.default;
 
   return (
     <button
@@ -49,7 +69,7 @@ export const GenreCard = ({ id, name, className }: GenreCardProps) => {
         className
       )}
       style={{
-        backgroundImage: `linear-gradient(to bottom right, rgba(109, 40, 217, 0.85), rgba(91, 33, 182, 0.9)), url(${backgroundImage})`,
+        backgroundImage: `${gradient}, url(${backgroundImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
