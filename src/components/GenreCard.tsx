@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -6,7 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 // Map of genre names to their corresponding background images
 const genreBackgrounds: Record<string, string> = {
-  Thriller:
+  Thriller: "/public/Thriller bg.jpg",  // Updated to use local image
   Action: "https://images.unsplash.com/photo-1547756536-cde3673fa2e5?auto=format&fit=crop&q=80&w=400",
   Comedy: "https://images.unsplash.com/photo-1531747118685-ca8fa6e08806?auto=format&fit=crop&q=80&w=400",
   Horror: "https://images.unsplash.com/photo-1533167649158-6d508895b680?auto=format&fit=crop&q=80&w=400",
