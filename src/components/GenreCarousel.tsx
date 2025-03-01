@@ -37,9 +37,9 @@ export const GenreCarousel = () => {
   // Show grid layout on mobile devices
   if (isMobile) {
     return (
-      <div className="grid grid-cols-4 gap-1">
+      <div className="grid grid-cols-3 gap-2">
         {genres?.genres.map((genre) => (
-          <div key={genre.id} className="mb-1">
+          <div key={genre.id} className="mb-2">
             <GenreCard id={genre.id} name={genre.name} />
           </div>
         ))}

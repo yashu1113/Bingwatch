@@ -18,25 +18,12 @@ export const GenreCard = ({ id, name, className }: GenreCardProps) => {
     navigate(`/genre/${id}`);
   };
 
-  if (isMobile) {
-    return (
-      <button
-        onClick={handleClick}
-        className={cn(
-          "w-full aspect-square rounded-full bg-gradient-to-br from-purple-600/90 to-purple-800/90 flex items-center justify-center p-1 text-white font-medium text-xs shadow-md hover:shadow-lg transition-all duration-200",
-          className
-        )}
-      >
-        {name}
-      </button>
-    );
-  }
-
   return (
     <button
       onClick={handleClick}
       className={cn(
-        "w-full h-20 rounded-lg bg-gradient-to-br from-purple-600/90 to-purple-800/90 flex items-center justify-center p-4 text-white font-semibold text-base shadow-md hover:shadow-lg transition-all duration-200",
+        "w-full rounded-lg bg-gradient-to-br from-purple-600/90 to-purple-800/90 flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 text-white font-semibold",
+        isMobile ? "h-12 p-2 text-xs" : "h-20 p-4 text-base",
         className
       )}
     >
