@@ -34,20 +34,7 @@ export const GenreCarousel = () => {
     );
   }
 
-  // Show grid layout on mobile devices
-  if (isMobile) {
-    return (
-      <div className="grid grid-cols-3 gap-2">
-        {genres?.genres.map((genre) => (
-          <div key={genre.id} className="mb-2">
-            <GenreCard id={genre.id} name={genre.name} />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  // Show carousel on larger screens
+  // Use carousel for both mobile and desktop
   return (
     <div className="relative">
       <Carousel
@@ -61,16 +48,16 @@ export const GenreCarousel = () => {
           {genres?.genres.map((genre) => (
             <CarouselItem
               key={genre.id}
-              className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
+              className={isMobile ? "pl-2 basis-1/3" : "pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5"}
             >
               <GenreCard id={genre.id} name={genre.name} />
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/30 border-0 text-white">
+        <CarouselPrevious className={isMobile ? "hidden" : "hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/30 border-0 text-white"}>
           <ArrowLeft className="h-4 w-4" />
         </CarouselPrevious>
-        <CarouselNext className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/30 border-0 text-white">
+        <CarouselNext className={isMobile ? "hidden" : "hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/30 border-0 text-white"}>
           <ArrowRight className="h-4 w-4" />
         </CarouselNext>
       </Carousel>
