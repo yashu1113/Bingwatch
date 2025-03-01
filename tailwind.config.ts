@@ -70,6 +70,7 @@ export default {
       },
       textShadow: {
         DEFAULT: '0 2px 4px rgba(0, 0, 0, 0.5)',
+        md: '0 3px 6px rgba(0, 0, 0, 0.7)',
       },
       keyframes: {
         "fade-up": {
@@ -115,6 +116,9 @@ export default {
       const newUtilities = {
         '.text-shadow': {
           textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+        },
+        '.text-shadow-md': {
+          textShadow: '0 3px 6px rgba(0, 0, 0, 0.7)',
         },
         '.text-shadow-none': {
           textShadow: 'none',
