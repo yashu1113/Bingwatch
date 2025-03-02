@@ -50,26 +50,24 @@ export const TrendingSlider = () => {
         >
           {trendingData?.results.slice(0, 10).map((item, index) => (
             <SwiperSlide key={item.id}>
-              <div className="relative flex">
-                <div className="relative z-10 mr-[-20px]">
+              <div className="relative">
+                <MediaCard
+                  id={item.id}
+                  title={item.title || item.name || ''}
+                  posterPath={item.poster_path}
+                  mediaType={item.media_type || 'movie'}
+                  releaseDate={item.release_date || item.first_air_date}
+                  voteAverage={item.vote_average}
+                />
+                <div className="absolute bottom-1 left-1 z-10">
                   <span 
-                    className="text-7xl md:text-8xl font-bold text-white opacity-90 text-shadow-md"
+                    className="text-6xl md:text-7xl font-bold text-white opacity-90 text-shadow-lg"
                     style={{
                       WebkitTextStroke: '2px rgba(255,255,255,0.2)',
                     }}
                   >
                     {index + 1}
                   </span>
-                </div>
-                <div className="flex-1">
-                  <MediaCard
-                    id={item.id}
-                    title={item.title || item.name || ''}
-                    posterPath={item.poster_path}
-                    mediaType={item.media_type || 'movie'}
-                    releaseDate={item.release_date || item.first_air_date}
-                    voteAverage={item.vote_average}
-                  />
                 </div>
               </div>
             </SwiperSlide>
