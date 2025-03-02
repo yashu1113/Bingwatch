@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -8,6 +8,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getTrending } from '@/services/tmdb';
 import { MediaCard } from './MediaCard';
 import { LoadingGrid } from './LoadingGrid';
+import { Button } from './ui/button';
+import { Plus, Play } from 'lucide-react';
 
 export const TrendingSlider = () => {
   const { data: trendingData, isLoading, error } = useQuery({
@@ -17,6 +19,8 @@ export const TrendingSlider = () => {
     retry: 3,
     retryDelay: 1000,
   });
+
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   if (isLoading) {
     return <LoadingGrid count={5} />;
@@ -38,7 +42,8 @@ export const TrendingSlider = () => {
           navigation
           autoplay={{
             delay: 3000,
-            disableOnInteraction: false,
+            disableOnInteraction: true,
+            pauseOnMouseEnter: true,
           }}
           breakpoints={{
             320: { slidesPerView: 2, spaceBetween: 10 },
@@ -50,7 +55,11 @@ export const TrendingSlider = () => {
         >
           {trendingData?.results.slice(0, 10).map((item, index) => (
             <SwiperSlide key={item.id}>
-              <div className="relative">
+              <div 
+                className="relative"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
                 <MediaCard
                   id={item.id}
                   title={item.title || item.name || ''}
@@ -69,6 +78,41 @@ export const TrendingSlider = () => {
                     {index + 1}
                   </span>
                 </div>
+                
+                {hoveredIndex === index && (
+                  <div className="absolute inset-0 bg-black/70 flex flex-col justify-between p-4 z-20">
+                    <div className="text-white">
+                      <h3 className="text-lg font-bold">{item.title || item.name}</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Button className="flex-1 bg-white text-black hover:bg-white/90">
+                          <Play className="h-4 w-4 mr-2" /> Watch Now
+                        </Button>
+                        <Button variant="outline" size="icon" className="bg-gray-800/80 border-gray-700">
+                          <Plus className="h-5 w-5" />
+                        </Button>
+                      </div>
+                      
+                      <div className="text-white/80 text-sm space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <span>{new Date(item.release_date || item.first_air_date || '').getFullYear()}</span>
+                          <span>•</span>
+                          <span className="border px-1 text-xs">U/A 13+</span>
+                          <span>•</span>
+                          <span>2h 6m</span>
+                        </div>
+                        <div>
+                          <span>8 Languages</span>
+                        </div>
+                        <p className="line-clamp-2 mt-2 text-white/70">
+                          {item.overview || "No description available."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </SwiperSlide>
           ))}
