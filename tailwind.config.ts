@@ -69,8 +69,8 @@ export default {
         },
       },
       textShadow: {
-        DEFAULT: '0 2px 4px rgba(0, 0, 0, 0.5)',
-        md: '0 3px 6px rgba(0, 0, 0, 0.7)',
+        DEFAULT: '0 2px 5px rgba(0, 0, 0, 0.6)',
+        md: '0 3px 6px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.9)',
       },
       keyframes: {
         "fade-up": {
@@ -111,14 +111,17 @@ export default {
   },
   plugins: [
     require("tailwindcss-animate"),
-    // Add text-shadow plugin
+    // Add enhanced text-shadow plugin
     function({ addUtilities }) {
       const newUtilities = {
         '.text-shadow': {
-          textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+          textShadow: '0 2px 5px rgba(0, 0, 0, 0.6)',
         },
         '.text-shadow-md': {
-          textShadow: '0 3px 6px rgba(0, 0, 0, 0.7)',
+          textShadow: '0 3px 6px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.9)',
+        },
+        '.text-shadow-lg': {
+          textShadow: '0 4px 8px rgba(0, 0, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 1)',
         },
         '.text-shadow-none': {
           textShadow: 'none',
