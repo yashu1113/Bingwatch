@@ -52,7 +52,7 @@ const Index = () => {
         </section>
 
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold">Trending Now</h2>
+          <h2 className="text-3xl font-bold">Top 10 in India Today</h2>
           <TrendingSlider />
         </section>
 

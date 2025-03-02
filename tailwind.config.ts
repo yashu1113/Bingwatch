@@ -70,7 +70,9 @@ export default {
       },
       textShadow: {
         DEFAULT: '0 2px 4px rgba(0, 0, 0, 0.7)',
-        md: '0 3px 6px rgba(0, 0, 0, 0.9)',
+        md: '0 3px 6px rgba(0, 0, 0, 0.9), 0 0 5px rgba(0, 0, 0, 0.8)',
+        lg: '0 4px 8px rgba(0, 0, 0, 1), 0 0 10px rgba(0, 0, 0, 0.9)',
+        number: '2px 2px 0px rgba(0, 0, 0, 0.8)',
       },
       keyframes: {
         "fade-up": {
@@ -119,6 +121,12 @@ export default {
         },
         '.text-shadow-md': {
           textShadow: '0 3px 6px rgba(0, 0, 0, 0.9), 0 0 5px rgba(0, 0, 0, 0.8)',
+        },
+        '.text-shadow-lg': {
+          textShadow: '0 4px 8px rgba(0, 0, 0, 1), 0 0 10px rgba(0, 0, 0, 0.9)',
+        },
+        '.text-shadow-number': {
+          textShadow: '2px 2px 0px rgba(0, 0, 0, 0.8)',
         },
         '.text-shadow-none': {
           textShadow: 'none',
