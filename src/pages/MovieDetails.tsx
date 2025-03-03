@@ -59,11 +59,27 @@ const MovieDetails = () => {
     (video) => video.site === "YouTube"
   ) || [];
 
+  // Use backdrop_path for horizontal image if available, fallback to poster_path
+  const backgroundImage = movie.backdrop_path 
+    ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
+    : (movie.poster_path ? `https://image.tmdb.org/t/p/original${movie.poster_path}` : '');
+
   return (
     <div className="min-h-screen bg-netflix-black text-white">
-      {/* Header with no padding on md+ screens for full-width background image */}
-      <div className="pt-16 md:pt-0"> 
-        <div className="md:pt-20">
+      {/* Full screen background header section */}
+      <div 
+        className="relative w-full pt-16 md:pt-0"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          minHeight: '90vh',
+        }}
+      > 
+        {/* Gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
+        
+        <div className="relative z-10 md:pt-20">
           <DetailHeader
             id={movie.id}
             title={movie.title}

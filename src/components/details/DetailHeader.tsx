@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Play, Plus, Check, Download, Share2 } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
@@ -78,15 +77,12 @@ export const DetailHeader = ({
 
   return (
     <div className="space-y-8">
-      <div className="relative">
-        {/* Gradient overlay background for larger screens */}
-        <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent z-0"></div>
-        
+      <div className="w-full container mx-auto px-4 py-8 md:py-16">
         {/* Main content container */}
         <div className="relative z-10 md:min-h-[500px] flex flex-col md:flex-row items-start">
           {/* Left content with info */}
-          <div className="w-full md:w-1/2 lg:w-7/12 md:pl-6 lg:pl-12 flex flex-col justify-center py-6 md:py-12 space-y-4">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">{title}</h1>
+          <div className="w-full md:w-7/12 lg:w-7/12 flex flex-col justify-center space-y-6">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white text-shadow-lg">{title}</h1>
             
             <div className="flex items-center gap-3 text-sm md:text-base text-gray-300">
               {rating && <span className="flex items-center">IMDb {rating}</span>}
@@ -100,7 +96,7 @@ export const DetailHeader = ({
               )}
             </div>
             
-            <p className="text-base md:text-lg text-gray-300 max-w-3xl line-clamp-4 md:line-clamp-none">
+            <p className="text-base md:text-lg text-gray-300 max-w-3xl md:line-clamp-none">
               {overview}
             </p>
             
@@ -162,24 +158,15 @@ export const DetailHeader = ({
               <StreamingButtons mediaType={mediaType} id={id} isInTheaters={isInTheaters} />
             </div>
           </div>
-          
-          {/* Right side - Poster displayed on mobile, background image on desktop */}
-          <div className="w-full md:hidden">
+
+          {/* Mobile-only poster */}
+          <div className="w-full md:hidden my-4">
             <img
               src={`https://image.tmdb.org/t/p/w500${posterPath}`}
               alt={title}
-              className="rounded-lg shadow-lg w-full"
+              className="rounded-lg shadow-lg w-full max-w-xs mx-auto"
             />
           </div>
-        </div>
-        
-        {/* Background image for desktop view */}
-        <div className="hidden md:block absolute top-0 right-0 bottom-0 w-1/2 z-0">
-          <img
-            src={`https://image.tmdb.org/t/p/original${posterPath}`}
-            alt=""
-            className="object-cover h-full w-full opacity-90"
-          />
         </div>
       </div>
       
