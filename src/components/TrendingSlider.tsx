@@ -24,6 +24,7 @@ export const TrendingSlider = () => {
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const { addToWatchlist, isInWatchlist } = useWatchlist();
+  const [swiperInstance, setSwiperInstance] = useState<any>(null);
 
   if (isLoading) {
     return <LoadingGrid count={5} />;
@@ -49,12 +50,29 @@ export const TrendingSlider = () => {
     });
   };
 
+  // Handle mouse enter to pause autoplay
+  const handleMouseEnter = (index: number) => {
+    setHoveredIndex(index);
+    if (swiperInstance) {
+      swiperInstance.autoplay.stop();
+    }
+  };
+
+  // Handle mouse leave to resume autoplay
+  const handleMouseLeave = () => {
+    setHoveredIndex(null);
+    if (swiperInstance) {
+      swiperInstance.autoplay.start();
+    }
+  };
+
   return (
-    <div className="relative w-full">
+    <div className="relative w-full overflow-visible">
       <Suspense fallback={<LoadingGrid count={5} />}>
         <Swiper
           modules={[Navigation, Autoplay]}
           navigation
+          onSwiper={setSwiperInstance}
           autoplay={{
             delay: 3000,
             disableOnInteraction: true,
@@ -66,17 +84,27 @@ export const TrendingSlider = () => {
             768: { slidesPerView: 4, spaceBetween: 15 },
             1024: { slidesPerView: 5, spaceBetween: 20 },
           }}
-          className="w-full"
+          className="w-full py-4"
         >
           {trendingData?.results.slice(0, 10).map((item, index) => (
             <SwiperSlide key={item.id}>
               <div 
-                className="relative group transition-transform duration-300 hover:scale-110 hover:z-10"
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
+                className="relative group transition-all duration-300 transform-gpu hover:z-10"
+                style={{ 
+                  transformOrigin: 'center center',
+                  height: hoveredIndex === index ? 'auto' : '100%',
+                }}
+                onMouseEnter={() => handleMouseEnter(index)}
+                onMouseLeave={handleMouseLeave}
               >
                 {/* Regular MediaCard without its hover effect - we'll override it */}
-                <div className={`${hoveredIndex === index ? 'invisible' : 'visible'}`}>
+                <div 
+                  className={`transition-all duration-300 ease-in-out ${
+                    hoveredIndex === index 
+                      ? 'opacity-0 absolute inset-0 pointer-events-none' 
+                      : 'opacity-100'
+                  }`}
+                >
                   <MediaCard
                     id={item.id}
                     title={item.title || item.name || ''}
@@ -99,18 +127,24 @@ export const TrendingSlider = () => {
                   </span>
                 </div>
                 
-                {/* Custom hover overlay like JioHotstar */}
+                {/* Enhanced JioHotstar-like hover overlay */}
                 {hoveredIndex === index && (
-                  <div className="absolute inset-0 bg-black/80 rounded-lg overflow-hidden shadow-2xl flex flex-col justify-between p-4 z-20">
+                  <div 
+                    className="absolute inset-0 bg-black/80 rounded-lg overflow-hidden shadow-2xl flex flex-col justify-between p-4 z-20 scale-110 animate-fade-in"
+                    style={{ 
+                      minHeight: '320px',
+                      transformOrigin: 'center center',
+                    }}
+                  >
                     <div className="text-white">
-                      <h3 className="text-lg font-bold">{item.title || item.name}</h3>
+                      <h3 className="text-lg font-bold line-clamp-1">{item.title || item.name}</h3>
                     </div>
                     
                     <div className="space-y-4">
                       <div className="flex gap-2">
                         <Button 
                           asChild
-                          className="flex-1 bg-white text-black hover:bg-white/90 font-medium"
+                          className="flex-1 bg-white text-black hover:bg-white/90 font-medium transition-all shadow-md"
                         >
                           <Link to={`/${item.media_type || 'movie'}/${item.id}`}>
                             <Play className="h-4 w-4 mr-1" /> Watch Now
@@ -119,7 +153,7 @@ export const TrendingSlider = () => {
                         <Button 
                           variant="outline" 
                           size="icon" 
-                          className="bg-gray-800/80 border-gray-700 hover:bg-gray-700/80"
+                          className="bg-gray-800/80 border-gray-700 hover:bg-gray-700/80 transition-all shadow-md"
                           onClick={(e) => handleAddToWatchlist(e, item)}
                           disabled={isInWatchlist(item.id)}
                         >
@@ -142,7 +176,7 @@ export const TrendingSlider = () => {
                         <div>
                           <span>8 Languages</span>
                         </div>
-                        <p className="line-clamp-2 mt-2 text-white/70">
+                        <p className="line-clamp-3 mt-2 text-white/70 text-sm leading-tight">
                           {item.overview || "No description available."}
                         </p>
                       </div>
