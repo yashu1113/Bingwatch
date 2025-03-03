@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDetails } from '@/services/tmdb';
@@ -59,23 +60,29 @@ const MovieDetails = () => {
   ) || [];
 
   return (
-    <div className="min-h-screen bg-netflix-black text-white pt-20 md:pt-24">
-      <div className="container mx-auto px-4 py-4 md:py-8 space-y-6 md:space-y-8">
-        <DetailHeader
-          id={movie.id}
-          title={movie.title}
-          overview={movie.overview}
-          posterPath={movie.poster_path}
-          genres={movie.genres}
-          releaseDate={movie.release_date}
-          voteAverage={movie.vote_average}
-          runtime={movie.runtime}
-          trailer={trailer}
-          mediaType="movie"
-          isInTheaters={movie.isInTheaters}
-          cast={movie.credits?.cast}
-        />
+    <div className="min-h-screen bg-netflix-black text-white">
+      {/* Header with no padding on md+ screens for full-width background image */}
+      <div className="pt-16 md:pt-0"> 
+        <div className="md:pt-20">
+          <DetailHeader
+            id={movie.id}
+            title={movie.title}
+            overview={movie.overview}
+            posterPath={movie.poster_path}
+            genres={movie.genres}
+            releaseDate={movie.release_date}
+            voteAverage={movie.vote_average}
+            runtime={movie.runtime}
+            trailer={trailer}
+            mediaType="movie"
+            isInTheaters={movie.isInTheaters}
+            cast={movie.credits?.cast}
+          />
+        </div>
+      </div>
 
+      {/* Content with regular container padding */}
+      <div className="container mx-auto px-4 py-4 md:py-8 space-y-8 md:space-y-12">
         <VideoSection videos={videos} />
 
         {movie?.similar?.results?.length > 0 && (
