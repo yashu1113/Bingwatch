@@ -34,7 +34,6 @@ export const GenreCarousel = () => {
     );
   }
 
-  // Use carousel for both mobile and desktop
   return (
     <div className="relative">
       <Carousel
@@ -54,10 +53,10 @@ export const GenreCarousel = () => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className={isMobile ? "hidden" : "hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/30 border-0 text-white"}>
+        <CarouselPrevious className={isMobile ? "hidden" : "hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 border-0 text-white"}>
           <ArrowLeft className="h-4 w-4" />
         </CarouselPrevious>
-        <CarouselNext className={isMobile ? "hidden" : "hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/30 border-0 text-white"}>
+        <CarouselNext className={isMobile ? "hidden" : "hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 border-0 text-white"}>
           <ArrowRight className="h-4 w-4" />
         </CarouselNext>
       </Carousel>

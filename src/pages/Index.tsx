@@ -7,7 +7,6 @@ import { TrendingSlider } from '@/components/TrendingSlider';
 import { GenreCarousel } from '@/components/GenreCarousel';
 import { IndianSection } from '@/components/IndianSection';
 import { UpcomingMovies } from '@/components/UpcomingMovies';
-import { HighlightsSection } from '@/components/HighlightsSection';
 import { WatchlistRecommendations } from '@/components/WatchlistRecommendations';
 
 const FEATURED_GENRES = [
@@ -44,13 +43,13 @@ const Index = () => {
       </div>
       
       <main className="container space-y-12 py-8">
-        <HighlightsSection />
-
+        {/* Genres section first after hero slider */}
         <section className="space-y-6">
           <h2 className="text-3xl font-bold">Genres</h2>
           <GenreCarousel />
         </section>
 
+        {/* Top 10 section right after genres */}
         <section className="space-y-6">
           <h2 className="text-3xl font-bold">Top 10 in India Today - Hindi</h2>
           <TrendingSlider />

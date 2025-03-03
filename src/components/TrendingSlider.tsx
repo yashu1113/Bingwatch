@@ -10,6 +10,8 @@ import { MediaCard } from './MediaCard';
 import { LoadingGrid } from './LoadingGrid';
 import { Button } from './ui/button';
 import { Plus, Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useWatchlist } from '@/contexts/WatchlistContext';
 
 export const TrendingSlider = () => {
   const { data: trendingData, isLoading, error } = useQuery({
@@ -21,6 +23,7 @@ export const TrendingSlider = () => {
   });
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const { addToWatchlist, isInWatchlist } = useWatchlist();
 
   if (isLoading) {
     return <LoadingGrid count={5} />;
@@ -33,6 +36,18 @@ export const TrendingSlider = () => {
       </div>
     );
   }
+
+  const handleAddToWatchlist = (e: React.MouseEvent, item: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    addToWatchlist({
+      id: item.id,
+      title: item.title || item.name,
+      posterPath: item.poster_path,
+      mediaType: item.media_type || 'movie',
+    });
+  };
 
   return (
     <div className="relative w-full">
@@ -56,18 +71,23 @@ export const TrendingSlider = () => {
           {trendingData?.results.slice(0, 10).map((item, index) => (
             <SwiperSlide key={item.id}>
               <div 
-                className="relative"
+                className="relative group transition-transform duration-300 hover:scale-110 hover:z-10"
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
-                <MediaCard
-                  id={item.id}
-                  title={item.title || item.name || ''}
-                  posterPath={item.poster_path}
-                  mediaType={item.media_type || 'movie'}
-                  releaseDate={item.release_date || item.first_air_date}
-                  voteAverage={item.vote_average}
-                />
+                {/* Regular MediaCard without its hover effect - we'll override it */}
+                <div className={`${hoveredIndex === index ? 'invisible' : 'visible'}`}>
+                  <MediaCard
+                    id={item.id}
+                    title={item.title || item.name || ''}
+                    posterPath={item.poster_path}
+                    mediaType={item.media_type || 'movie'}
+                    releaseDate={item.release_date || item.first_air_date}
+                    voteAverage={item.vote_average}
+                  />
+                </div>
+                
+                {/* Number indicator */}
                 <div className="absolute bottom-1 left-1 z-10">
                   <span 
                     className="text-6xl md:text-7xl font-bold text-white opacity-90 text-shadow-lg"
@@ -79,29 +99,45 @@ export const TrendingSlider = () => {
                   </span>
                 </div>
                 
+                {/* Custom hover overlay like JioHotstar */}
                 {hoveredIndex === index && (
-                  <div className="absolute inset-0 bg-black/70 flex flex-col justify-between p-4 z-20">
+                  <div className="absolute inset-0 bg-black/80 rounded-lg overflow-hidden shadow-2xl flex flex-col justify-between p-4 z-20">
                     <div className="text-white">
                       <h3 className="text-lg font-bold">{item.title || item.name}</h3>
                     </div>
                     
                     <div className="space-y-4">
                       <div className="flex gap-2">
-                        <Button className="flex-1 bg-white text-black hover:bg-white/90">
-                          <Play className="h-4 w-4 mr-2" /> Watch Now
+                        <Button 
+                          asChild
+                          className="flex-1 bg-white text-black hover:bg-white/90 font-medium"
+                        >
+                          <Link to={`/${item.media_type || 'movie'}/${item.id}`}>
+                            <Play className="h-4 w-4 mr-1" /> Watch Now
+                          </Link>
                         </Button>
-                        <Button variant="outline" size="icon" className="bg-gray-800/80 border-gray-700">
-                          <Plus className="h-5 w-5" />
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="bg-gray-800/80 border-gray-700 hover:bg-gray-700/80"
+                          onClick={(e) => handleAddToWatchlist(e, item)}
+                          disabled={isInWatchlist(item.id)}
+                        >
+                          <Plus className={`h-5 w-5 ${isInWatchlist(item.id) ? 'text-primary' : 'text-white'}`} />
                         </Button>
                       </div>
                       
                       <div className="text-white/80 text-sm space-y-1">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 flex-wrap">
                           <span>{new Date(item.release_date || item.first_air_date || '').getFullYear()}</span>
                           <span>•</span>
                           <span className="border px-1 text-xs">U/A 13+</span>
-                          <span>•</span>
-                          <span>2h 6m</span>
+                          {item.media_type === 'movie' && (
+                            <>
+                              <span>•</span>
+                              <span>2h 6m</span>
+                            </>
+                          )}
                         </div>
                         <div>
                           <span>8 Languages</span>
