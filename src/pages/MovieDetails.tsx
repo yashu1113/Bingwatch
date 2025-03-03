@@ -7,11 +7,13 @@ import { DetailHeader } from '@/components/details/DetailHeader';
 import { VideoSection } from '@/components/details/VideoSection';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingGrid } from '@/components/LoadingGrid';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const { data: movie, isLoading, isError } = useQuery({
     queryKey: ['movie', id],
@@ -60,26 +62,50 @@ const MovieDetails = () => {
   ) || [];
 
   // Use backdrop_path for horizontal image if available, fallback to poster_path
-  const backgroundImage = movie.backdrop_path 
+  const backgroundImage = !isMobile && movie.backdrop_path 
     ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
     : (movie.poster_path ? `https://image.tmdb.org/t/p/original${movie.poster_path}` : '');
 
   return (
     <div className="min-h-screen bg-netflix-black text-white">
-      {/* Full screen background header section */}
-      <div 
-        className="relative w-full pt-16 md:pt-0"
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center top',
-          minHeight: '90vh',
-        }}
-      > 
-        {/* Gradient overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
-        
-        <div className="relative z-10 md:pt-20">
+      {/* Full screen background header section - only on non-mobile */}
+      {!isMobile ? (
+        <div 
+          className="relative w-full pt-16 md:pt-0"
+          style={{
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+            minHeight: '70vh', // Changed from 90vh to 70vh so it doesn't extend to cast section
+          }}
+        > 
+          {/* Gradient overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
+          
+          <div className="relative z-10 md:pt-20">
+            <DetailHeader
+              id={movie.id}
+              title={movie.title}
+              overview={movie.overview}
+              posterPath={movie.poster_path}
+              genres={movie.genres}
+              releaseDate={movie.release_date}
+              voteAverage={movie.vote_average}
+              runtime={movie.runtime}
+              trailer={trailer}
+              mediaType="movie"
+              isInTheaters={movie.isInTheaters}
+              cast={movie.credits?.cast}
+              customLabels={{
+                inTheaters: "Now Playing in Theaters",
+                watchTrailer: "Watch Trailer"
+              }}
+            />
+          </div>
+        </div>
+      ) : (
+        // Original mobile layout
+        <div className="relative z-10 pt-20">
           <DetailHeader
             id={movie.id}
             title={movie.title}
@@ -93,9 +119,13 @@ const MovieDetails = () => {
             mediaType="movie"
             isInTheaters={movie.isInTheaters}
             cast={movie.credits?.cast}
+            customLabels={{
+              inTheaters: "Now Playing in Theaters",
+              watchTrailer: "Watch Trailer"
+            }}
           />
         </div>
-      </div>
+      )}
 
       {/* Content with regular container padding */}
       <div className="container mx-auto px-4 py-4 md:py-8 space-y-8 md:space-y-12">

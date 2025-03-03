@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Play, Plus, Check, Download, Share2 } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
@@ -5,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { StreamingButtons } from "@/components/StreamingButtons";
 import { CastSection } from "@/components/details/CastSection";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DetailHeaderProps {
   id: number;
@@ -19,6 +21,10 @@ interface DetailHeaderProps {
   mediaType: 'movie' | 'tv';
   isInTheaters?: boolean;
   cast?: { id: number; name: string; character: string; profile_path: string | null; }[];
+  customLabels?: {
+    inTheaters?: string;
+    watchTrailer?: string;
+  };
 }
 
 const formatRuntime = (minutes?: number): string => {
@@ -45,9 +51,11 @@ export const DetailHeader = ({
   mediaType,
   isInTheaters,
   cast,
+  customLabels = {},
 }: DetailHeaderProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleWatchlistClick = () => {
     const inWatchlist = isInWatchlist(id);
@@ -73,7 +81,7 @@ export const DetailHeader = ({
 
   const releaseYear = releaseDate ? new Date(releaseDate).getFullYear() : '';
   const formattedRuntime = mediaType === 'movie' && runtime ? formatRuntime(runtime) : '';
-  const rating = voteAverage ? `${voteAverage.toFixed(1)}` : '';
+  const rating = voteAverage ? `★ ${voteAverage.toFixed(1)}` : '';
 
   return (
     <div className="space-y-8">
@@ -85,11 +93,13 @@ export const DetailHeader = ({
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white text-shadow-lg">{title}</h1>
             
             <div className="flex items-center gap-3 text-sm md:text-base text-gray-300">
-              {rating && <span className="flex items-center">IMDb {rating}</span>}
+              {rating && <span className="flex items-center">{rating}</span>}
               {formattedRuntime && <span className="flex items-center">{formattedRuntime}</span>}
               {releaseYear && <span>{releaseYear}</span>}
               {mediaType === 'movie' && isInTheaters && (
-                <span className="px-1.5 py-0.5 bg-gray-700 text-white rounded text-xs">In Theaters</span>
+                <span className="px-1.5 py-0.5 bg-gray-700 text-white rounded text-xs">
+                  {customLabels.inTheaters || "In Theaters"}
+                </span>
               )}
               {mediaType === 'tv' && (
                 <span className="px-1.5 py-0.5 bg-gray-700 text-white rounded text-xs">TV Series</span>
@@ -118,7 +128,7 @@ export const DetailHeader = ({
                   className="bg-white hover:bg-white/90 text-black font-medium px-6"
                 >
                   <Play className="mr-2 h-5 w-5 fill-black" />
-                  Play
+                  {customLabels.watchTrailer || "Play"}
                 </Button>
               )}
               <Button
