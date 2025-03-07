@@ -4,7 +4,7 @@ import { Search } from 'lucide-react';
 interface SearchInputProps {
   query: string;
   onChange: (value: string) => void;
-  onSubmit: (e: React.FormEvent) => void
+  onSubmit: (e: React.FormEvent) => void;
 }
 
 export const SearchInput = ({ query, onChange, onSubmit }: SearchInputProps) => {
