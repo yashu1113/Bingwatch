@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDetails } from '@/services/tmdb';
@@ -55,6 +56,10 @@ const TVShowDetails = () => {
   const videos = show.videos?.results?.filter(
     (video) => video.site === "YouTube"
   ) || [];
+
+  // Default to season 1, episode 1 if not available
+  const firstSeason = show.seasons?.[0]?.season_number || 1;
+  const firstEpisode = 1; // Default to first episode
 
   return (
     <div className="min-h-screen bg-netflix-black text-white pt-20 md:pt-24">

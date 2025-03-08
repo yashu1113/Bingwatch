@@ -1,19 +1,19 @@
-
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
-import { Loader2 } from "lucide-react";
+import { Loader2, Wifi } from "lucide-react";
 import { memo } from "react";
 
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
   id: number;
   isInTheaters?: boolean;
+  seasonNumber?: number;
+  episodeNumber?: number;
 }
 
 const getProviderColor = (providerName: string): string => {
   const name = providerName.toLowerCase();
-  // Common Indian OTT platforms
   if (name.includes('netflix')) return 'streaming-netflix';
   if (name.includes('prime')) return 'streaming-prime';
   if (name.includes('hotstar') || name.includes('jio')) return 'streaming-jiostar';
@@ -25,19 +25,33 @@ const getProviderColor = (providerName: string): string => {
   return 'bg-gray-600 hover:bg-gray-700 border-gray-700';
 };
 
-const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingButtonsProps) => {
+const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasonNumber = 1, episodeNumber = 1 }: StreamingButtonsProps) => {
   const { data: providers, isLoading } = useQuery({
     queryKey: ['watch-providers', mediaType, id],
     queryFn: () => getWatchProviders(mediaType, id),
-    staleTime: 1000 * 60 * 30, // Consider data fresh for 30 minutes
-    gcTime: 1000 * 60 * 60, // Keep in cache for 1 hour (renamed from cacheTime)
-    refetchOnWindowFocus: false, // Disable automatic refetch on window focus
-    refetchInterval: 1000 * 60 * 60 * 6, // Refetch every 6 hours
+    staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60,
+    refetchOnWindowFocus: false,
+    refetchInterval: 1000 * 60 * 60 * 6,
   });
 
   const handleStreamingClick = (url: string) => {
     const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
     window.open(formattedUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleLiveStreamClick = () => {
+    try {
+      let streamUrl = "";
+      if (mediaType === 'movie') {
+        streamUrl = `https://flicky.host/embed/movie/?id=${id}`;
+      } else {
+        streamUrl = `https://flicky.host/embed/tv/?id=${id}/${seasonNumber}/${episodeNumber}`;
+      }
+      window.open(streamUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error("Error opening live stream:", error);
+    }
   };
 
   if (isLoading) {
@@ -54,22 +68,6 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingBut
   const providerUrl = providers?.results?.IN?.link;
 
   const hasStreamingOptions = streamingProviders.length > 0 || rentalProviders.length > 0;
-
-  if (!hasStreamingOptions && !providers?.results?.IN) {
-    return (
-      <p className="text-gray-400 italic">
-        Not available on streaming or rental platforms in India
-      </p>
-    );
-  }
-
-  if (!hasStreamingOptions) {
-    return (
-      <p className="text-gray-400 italic">
-        Not available on streaming or rental platforms in India
-      </p>
-    );
-  }
 
   const renderProviderButton = (provider: any, type: 'stream' | 'rent') => {
     const providerClass = getProviderColor(provider.provider_name);
@@ -105,6 +103,20 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingBut
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap gap-2 items-center">
+        <Button
+          variant="outline"
+          className="bg-purple-600 hover:bg-purple-700 text-white border-purple-700 
+            focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
+            transition-all duration-200 hover:scale-105"
+          onClick={handleLiveStreamClick}
+          aria-label="Live Stream"
+        >
+          <Wifi className="mr-2 h-4 w-4" />
+          Live Stream
+        </Button>
+      </div>
+      
       {streamingProviders.length > 0 && (
         <div>
           <h4 className="text-sm font-medium mb-2">Stream on:</h4>
@@ -122,9 +134,14 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingBut
           </div>
         </div>
       )}
+
+      {!hasStreamingOptions && !providers?.results?.IN && (
+        <p className="text-gray-400 italic">
+          Not available on streaming or rental platforms in India
+        </p>
+      )}
     </div>
   );
 };
 
-// Memoize the component to prevent unnecessary re-renders
 export const StreamingButtons = memo(StreamingButtonsComponent);
