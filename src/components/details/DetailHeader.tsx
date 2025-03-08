@@ -101,11 +101,6 @@ export const DetailHeader = ({
             {mediaType === 'movie' && runtime && (
               <p>Runtime: {formatRuntime(runtime)}</p>
             )}
-            {isInTheaters && (
-              <span className="inline-flex items-center px-3 py-1 bg-[#F4A261] text-white rounded-lg text-sm font-medium">
-                Now Playing in Theaters
-              </span>
-            )}
           </div>
           <div className="flex flex-col space-y-4 mt-auto">
             <div className="flex flex-wrap gap-3">

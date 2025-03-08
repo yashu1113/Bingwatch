@@ -55,11 +55,11 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingBut
 
   const hasStreamingOptions = streamingProviders.length > 0 || rentalProviders.length > 0;
 
-  if (!hasStreamingOptions && isInTheaters && !providers?.results?.IN) {
+  if (!hasStreamingOptions && !providers?.results?.IN) {
     return (
-      <div className="inline-flex items-center px-3 py-1.5 bg-[#F4A261] text-white rounded-lg font-medium">
-        Now Playing in Theaters
-      </div>
+      <p className="text-gray-400 italic">
+        Not available on streaming or rental platforms in India
+      </p>
     );
   }
 

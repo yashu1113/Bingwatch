@@ -49,9 +49,9 @@ const Index = () => {
           <GenreCarousel />
         </section>
 
-        {/* Top 10 section right after genres */}
+        {/* Trending section right after genres */}
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold">Top 10 in India Today - Hindi</h2>
+          <h2 className="text-3xl font-bold">Trending</h2>
           <TrendingSlider />
         </section>
 
