@@ -6,6 +6,7 @@ import { MovieCarousel } from '@/components/MovieCarousel';
 import { DetailHeader } from '@/components/details/DetailHeader';
 import { VideoSection } from '@/components/details/VideoSection';
 import { useToast } from '@/hooks/use-toast';
+import { LoadingGrid } from '@/components/LoadingGrid';
 
 const TVShowDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -31,10 +32,7 @@ const TVShowDetails = () => {
   if (isLoading) {
     return (
       <div className="container py-20 md:py-24">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-1/3 bg-gray-800 rounded" />
-          <div className="h-96 bg-gray-800 rounded" />
-        </div>
+        <LoadingGrid count={1} className="max-w-4xl mx-auto" />
       </div>
     );
   }
@@ -44,6 +42,7 @@ const TVShowDetails = () => {
       <div className="container py-20 md:py-24">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold">TV Show not found</h1>
+          <p className="mt-2 text-gray-400">Please try again later</p>
         </div>
       </div>
     );
@@ -56,10 +55,6 @@ const TVShowDetails = () => {
   const videos = show.videos?.results?.filter(
     (video) => video.site === "YouTube"
   ) || [];
-
-  // Default to season 1, episode 1 if not available
-  const firstSeason = show.seasons?.[0]?.season_number || 1;
-  const firstEpisode = 1; // Default to first episode
 
   return (
     <div className="min-h-screen bg-netflix-black text-white pt-20 md:pt-24">
@@ -75,6 +70,7 @@ const TVShowDetails = () => {
           trailer={trailer}
           mediaType="tv"
           cast={show.credits?.cast}
+          seasons={show.seasons}
         />
 
         <VideoSection videos={videos} />

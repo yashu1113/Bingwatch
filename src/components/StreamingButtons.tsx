@@ -2,14 +2,14 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
 import { Loader2, Wifi } from "lucide-react";
-import { memo } from "react";
+import { memo, useState } from "react";
+import { StreamingPlayer } from "@/components/StreamingPlayer";
 
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
   id: number;
   isInTheaters?: boolean;
-  seasonNumber?: number;
-  episodeNumber?: number;
+  seasons?: { season_number: number; name: string; episode_count: number }[];
 }
 
 const getProviderColor = (providerName: string): string => {
@@ -25,7 +25,9 @@ const getProviderColor = (providerName: string): string => {
   return 'bg-gray-600 hover:bg-gray-700 border-gray-700';
 };
 
-const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasonNumber = 1, episodeNumber = 1 }: StreamingButtonsProps) => {
+const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons = [] }: StreamingButtonsProps) => {
+  const [showPlayer, setShowPlayer] = useState(false);
+  
   const { data: providers, isLoading } = useQuery({
     queryKey: ['watch-providers', mediaType, id],
     queryFn: () => getWatchProviders(mediaType, id),
@@ -38,20 +40,6 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasonNumber =
   const handleStreamingClick = (url: string) => {
     const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
     window.open(formattedUrl, '_blank', 'noopener,noreferrer');
-  };
-
-  const handleLiveStreamClick = () => {
-    try {
-      let streamUrl = "";
-      if (mediaType === 'movie') {
-        streamUrl = `https://flicky.host/embed/movie/?id=${id}`;
-      } else {
-        streamUrl = `https://flicky.host/embed/tv/?id=${id}/${seasonNumber}/${episodeNumber}`;
-      }
-      window.open(streamUrl, '_blank', 'noopener,noreferrer');
-    } catch (error) {
-      console.error("Error opening live stream:", error);
-    }
   };
 
   if (isLoading) {
@@ -103,42 +91,54 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasonNumber =
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2 items-center">
-        <Button
-          variant="outline"
-          className="bg-purple-600 hover:bg-purple-700 text-white border-purple-700 
-            focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
-            transition-all duration-200 hover:scale-105"
-          onClick={handleLiveStreamClick}
-          aria-label="Live Stream"
-        >
-          <Wifi className="mr-2 h-4 w-4" />
-          Live Stream
-        </Button>
-      </div>
+      {showPlayer ? (
+        <StreamingPlayer 
+          mediaType={mediaType} 
+          id={id}
+          seasons={seasons}
+        />
+      ) : (
+        <div className="flex flex-wrap gap-2 items-center">
+          <Button
+            variant="outline"
+            className="bg-purple-600 hover:bg-purple-700 text-white border-purple-700 
+              focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
+              transition-all duration-200 hover:scale-105"
+            onClick={() => setShowPlayer(true)}
+            aria-label="Live Stream"
+          >
+            <Wifi className="mr-2 h-4 w-4" />
+            Live Stream
+          </Button>
+        </div>
+      )}
       
-      {streamingProviders.length > 0 && (
-        <div>
-          <h4 className="text-sm font-medium mb-2">Stream on:</h4>
-          <div className="flex flex-wrap gap-2">
-            {streamingProviders.map(provider => renderProviderButton(provider, 'stream'))}
-          </div>
-        </div>
-      )}
+      {!showPlayer && (
+        <>
+          {streamingProviders.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium mb-2">Stream on:</h4>
+              <div className="flex flex-wrap gap-2">
+                {streamingProviders.map(provider => renderProviderButton(provider, 'stream'))}
+              </div>
+            </div>
+          )}
 
-      {rentalProviders.length > 0 && (
-        <div>
-          <h4 className="text-sm font-medium mb-2">Rent on:</h4>
-          <div className="flex flex-wrap gap-2">
-            {rentalProviders.map(provider => renderProviderButton(provider, 'rent'))}
-          </div>
-        </div>
-      )}
+          {rentalProviders.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium mb-2">Rent on:</h4>
+              <div className="flex flex-wrap gap-2">
+                {rentalProviders.map(provider => renderProviderButton(provider, 'rent'))}
+              </div>
+            </div>
+          )}
 
-      {!hasStreamingOptions && !providers?.results?.IN && (
-        <p className="text-gray-400 italic">
-          Not available on streaming or rental platforms in India
-        </p>
+          {!hasStreamingOptions && !providers?.results?.IN && (
+            <p className="text-gray-400 italic">
+              Not available on streaming or rental platforms in India
+            </p>
+          )}
+        </>
       )}
     </div>
   );
