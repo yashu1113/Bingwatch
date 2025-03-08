@@ -70,7 +70,7 @@ const TVShowDetails = () => {
           trailer={trailer}
           mediaType="tv"
           cast={show.credits?.cast}
-          seasons={show.seasons}
+          seasons={show.number_of_seasons > 0 ? show.seasons : undefined}
         />
 
         <VideoSection videos={videos} />

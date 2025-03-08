@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Wifi, ChevronDown, ChevronUp, Play, SkipBack, SkipForward } from "lucide-react";
+import { Loader2, Wifi, ChevronDown, ChevronUp, Play, SkipBack, SkipForward, Maximize, Minimize, X, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface StreamingPlayerProps {
   mediaType: 'movie' | 'tv';
@@ -19,7 +20,37 @@ export const StreamingPlayer = ({ mediaType, id, seasons = [] }: StreamingPlayer
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSeasonSelector, setShowSeasonSelector] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const isMobile = useIsMobile();
+  
+  // Handle fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement && playerContainerRef.current) {
+        await playerContainerRef.current.requestFullscreen();
+      } else if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      console.error('Error toggling fullscreen:', err);
+    }
+  };
+
   const handlePlay = () => {
     setIsLoading(true);
     setError(null);
@@ -29,6 +60,9 @@ export const StreamingPlayer = ({ mediaType, id, seasons = [] }: StreamingPlayer
   };
 
   const handleClose = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
     setIsPlaying(false);
     setError(null);
   };
@@ -63,6 +97,21 @@ export const StreamingPlayer = ({ mediaType, id, seasons = [] }: StreamingPlayer
       if (prevSeason) {
         setSelectedSeason(prev => prev - 1);
         setSelectedEpisode(prevSeason.episode_count);
+      }
+    }
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    if (iframeRef.current) {
+      try {
+        // Send mute/unmute message to iframe
+        iframeRef.current.contentWindow?.postMessage(
+          { action: isMuted ? 'unmute' : 'mute' },
+          '*'
+        );
+      } catch (err) {
+        console.error('Error toggling mute:', err);
       }
     }
   };
@@ -108,6 +157,7 @@ export const StreamingPlayer = ({ mediaType, id, seasons = [] }: StreamingPlayer
           onClick={handleClose}
           className="bg-gray-800 hover:bg-gray-700"
         >
+          <X className="mr-2 h-4 w-4" />
           Close Player
         </Button>
       </div>
@@ -185,7 +235,15 @@ export const StreamingPlayer = ({ mediaType, id, seasons = [] }: StreamingPlayer
         </div>
       )}
 
-      <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden">
+      <div 
+        ref={playerContainerRef}
+        className={cn(
+          "relative w-full bg-black rounded-lg overflow-hidden transition-all",
+          isFullscreen 
+            ? "fixed inset-0 z-50" 
+            : "aspect-video"
+        )}
+      >
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-70 z-10">
             <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
@@ -205,14 +263,55 @@ export const StreamingPlayer = ({ mediaType, id, seasons = [] }: StreamingPlayer
             </Button>
           </div>
         ) : (
-          <iframe
-            src={getStreamUrl()}
-            className="w-full h-full"
-            allowFullScreen
-            onError={() => setError("Failed to load streaming content")}
-          />
+          <>
+            <iframe
+              ref={iframeRef}
+              src={getStreamUrl()}
+              className="w-full h-full"
+              allowFullScreen
+              onError={() => setError("Failed to load streaming content")}
+              allow="autoplay; fullscreen"
+            />
+            
+            <div className={cn(
+              "absolute bottom-0 left-0 right-0 flex justify-between items-center p-2 md:p-4 bg-gradient-to-t from-black/80 to-transparent",
+              isFullscreen ? "opacity-0 hover:opacity-100 transition-opacity" : ""
+            )}>
+              <div className="flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-white bg-transparent hover:bg-white/20"
+                  onClick={toggleMute}
+                >
+                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                </Button>
+              </div>
+              
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-white bg-transparent hover:bg-white/20"
+                onClick={toggleFullscreen}
+              >
+                {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+              </Button>
+            </div>
+            
+            {isFullscreen && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60"
+                onClick={handleClose}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </>
         )}
       </div>
     </div>
   );
 };
+
