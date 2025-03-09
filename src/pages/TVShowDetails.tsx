@@ -56,6 +56,13 @@ const TVShowDetails = () => {
     (video) => video.site === "YouTube"
   ) || [];
 
+  // Format seasons data for the streaming player
+  const formattedSeasons = show.seasons
+    ? show.seasons.filter(season => 
+        season.season_number > 0 && season.episode_count > 0
+      )
+    : [];
+
   return (
     <div className="min-h-screen bg-netflix-black text-white pt-20 md:pt-24">
       <div className="container mx-auto px-4 py-4 md:py-8 space-y-6 md:space-y-8">
@@ -70,7 +77,7 @@ const TVShowDetails = () => {
           trailer={trailer}
           mediaType="tv"
           cast={show.credits?.cast}
-          seasons={show.number_of_seasons > 0 ? show.seasons : undefined}
+          seasons={formattedSeasons.length > 0 ? formattedSeasons : undefined}
         />
 
         <VideoSection videos={videos} />
