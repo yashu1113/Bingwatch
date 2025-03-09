@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
@@ -36,6 +37,11 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons = [] }
     refetchOnWindowFocus: false,
     refetchInterval: 1000 * 60 * 60 * 6,
   });
+
+  // Handle click on Live Stream button
+  const handleLiveStreamClick = () => {
+    setShowPlayer(true);
+  };
 
   const handleStreamingClick = (url: string) => {
     const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
@@ -96,6 +102,7 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons = [] }
           mediaType={mediaType} 
           id={id}
           seasons={seasons}
+          onClose={() => setShowPlayer(false)}
         />
       ) : (
         <div className="flex flex-wrap gap-2 items-center">
@@ -104,7 +111,7 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons = [] }
             className="bg-purple-600 hover:bg-purple-700 text-white border-purple-700 
               focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
               transition-all duration-200 hover:scale-105"
-            onClick={() => setShowPlayer(true)}
+            onClick={handleLiveStreamClick}
             aria-label="Live Stream"
           >
             <Wifi className="mr-2 h-4 w-4" />

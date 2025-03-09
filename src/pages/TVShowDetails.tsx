@@ -56,11 +56,15 @@ const TVShowDetails = () => {
     (video) => video.site === "YouTube"
   ) || [];
 
-  // Format seasons data for the streaming player
+  // Format seasons data for the streaming player - making sure to filter out specials or seasons with 0 episodes
   const formattedSeasons = show.seasons
     ? show.seasons.filter(season => 
         season.season_number > 0 && season.episode_count > 0
-      )
+      ).map(season => ({
+        season_number: season.season_number,
+        name: season.name,
+        episode_count: season.episode_count
+      }))
     : [];
 
   return (

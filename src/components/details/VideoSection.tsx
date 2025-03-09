@@ -1,5 +1,6 @@
+
 import { Video } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 
 interface VideoSectionProps {
   videos: Array<{
