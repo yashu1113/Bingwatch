@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
 import { Loader2, Wifi } from "lucide-react";
-import { memo, useState } from "react";
-import { StreamingPlayer } from "@/components/StreamingPlayer";
+import { memo } from "react";
 
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
@@ -26,9 +25,7 @@ const getProviderColor = (providerName: string): string => {
   return 'bg-gray-600 hover:bg-gray-700 border-gray-700';
 };
 
-const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons = [] }: StreamingButtonsProps) => {
-  const [showPlayer, setShowPlayer] = useState(false);
-  
+const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingButtonsProps) => {
   const { data: providers, isLoading } = useQuery({
     queryKey: ['watch-providers', mediaType, id],
     queryFn: () => getWatchProviders(mediaType, id),
@@ -40,7 +37,12 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons = [] }
 
   // Handle click on Live Stream button
   const handleLiveStreamClick = () => {
-    setShowPlayer(true);
+    // Open a dynamic streaming URL in a new tab instead of showing an embedded player
+    const streamUrl = mediaType === 'movie' 
+      ? `https://flicky.host/embed/movie/?id=${id}`
+      : `https://flicky.host/embed/tv/?id=${id}`;
+    
+    window.open(streamUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleStreamingClick = (url: string) => {
@@ -97,55 +99,42 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons = [] }
 
   return (
     <div className="space-y-4">
-      {showPlayer ? (
-        <StreamingPlayer 
-          mediaType={mediaType} 
-          id={id}
-          seasons={seasons}
-          onClose={() => setShowPlayer(false)}
-        />
-      ) : (
-        <div className="flex flex-wrap gap-2 items-center">
-          <Button
-            variant="outline"
-            className="bg-purple-600 hover:bg-purple-700 text-white border-purple-700 
-              focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
-              transition-all duration-200 hover:scale-105"
-            onClick={handleLiveStreamClick}
-            aria-label="Live Stream"
-          >
-            <Wifi className="mr-2 h-4 w-4" />
-            Live Stream
-          </Button>
+      <div className="flex flex-wrap gap-2 items-center">
+        <Button
+          variant="outline"
+          className="bg-purple-600 hover:bg-purple-700 text-white border-purple-700 
+            focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
+            transition-all duration-200 hover:scale-105"
+          onClick={handleLiveStreamClick}
+          aria-label="Live Stream"
+        >
+          <Wifi className="mr-2 h-4 w-4" />
+          Live Stream
+        </Button>
+      </div>
+      
+      {streamingProviders.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium mb-2">Stream on:</h4>
+          <div className="flex flex-wrap gap-2">
+            {streamingProviders.map(provider => renderProviderButton(provider, 'stream'))}
+          </div>
         </div>
       )}
-      
-      {!showPlayer && (
-        <>
-          {streamingProviders.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium mb-2">Stream on:</h4>
-              <div className="flex flex-wrap gap-2">
-                {streamingProviders.map(provider => renderProviderButton(provider, 'stream'))}
-              </div>
-            </div>
-          )}
 
-          {rentalProviders.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium mb-2">Rent on:</h4>
-              <div className="flex flex-wrap gap-2">
-                {rentalProviders.map(provider => renderProviderButton(provider, 'rent'))}
-              </div>
-            </div>
-          )}
+      {rentalProviders.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium mb-2">Rent on:</h4>
+          <div className="flex flex-wrap gap-2">
+            {rentalProviders.map(provider => renderProviderButton(provider, 'rent'))}
+          </div>
+        </div>
+      )}
 
-          {!hasStreamingOptions && !providers?.results?.IN && (
-            <p className="text-gray-400 italic">
-              Not available on streaming or rental platforms in India
-            </p>
-          )}
-        </>
+      {!hasStreamingOptions && !providers?.results?.IN && (
+        <p className="text-gray-400 italic">
+          Not available on streaming or rental platforms in India
+        </p>
       )}
     </div>
   );
