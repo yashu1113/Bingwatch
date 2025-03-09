@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
 import { Loader2, Wifi } from "lucide-react";
-import { memo } from "react";
+import { memo, useState } from "react";
 
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
@@ -25,7 +25,9 @@ const getProviderColor = (providerName: string): string => {
   return 'bg-gray-600 hover:bg-gray-700 border-gray-700';
 };
 
-const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingButtonsProps) => {
+const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: StreamingButtonsProps) => {
+  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  
   const { data: providers, isLoading } = useQuery({
     queryKey: ['watch-providers', mediaType, id],
     queryFn: () => getWatchProviders(mediaType, id),
@@ -37,12 +39,38 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingBut
 
   // Handle click on Live Stream button
   const handleLiveStreamClick = () => {
-    // Open a dynamic streaming URL in a new tab instead of showing an embedded player
+    setIsPlayerOpen(true);
+    
+    // Create the player iframe in fullscreen
+    const playerContainer = document.createElement('div');
+    playerContainer.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
+    
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '×';
+    closeButton.className = 'absolute top-4 right-4 text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 z-10 focus:outline-none';
+    closeButton.onclick = () => {
+      document.body.removeChild(playerContainer);
+      setIsPlayerOpen(false);
+    };
+    
+    // Create iframe for the player
     const streamUrl = mediaType === 'movie' 
       ? `https://flicky.host/embed/movie/?id=${id}`
-      : `https://flicky.host/embed/tv/?id=${id}`;
+      : `https://flicky.host/embed/tv/?id=${id}${seasons && seasons.length > 0 ? `&s=${seasons[0].season_number}&e=1` : ''}`;
     
-    window.open(streamUrl, '_blank', 'noopener,noreferrer');
+    const iframe = document.createElement('iframe');
+    iframe.src = streamUrl;
+    iframe.className = 'w-full h-full';
+    iframe.allowFullscreen = true;
+    
+    // Add elements to the DOM
+    playerContainer.appendChild(closeButton);
+    playerContainer.appendChild(iframe);
+    document.body.appendChild(playerContainer);
+    
+    // Force focus to iframe for better keyboard control
+    iframe.focus();
   };
 
   const handleStreamingClick = (url: string) => {
@@ -107,6 +135,7 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters }: StreamingBut
             transition-all duration-200 hover:scale-105"
           onClick={handleLiveStreamClick}
           aria-label="Live Stream"
+          disabled={isPlayerOpen}
         >
           <Wifi className="mr-2 h-4 w-4" />
           Live Stream
