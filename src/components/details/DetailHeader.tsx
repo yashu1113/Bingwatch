@@ -20,7 +20,6 @@ interface DetailHeaderProps {
   mediaType: 'movie' | 'tv';
   isInTheaters?: boolean;
   cast?: { id: number; name: string; character: string; profile_path: string | null; }[];
-  seasons?: { season_number: number; name: string; episode_count: number }[];
 }
 
 const formatRuntime = (minutes?: number): string => {
@@ -47,7 +46,6 @@ export const DetailHeader = ({
   mediaType,
   isInTheaters,
   cast,
-  seasons,
 }: DetailHeaderProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
@@ -141,7 +139,6 @@ export const DetailHeader = ({
               mediaType={mediaType} 
               id={id} 
               isInTheaters={isInTheaters} 
-              seasons={seasons}
             />
           </div>
         </div>
