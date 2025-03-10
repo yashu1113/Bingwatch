@@ -1,8 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
-import { Loader2, Wifi, Film, Play, ExternalLink, List } from "lucide-react";
+import { Loader2, Wifi, Film, Play, ExternalLink } from "lucide-react";
 import { memo, useState, useRef, useEffect } from "react";
 import { 
   Tabs, 
@@ -144,9 +143,7 @@ const StreamingButtonsComponent = ({ mediaType, id, title, isInTheaters, seasons
     iframe.referrerPolicy = "no-referrer";
     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
     
-    // Removing the sandbox attribute as it can be too restrictive and cause black screens
-    // Instead using specific permissions that don't block content
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation');
+    iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation');
     iframeRef.current = iframe;
     
     const loadingIndicator = document.createElement('div');
@@ -164,13 +161,12 @@ const StreamingButtonsComponent = ({ mediaType, id, title, isInTheaters, seasons
         playerContainerRef.current?.removeChild(loadingIndicator);
       }
       toast({
-        title: "Stream loaded",
-        description: "If no video appears, try another source or check your ad blocker.",
+        title: `${source} stream loaded`,
+        description: "If video doesn't appear in 5 seconds, try another source.",
         duration: 3000,
       });
     };
     
-    // Listen for iframe load errors
     iframe.onerror = () => {
       toast({
         title: "Stream failed to load",
