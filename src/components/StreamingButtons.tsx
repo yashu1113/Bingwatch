@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
@@ -124,6 +125,11 @@ const StreamingButtonsComponent = ({ mediaType, id, title, isInTheaters, seasons
           ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`
           : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${selectedSeason}&e=${selectedEpisode}`;
         break;
+      case 'embedflix':
+        streamUrl = mediaType === 'movie'
+          ? `https://embedflix.net/movie/${id}`
+          : `https://embedflix.net/tv/${id}/${selectedSeason}/${selectedEpisode}`;
+        break;
       default:
         streamUrl = mediaType === 'movie' 
           ? `https://2embed.org/embed/movie?tmdb=${id}`
@@ -135,8 +141,12 @@ const StreamingButtonsComponent = ({ mediaType, id, title, isInTheaters, seasons
     iframe.className = 'w-full h-full';
     iframe.style.marginTop = '56px';
     iframe.allowFullscreen = true;
+    iframe.referrerPolicy = "no-referrer";
     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-    iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation');
+    
+    // Removing the sandbox attribute as it can be too restrictive and cause black screens
+    // Instead using specific permissions that don't block content
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation');
     iframeRef.current = iframe;
     
     const loadingIndicator = document.createElement('div');
@@ -157,6 +167,16 @@ const StreamingButtonsComponent = ({ mediaType, id, title, isInTheaters, seasons
         title: "Stream loaded",
         description: "If no video appears, try another source or check your ad blocker.",
         duration: 3000,
+      });
+    };
+    
+    // Listen for iframe load errors
+    iframe.onerror = () => {
+      toast({
+        title: "Stream failed to load",
+        description: "Please try another source.",
+        variant: "destructive",
+        duration: 5000,
       });
     };
     
@@ -322,6 +342,25 @@ const StreamingButtonsComponent = ({ mediaType, id, title, isInTheaters, seasons
         >
           <Wifi className="mr-2 h-4 w-4" />
           SuperEmbed
+          {mediaType === 'tv' && (
+            <span className="ml-2 text-xs bg-gray-800 px-2 py-0.5 rounded">
+              S{selectedSeason}:E{selectedEpisode}
+            </span>
+          )}
+        </Button>
+        
+        <Button
+          variant="outline"
+          className={`bg-blue-600 hover:bg-blue-700 text-white border-blue-700 
+            focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
+            transition-all duration-200 hover:scale-105 flex-1 md:flex-none
+            ${activeStreamSource === 'embedflix' ? 'ring-2 ring-white' : ''}`}
+          onClick={() => handleStreamClick('embedflix')}
+          aria-label="EmbedFlix Stream"
+          disabled={isPlayerOpen && activeStreamSource !== 'embedflix'}
+        >
+          <Film className="mr-2 h-4 w-4" />
+          EmbedFlix
           {mediaType === 'tv' && (
             <span className="ml-2 text-xs bg-gray-800 px-2 py-0.5 rounded">
               S{selectedSeason}:E{selectedEpisode}
