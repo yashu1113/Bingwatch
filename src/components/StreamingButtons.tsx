@@ -1,9 +1,14 @@
-
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
-import { Loader2, Wifi, Film } from "lucide-react";
+import { Loader2, Wifi, Film, ChevronDown, List } from "lucide-react";
 import { memo, useState } from "react";
+import { 
+  Tabs, 
+  TabsList, 
+  TabsTrigger, 
+  TabsContent 
+} from "@/components/ui/tabs";
 
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
@@ -27,6 +32,10 @@ const getProviderColor = (providerName: string): string => {
 
 const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: StreamingButtonsProps) => {
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  const [selectedSeason, setSelectedSeason] = useState(seasons && seasons.length > 0 ? seasons[0].season_number : 1);
+  const [selectedEpisode, setSelectedEpisode] = useState(1);
+  const [showSeasonSelector, setShowSeasonSelector] = useState(false);
+  const [showEpisodeSelector, setShowEpisodeSelector] = useState(false);
   
   const { data: providers, isLoading } = useQuery({
     queryKey: ['watch-providers', mediaType, id],
@@ -37,15 +46,23 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     refetchInterval: 1000 * 60 * 60 * 6,
   });
 
-  // Handle click on Live Stream button
+  const getEpisodeCount = () => {
+    if (!seasons) return 0;
+    const season = seasons.find(s => s.season_number === selectedSeason);
+    return season ? season.episode_count : 0;
+  };
+
+  const generateEpisodeNumbers = () => {
+    const count = getEpisodeCount();
+    return Array.from({ length: count }, (_, i) => i + 1);
+  };
+
   const handleLiveStreamClick = () => {
     setIsPlayerOpen(true);
     
-    // Create the player iframe in fullscreen
     const playerContainer = document.createElement('div');
     playerContainer.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
     
-    // Create close button
     const closeButton = document.createElement('button');
     closeButton.innerHTML = '×';
     closeButton.className = 'absolute top-4 right-4 text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 z-10 focus:outline-none';
@@ -54,11 +71,9 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
       setIsPlayerOpen(false);
     };
     
-    // Create iframe for the player using 2embed.org API (alternative to flicky.host)
-    // The ID formats match TMDB IDs so we can use them directly
     const streamUrl = mediaType === 'movie' 
       ? `https://2embed.org/embed/movie?tmdb=${id}`
-      : `https://2embed.org/embed/series?tmdb=${id}${seasons && seasons.length > 0 ? `&s=${seasons[0].season_number}&e=1` : ''}`;
+      : `https://2embed.org/embed/series?tmdb=${id}&s=${selectedSeason}&e=${selectedEpisode}`;
     
     const iframe = document.createElement('iframe');
     iframe.src = streamUrl;
@@ -66,25 +81,63 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     iframe.allowFullscreen = true;
     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
     
-    // Create a loading indicator
     const loadingIndicator = document.createElement('div');
     loadingIndicator.className = 'absolute inset-0 flex items-center justify-center bg-black/80';
     loadingIndicator.innerHTML = '<div class="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>';
     
-    // Add elements to the DOM
     playerContainer.appendChild(loadingIndicator);
     playerContainer.appendChild(closeButton);
     playerContainer.appendChild(iframe);
     document.body.appendChild(playerContainer);
     
-    // Remove loading indicator once iframe is loaded
     iframe.onload = () => {
       if (loadingIndicator.parentNode === playerContainer) {
         playerContainer.removeChild(loadingIndicator);
       }
     };
     
-    // Force focus to iframe for better keyboard control
+    iframe.focus();
+  };
+
+  const handleAlternativeStreamClick = () => {
+    const vidsrcUrl = mediaType === 'movie'
+      ? `https://vidsrc.to/embed/movie/${id}`
+      : `https://vidsrc.to/embed/tv/${id}/${selectedSeason}/${selectedEpisode}`;
+    
+    setIsPlayerOpen(true);
+    
+    const playerContainer = document.createElement('div');
+    playerContainer.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
+    
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '×';
+    closeButton.className = 'absolute top-4 right-4 text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 z-10 focus:outline-none';
+    closeButton.onclick = () => {
+      document.body.removeChild(playerContainer);
+      setIsPlayerOpen(false);
+    };
+    
+    const iframe = document.createElement('iframe');
+    iframe.src = vidsrcUrl;
+    iframe.className = 'w-full h-full';
+    iframe.allowFullscreen = true;
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'absolute inset-0 flex items-center justify-center bg-black/80';
+    loadingIndicator.innerHTML = '<div class="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>';
+    
+    playerContainer.appendChild(loadingIndicator);
+    playerContainer.appendChild(closeButton);
+    playerContainer.appendChild(iframe);
+    document.body.appendChild(playerContainer);
+    
+    iframe.onload = () => {
+      if (loadingIndicator.parentNode === playerContainer) {
+        playerContainer.removeChild(loadingIndicator);
+      }
+    };
+    
     iframe.focus();
   };
 
@@ -140,6 +193,64 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     );
   };
 
+  const renderSeasonSelector = () => {
+    if (!seasons || seasons.length === 0 || mediaType !== 'tv') return null;
+    
+    return (
+      <div className="mt-4">
+        <h4 className="text-sm font-medium mb-2">Episodes:</h4>
+        <Tabs defaultValue="season" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-800">
+            <TabsTrigger value="season">Season</TabsTrigger>
+            <TabsTrigger value="episode">Episode</TabsTrigger>
+          </TabsList>
+          <TabsContent value="season" className="bg-gray-900 rounded-b-lg p-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+              {seasons.map((season) => (
+                <Button
+                  key={season.season_number}
+                  variant="outline" 
+                  size="sm"
+                  className={`flex items-center justify-between ${
+                    selectedSeason === season.season_number 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-800 hover:bg-gray-700'
+                  }`}
+                  onClick={() => {
+                    setSelectedSeason(season.season_number);
+                    setSelectedEpisode(1);
+                  }}
+                >
+                  <span>{season.name}</span>
+                  <span className="text-xs opacity-70">({season.episode_count})</span>
+                </Button>
+              ))}
+            </div>
+          </TabsContent>
+          <TabsContent value="episode" className="bg-gray-900 rounded-b-lg p-3">
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-48 overflow-y-auto">
+              {generateEpisodeNumbers().map((epNum) => (
+                <Button
+                  key={epNum}
+                  variant="outline"
+                  size="sm"
+                  className={`${
+                    selectedEpisode === epNum 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-800 hover:bg-gray-700'
+                  }`}
+                  onClick={() => setSelectedEpisode(epNum)}
+                >
+                  {epNum}
+                </Button>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2 items-center">
@@ -154,6 +265,11 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
         >
           <Wifi className="mr-2 h-4 w-4" />
           Live Stream
+          {mediaType === 'tv' && (
+            <span className="ml-2 text-xs bg-gray-800 px-2 py-0.5 rounded">
+              S{selectedSeason}:E{selectedEpisode}
+            </span>
+          )}
         </Button>
         
         <Button
@@ -161,43 +277,21 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
           className="bg-red-600 hover:bg-red-700 text-white border-red-700 
             focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
             transition-all duration-200 hover:scale-105"
-          onClick={() => {
-            const vidsrcUrl = mediaType === 'movie'
-              ? `https://vidsrc.to/embed/movie/${id}`
-              : `https://vidsrc.to/embed/tv/${id}${seasons && seasons.length > 0 ? `/1/1` : ''}`;
-            
-            setIsPlayerOpen(true);
-            
-            const playerContainer = document.createElement('div');
-            playerContainer.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
-            
-            const closeButton = document.createElement('button');
-            closeButton.innerHTML = '×';
-            closeButton.className = 'absolute top-4 right-4 text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 z-10 focus:outline-none';
-            closeButton.onclick = () => {
-              document.body.removeChild(playerContainer);
-              setIsPlayerOpen(false);
-            };
-            
-            const iframe = document.createElement('iframe');
-            iframe.src = vidsrcUrl;
-            iframe.className = 'w-full h-full';
-            iframe.allowFullscreen = true;
-            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-            
-            playerContainer.appendChild(closeButton);
-            playerContainer.appendChild(iframe);
-            document.body.appendChild(playerContainer);
-            
-            iframe.focus();
-          }}
+          onClick={handleAlternativeStreamClick}
           aria-label="Alternative Stream"
           disabled={isPlayerOpen}
         >
           <Film className="mr-2 h-4 w-4" />
           Alternative Stream
+          {mediaType === 'tv' && (
+            <span className="ml-2 text-xs bg-gray-800 px-2 py-0.5 rounded">
+              S{selectedSeason}:E{selectedEpisode}
+            </span>
+          )}
         </Button>
       </div>
+
+      {mediaType === 'tv' && seasons && seasons.length > 0 && renderSeasonSelector()}
       
       {streamingProviders.length > 0 && (
         <div>
