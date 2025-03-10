@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
-import { Loader2, Wifi } from "lucide-react";
+import { Loader2, Wifi, Film } from "lucide-react";
 import { memo, useState } from "react";
 
 interface StreamingButtonsProps {
@@ -54,20 +54,35 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
       setIsPlayerOpen(false);
     };
     
-    // Create iframe for the player
+    // Create iframe for the player using 2embed.org API (alternative to flicky.host)
+    // The ID formats match TMDB IDs so we can use them directly
     const streamUrl = mediaType === 'movie' 
-      ? `https://flicky.host/embed/movie/?id=${id}`
-      : `https://flicky.host/embed/tv/?id=${id}${seasons && seasons.length > 0 ? `&s=${seasons[0].season_number}&e=1` : ''}`;
+      ? `https://2embed.org/embed/movie?tmdb=${id}`
+      : `https://2embed.org/embed/series?tmdb=${id}${seasons && seasons.length > 0 ? `&s=${seasons[0].season_number}&e=1` : ''}`;
     
     const iframe = document.createElement('iframe');
     iframe.src = streamUrl;
     iframe.className = 'w-full h-full';
     iframe.allowFullscreen = true;
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    
+    // Create a loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'absolute inset-0 flex items-center justify-center bg-black/80';
+    loadingIndicator.innerHTML = '<div class="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>';
     
     // Add elements to the DOM
+    playerContainer.appendChild(loadingIndicator);
     playerContainer.appendChild(closeButton);
     playerContainer.appendChild(iframe);
     document.body.appendChild(playerContainer);
+    
+    // Remove loading indicator once iframe is loaded
+    iframe.onload = () => {
+      if (loadingIndicator.parentNode === playerContainer) {
+        playerContainer.removeChild(loadingIndicator);
+      }
+    };
     
     // Force focus to iframe for better keyboard control
     iframe.focus();
@@ -139,6 +154,48 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
         >
           <Wifi className="mr-2 h-4 w-4" />
           Live Stream
+        </Button>
+        
+        <Button
+          variant="outline"
+          className="bg-red-600 hover:bg-red-700 text-white border-red-700 
+            focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
+            transition-all duration-200 hover:scale-105"
+          onClick={() => {
+            const vidsrcUrl = mediaType === 'movie'
+              ? `https://vidsrc.to/embed/movie/${id}`
+              : `https://vidsrc.to/embed/tv/${id}${seasons && seasons.length > 0 ? `/1/1` : ''}`;
+            
+            setIsPlayerOpen(true);
+            
+            const playerContainer = document.createElement('div');
+            playerContainer.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
+            
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '×';
+            closeButton.className = 'absolute top-4 right-4 text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 z-10 focus:outline-none';
+            closeButton.onclick = () => {
+              document.body.removeChild(playerContainer);
+              setIsPlayerOpen(false);
+            };
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = vidsrcUrl;
+            iframe.className = 'w-full h-full';
+            iframe.allowFullscreen = true;
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            
+            playerContainer.appendChild(closeButton);
+            playerContainer.appendChild(iframe);
+            document.body.appendChild(playerContainer);
+            
+            iframe.focus();
+          }}
+          aria-label="Alternative Stream"
+          disabled={isPlayerOpen}
+        >
+          <Film className="mr-2 h-4 w-4" />
+          Alternative Stream
         </Button>
       </div>
       
