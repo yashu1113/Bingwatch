@@ -9,7 +9,7 @@ import { getTrending } from '@/services/tmdb';
 import { MediaCard } from './MediaCard';
 import { LoadingGrid } from './LoadingGrid';
 import { Button } from './ui/button';
-import { Plus, Check, Play, Star, Calendar, Clock } from 'lucide-react';
+import { Play, Calendar, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useToast } from '@/hooks/use-toast';
@@ -39,32 +39,7 @@ export const TrendingSlider = () => {
     );
   }
 
-  const handleWatchlistToggle = (e: React.MouseEvent, item: any) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const isInList = isInWatchlist(item.id);
-    
-    if (isInList) {
-      removeFromWatchlist(item.id);
-      toast({
-        title: "Removed from Watchlist",
-        description: `${item.title || item.name} has been removed from your watchlist`,
-      });
-    } else {
-      addToWatchlist({
-        id: item.id,
-        title: item.title || item.name,
-        posterPath: item.poster_path,
-        mediaType: item.media_type || 'movie',
-      });
-      toast({
-        title: "Added to Watchlist",
-        description: `${item.title || item.name} has been added to your watchlist`,
-      });
-    }
-  };
-
+  // Make Trending section hover simpler: similar to UpcomingMovies card
   return (
     <div className="relative w-full">
       <Suspense fallback={<LoadingGrid count={5} />}>
@@ -91,18 +66,6 @@ export const TrendingSlider = () => {
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
-                {/* Regular MediaCard without its hover effect - we'll override it */}
-                <div className={`${hoveredIndex === index ? 'invisible' : 'visible'}`}>
-                  <MediaCard
-                    id={item.id}
-                    title={item.title || item.name || ''}
-                    posterPath={item.poster_path}
-                    mediaType={item.media_type || 'movie'}
-                    releaseDate={item.release_date || item.first_air_date}
-                    voteAverage={item.vote_average}
-                  />
-                </div>
-                
                 {/* Number indicator */}
                 <div className="absolute bottom-1 left-1 z-10">
                   <span 
@@ -114,67 +77,47 @@ export const TrendingSlider = () => {
                     {index + 1}
                   </span>
                 </div>
-                
-                {/* Custom hover overlay with enhanced design */}
+                {/* Main card */}
+                <div className={`${hoveredIndex === index ? 'opacity-0' : 'opacity-100'}`}>
+                  <MediaCard
+                    id={item.id}
+                    title={item.title || item.name || ''}
+                    posterPath={item.poster_path}
+                    mediaType={item.media_type || 'movie'}
+                    releaseDate={item.release_date || item.first_air_date}
+                    voteAverage={item.vote_average}
+                  />
+                </div>
+                {/* Custom hover overlay just like UpcomingMovies/Coming Soon */}
                 {hoveredIndex === index && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/85 to-black/75 rounded-lg overflow-hidden shadow-2xl flex flex-col justify-between p-4 z-20 animate-fade-in">
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-bold text-white line-clamp-2">{item.title || item.name}</h3>
-                      
-                      <div className="flex items-center gap-2 flex-wrap text-white/80 text-xs">
-                        <div className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          <span>{new Date(item.release_date || item.first_air_date || '').getFullYear()}</span>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <Star className="h-3 w-3 mr-1 text-yellow-400" />
-                          <span>{item.vote_average?.toFixed(1) || 'N/A'}</span>
-                        </div>
-                        
-                        {item.media_type === 'movie' && (
-                          <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1" />
-                            <span>2h 6m</span>
-                          </div>
-                        )}
-                        
-                        <span className="border border-white/20 px-1 py-0.5 text-xs rounded">
-                          {item.media_type === 'movie' ? 'Movie' : 'TV Show'}
+                  <div className="absolute inset-0 rounded-lg bg-black/95 flex flex-col items-center justify-center text-center p-4 z-20 animate-fade-in shadow-2xl gap-3">
+                    <img 
+                      src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                      alt={item.title || item.name}
+                      className="w-2/3 mx-auto aspect-[2/3] object-cover rounded-lg mb-4 shadow-lg"
+                    />
+                    <h3 className="text-lg font-bold text-white line-clamp-2 mb-1">{item.title || item.name}</h3>
+                    <div className="flex items-center justify-center gap-3 text-white/90 text-sm mb-1">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        <span>
+                          {(item.release_date || item.first_air_date) ? 
+                            new Date(item.release_date || item.first_air_date).getFullYear() : 'N/A'}
                         </span>
                       </div>
-                    </div>
-                    
-                    <div className="space-y-3 mt-2">
-                      <p className="line-clamp-3 text-xs text-white/70">
-                        {item.overview || "No description available."}
-                      </p>
-                      
-                      <div className="flex gap-2">
-                        <Button 
-                          asChild
-                          size="sm"
-                          className="flex-1 bg-netflix-red hover:bg-netflix-red/90 text-white font-medium"
-                        >
-                          <Link to={`/${item.media_type || 'movie'}/${item.id}`}>
-                            <Play className="h-3.5 w-3.5 mr-1" /> Watch Now
-                          </Link>
-                        </Button>
-                        
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="bg-gray-800/80 border-gray-700 hover:bg-gray-700/80"
-                          onClick={(e) => handleWatchlistToggle(e, item)}
-                        >
-                          {isInWatchlist(item.id) ? (
-                            <Check className="h-4 w-4 text-green-400" />
-                          ) : (
-                            <Plus className="h-4 w-4 text-white" />
-                          )}
-                        </Button>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-yellow-400" />
+                        <span>{item.vote_average?.toFixed(1) || 'N/A'}</span>
                       </div>
                     </div>
+                    <Button
+                      asChild
+                      className="w-full max-w-xs mt-2 bg-netflix-red hover:bg-netflix-red/90 text-white font-bold"
+                    >
+                      <Link to={`/${item.media_type || 'movie'}/${item.id}`}>
+                        <Play className="h-4 w-4 mr-2 inline" /> Watch Now
+                      </Link>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -185,3 +128,4 @@ export const TrendingSlider = () => {
     </div>
   );
 };
+
