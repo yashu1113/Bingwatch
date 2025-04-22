@@ -59,10 +59,18 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
 
   const handleLiveStreamClick = () => {
     setIsPlayerOpen(true);
-    
+
+    let streamUrl = "";
+
+    if (mediaType === "movie") {
+      streamUrl = `https://letsembed.cc/embed/movie/?id=${id}&server=mystream`;
+    } else {
+      streamUrl = `https://letsembed.cc/embed/tv/?id=${id}/${selectedSeason}/${selectedEpisode}&server=mystream`;
+    }
+
     const playerContainer = document.createElement('div');
     playerContainer.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
-    
+
     const closeButton = document.createElement('button');
     closeButton.innerHTML = '×';
     closeButton.className = 'absolute top-4 right-4 text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 z-10 focus:outline-none';
@@ -70,32 +78,28 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
       document.body.removeChild(playerContainer);
       setIsPlayerOpen(false);
     };
-    
-    const streamUrl = mediaType === 'movie' 
-      ? `https://2embed.org/embed/movie?tmdb=${id}`
-      : `https://2embed.org/embed/series?tmdb=${id}&s=${selectedSeason}&e=${selectedEpisode}`;
-    
+
     const iframe = document.createElement('iframe');
     iframe.src = streamUrl;
     iframe.className = 'w-full h-full';
-    iframe.allowFullscreen = true;
+    iframe.setAttribute('allowfullscreen', 'true');
     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-    
+
     const loadingIndicator = document.createElement('div');
     loadingIndicator.className = 'absolute inset-0 flex items-center justify-center bg-black/80';
     loadingIndicator.innerHTML = '<div class="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>';
-    
+
     playerContainer.appendChild(loadingIndicator);
     playerContainer.appendChild(closeButton);
     playerContainer.appendChild(iframe);
     document.body.appendChild(playerContainer);
-    
+
     iframe.onload = () => {
       if (loadingIndicator.parentNode === playerContainer) {
         playerContainer.removeChild(loadingIndicator);
       }
     };
-    
+
     iframe.focus();
   };
 
