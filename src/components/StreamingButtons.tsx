@@ -10,6 +10,7 @@ import {
   TabsContent 
 } from "@/components/ui/tabs";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
@@ -48,6 +49,8 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [showSeasonSelector, setShowSeasonSelector] = useState(false);
   const [showEpisodeSelector, setShowEpisodeSelector] = useState(false);
+  const [selectedLang, setSelectedLang] = useState<string>('en');
+  const { toast } = useToast();
 
   const { data: providers, isLoading } = useQuery({
     queryKey: ['watch-providers', mediaType, id],
@@ -72,15 +75,24 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
   const handleLiveStreamClick = () => {
     setIsPlayerOpen(true);
 
+    let seasonPath = "";
+    let episodePath = "";
+    if (mediaType === "tv") {
+      seasonPath = `/${selectedSeason}`;
+      episodePath = `/${selectedEpisode}`;
+    }
+    let langParam = selectedLang !== "en" ? `&lang=${selectedLang}` : "";
     let streamUrl = "";
     if (mediaType === "movie") {
-      streamUrl = `https://letsembed.cc/embed/movie/?id=${id}&server=mystream`;
+      streamUrl = `https://letsembed.cc/embed/movie/?id=${id}&server=mystream${langParam}`;
     } else {
-      streamUrl = `https://letsembed.cc/embed/tv/?id=${id}/${selectedSeason}/${selectedEpisode}&server=mystream`;
+      streamUrl = `https://letsembed.cc/embed/tv/?id=${id}${seasonPath}${episodePath}&server=mystream${langParam}`;
     }
 
     const playerContainer = document.createElement('div');
     playerContainer.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
+    playerContainer.style.position = "fixed";
+    playerContainer.style.zIndex = "99999";
 
     const closeButton = document.createElement('button');
     closeButton.innerHTML = '×';
@@ -90,9 +102,45 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
       setIsPlayerOpen(false);
     };
 
+    let langSelectWrapper: HTMLDivElement | null = null;
+    if (availableLangs.length > 1) {
+      langSelectWrapper = document.createElement('div');
+      langSelectWrapper.className = "absolute top-4 left-4 z-10 bg-gray-900/90 px-4 py-2 rounded shadow-lg flex items-center gap-2";
+      const label = document.createElement('span');
+      label.textContent = "Language:";
+      label.className = "text-white text-sm";
+      langSelectWrapper.appendChild(label);
+
+      const langSelect = document.createElement('select');
+      langSelect.className = "bg-gray-800 text-white px-2 py-1 rounded outline-none text-sm";
+      availableLangs.forEach(lang => {
+        const option = document.createElement('option');
+        option.value = lang;
+        option.text = getLanguageLabel(lang);
+        langSelect.appendChild(option);
+      });
+      langSelect.value = selectedLang;
+
+      langSelect.onchange = (e) => {
+        const lang = (e.target as HTMLSelectElement).value;
+        setSelectedLang(lang);
+        let newLangParam = lang !== "en" ? `&lang=${lang}` : "";
+        let newSrc = "";
+        if (mediaType === "movie") {
+          newSrc = `https://letsembed.cc/embed/movie/?id=${id}&server=mystream${newLangParam}`;
+        } else {
+          newSrc = `https://letsembed.cc/embed/tv/?id=${id}${seasonPath}${episodePath}&server=mystream${newLangParam}`;
+        }
+        iframe.src = newSrc;
+      };
+
+      langSelectWrapper.appendChild(langSelect);
+      playerContainer.appendChild(langSelectWrapper);
+    }
+
     const iframe = document.createElement('iframe');
     iframe.src = streamUrl;
-    iframe.className = 'w-full h-full';
+    iframe.className = 'w-full h-full rounded-lg bg-black';
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
 
@@ -115,15 +163,23 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
   };
 
   const handleAlternativeStreamClick = () => {
+    setIsPlayerOpen(true);
+
+    let seasonPath = "";
+    let episodePath = "";
+    if (mediaType === "tv") {
+      seasonPath = `/${selectedSeason}`;
+      episodePath = `/${selectedEpisode}`;
+    }
     const vidsrcUrl = mediaType === 'movie'
       ? `https://vidsrc.to/embed/movie/${id}`
-      : `https://vidsrc.to/embed/tv/${id}/${selectedSeason}/${selectedEpisode}`;
-    
-    setIsPlayerOpen(true);
-    
+      : `https://vidsrc.to/embed/tv/${id}${seasonPath}${episodePath}`;
+      
     const playerContainer = document.createElement('div');
     playerContainer.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
-    
+    playerContainer.style.position = "fixed";
+    playerContainer.style.zIndex = "99999";
+
     const closeButton = document.createElement('button');
     closeButton.innerHTML = '×';
     closeButton.className = 'absolute top-4 right-4 text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 z-10 focus:outline-none';
@@ -131,28 +187,28 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
       document.body.removeChild(playerContainer);
       setIsPlayerOpen(false);
     };
-    
+
     const iframe = document.createElement('iframe');
     iframe.src = vidsrcUrl;
-    iframe.className = 'w-full h-full';
-    iframe.allowFullscreen = true;
+    iframe.className = 'w-full h-full rounded-lg bg-black';
+    iframe.setAttribute('allowfullscreen', 'true');
     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-    
+
     const loadingIndicator = document.createElement('div');
     loadingIndicator.className = 'absolute inset-0 flex items-center justify-center bg-black/80';
     loadingIndicator.innerHTML = '<div class="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>';
-    
+
     playerContainer.appendChild(loadingIndicator);
     playerContainer.appendChild(closeButton);
     playerContainer.appendChild(iframe);
     document.body.appendChild(playerContainer);
-    
+
     iframe.onload = () => {
       if (loadingIndicator.parentNode === playerContainer) {
         playerContainer.removeChild(loadingIndicator);
       }
     };
-    
+
     iframe.focus();
   };
 
@@ -162,8 +218,18 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
   };
 
   const handleDownloadClick = () => {
-    window.open(`https://dl.letsembed.cc/?id=${id}`, "_blank", "noopener,noreferrer");
+    if (mediaType === "movie") {
+      window.open(`https://dl.letsembed.cc/?id=${id}`, "_blank", "noopener,noreferrer");
+    } else {
+      toast({
+        title: "Download Not Available",
+        description: "You can only download movies.",
+        variant: "destructive"
+      });
+    }
   };
+
+  const availableLangs = SUPPORTED_LANGUAGES.map(l => l.code);
 
   if (isLoading) {
     return (

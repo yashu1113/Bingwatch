@@ -1,4 +1,3 @@
-
 import React, { Suspense, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
@@ -39,7 +38,6 @@ export const TrendingSlider = () => {
     );
   }
 
-  // Make Trending section hover simpler: similar to UpcomingMovies card
   return (
     <div className="relative w-full">
       <Suspense fallback={<LoadingGrid count={5} />}>
@@ -66,7 +64,6 @@ export const TrendingSlider = () => {
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
-                {/* Number indicator */}
                 <div className="absolute bottom-1 left-1 z-10">
                   <span 
                     className="text-6xl md:text-7xl font-bold text-white opacity-90 text-shadow-lg"
@@ -77,7 +74,6 @@ export const TrendingSlider = () => {
                     {index + 1}
                   </span>
                 </div>
-                {/* Main card */}
                 <div className={`${hoveredIndex === index ? 'opacity-0' : 'opacity-100'}`}>
                   <MediaCard
                     id={item.id}
@@ -88,7 +84,6 @@ export const TrendingSlider = () => {
                     voteAverage={item.vote_average}
                   />
                 </div>
-                {/* Custom hover overlay just like UpcomingMovies/Coming Soon */}
                 {hoveredIndex === index && (
                   <div className="absolute inset-0 rounded-lg bg-black/95 flex flex-col items-center justify-center text-center p-4 z-20 animate-fade-in shadow-2xl gap-3">
                     <img 
@@ -128,4 +123,3 @@ export const TrendingSlider = () => {
     </div>
   );
 };
-
