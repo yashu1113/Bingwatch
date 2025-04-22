@@ -9,6 +9,7 @@ import {
   TabsTrigger, 
   TabsContent 
 } from "@/components/ui/tabs";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
@@ -16,6 +17,17 @@ interface StreamingButtonsProps {
   isInTheaters?: boolean;
   seasons?: { season_number: number; name: string; episode_count: number }[];
 }
+
+const SUPPORTED_LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "Hindi" },
+  { code: "ta", label: "Tamil" },
+  { code: "te", label: "Telugu" },
+  { code: "bn", label: "Bengali" }
+];
+
+const getLanguageLabel = (lang: string) =>
+  SUPPORTED_LANGUAGES.find(lng => lng.code === lang)?.label || "English";
 
 const getProviderColor = (providerName: string): string => {
   const name = providerName.toLowerCase();
@@ -36,7 +48,8 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [showSeasonSelector, setShowSeasonSelector] = useState(false);
   const [showEpisodeSelector, setShowEpisodeSelector] = useState(false);
-  
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
+
   const { data: providers, isLoading } = useQuery({
     queryKey: ['watch-providers', mediaType, id],
     queryFn: () => getWatchProviders(mediaType, id),
@@ -57,15 +70,18 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     return Array.from({ length: count }, (_, i) => i + 1);
   };
 
+  const getEmbedLangParam = () => {
+    return `&lang=${selectedLanguage}`;
+  };
+
   const handleLiveStreamClick = () => {
     setIsPlayerOpen(true);
 
     let streamUrl = "";
-
     if (mediaType === "movie") {
-      streamUrl = `https://letsembed.cc/embed/movie/?id=${id}&server=mystream`;
+      streamUrl = `https://letsembed.cc/embed/movie/?id=${id}&server=mystream${getEmbedLangParam()}`;
     } else {
-      streamUrl = `https://letsembed.cc/embed/tv/?id=${id}/${selectedSeason}/${selectedEpisode}&server=mystream`;
+      streamUrl = `https://letsembed.cc/embed/tv/?id=${id}/${selectedSeason}/${selectedEpisode}&server=mystream${getEmbedLangParam()}`;
     }
 
     const playerContainer = document.createElement('div');
@@ -148,6 +164,11 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
   const handleStreamingClick = (url: string) => {
     const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
     window.open(formattedUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleDownloadClick = () => {
+    let downloadUrl = `https://letsembed.cc/embed/movie/?id=${id}&server=mystream${getEmbedLangParam()}`;
+    window.open(downloadUrl, "_blank", "noopener,noreferrer");
   };
 
   if (isLoading) {
@@ -257,6 +278,35 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-3 mb-2">
+        <label htmlFor="language-select" className="text-sm text-gray-200">Audio Language:</label>
+        <Select value={selectedLanguage} onValueChange={val => setSelectedLanguage(val)}>
+          <SelectTrigger
+            id="language-select"
+            className="w-36 bg-gray-900 border-gray-700 text-gray-200"
+          >
+            <SelectValue>{getLanguageLabel(selectedLanguage)}</SelectValue>
+          </SelectTrigger>
+          <SelectContent className="z-50 bg-gray-900 text-white">
+            {SUPPORTED_LANGUAGES.map(lang => (
+              <SelectItem key={lang.code} value={lang.code} className="hover:bg-gray-800">{lang.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {mediaType === 'movie' && (
+          <Button
+            variant="outline"
+            className="bg-green-700 hover:bg-green-800 text-white border-green-800 transition-all duration-200 hover:scale-105"
+            onClick={handleDownloadClick}
+            aria-label="Download"
+          >
+            <span className="mr-2">
+              <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" strokeLinejoin="round" strokeLinecap="round"/></svg>
+            </span>
+            Download
+          </Button>
+        )}
+      </div>
       <div className="flex flex-wrap gap-2 items-center">
         <Button
           variant="outline"
