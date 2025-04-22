@@ -102,42 +102,6 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
       setIsPlayerOpen(false);
     };
 
-    let langSelectWrapper: HTMLDivElement | null = null;
-    if (availableLangs.length > 1) {
-      langSelectWrapper = document.createElement('div');
-      langSelectWrapper.className = "absolute top-4 left-4 z-10 bg-gray-900/90 px-4 py-2 rounded shadow-lg flex items-center gap-2";
-      const label = document.createElement('span');
-      label.textContent = "Language:";
-      label.className = "text-white text-sm";
-      langSelectWrapper.appendChild(label);
-
-      const langSelect = document.createElement('select');
-      langSelect.className = "bg-gray-800 text-white px-2 py-1 rounded outline-none text-sm";
-      availableLangs.forEach(lang => {
-        const option = document.createElement('option');
-        option.value = lang;
-        option.text = getLanguageLabel(lang);
-        langSelect.appendChild(option);
-      });
-      langSelect.value = selectedLang;
-
-      langSelect.onchange = (e) => {
-        const lang = (e.target as HTMLSelectElement).value;
-        setSelectedLang(lang);
-        let newLangParam = lang !== "en" ? `&lang=${lang}` : "";
-        let newSrc = "";
-        if (mediaType === "movie") {
-          newSrc = `https://letsembed.cc/embed/movie/?id=${id}&server=mystream${newLangParam}`;
-        } else {
-          newSrc = `https://letsembed.cc/embed/tv/?id=${id}${seasonPath}${episodePath}&server=mystream${newLangParam}`;
-        }
-        iframe.src = newSrc;
-      };
-
-      langSelectWrapper.appendChild(langSelect);
-      playerContainer.appendChild(langSelectWrapper);
-    }
-
     const iframe = document.createElement('iframe');
     iframe.src = streamUrl;
     iframe.className = 'w-full h-full rounded-lg bg-black';
