@@ -16,9 +16,9 @@ const FEATURED_GENRES = [
 ];
 
 const Index = () => {
-  const { data: trendingAll, isLoading: trendingLoading } = useQuery({
-    queryKey: ['trending', 'all', 'week'],
-    queryFn: () => getTrending('all', 'week'),
+  const { data: indianContent, isLoading: indianLoading } = useQuery({
+    queryKey: ['indian-content', 'movie', 1],
+    queryFn: () => getIndianContent('movie', 1),
   });
 
   const { data: topRated, isLoading: topRatedLoading } = useQuery({
@@ -35,10 +35,10 @@ const Index = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-[#141414] text-white">
+    <div className="min-h-screen bg-gradient-to-b from-black via-[#141414] to-[#141414] text-white">
       <div className="-mt-16 relative">
-        {!trendingLoading && trendingAll?.results && (
-          <HeroSlider items={trendingAll.results.slice(0, 5)} />
+        {!indianLoading && indianContent?.results && (
+          <HeroSlider items={indianContent.results.slice(0, 5)} />
         )}
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#141414] to-transparent" />
       </div>
@@ -52,7 +52,7 @@ const Index = () => {
         
         {/* Trending Section */}
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold text-gray-100">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
             Trending Now
           </h2>
           <TrendingSlider />
@@ -60,7 +60,7 @@ const Index = () => {
 
         {/* Genres Section */}
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold text-gray-100">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
             Browse by Genre
           </h2>
           <GenreCarousel />
@@ -68,7 +68,7 @@ const Index = () => {
 
         {/* Top Rated Section */}
         <section className="space-y-6">
-          <h2 className="text-3xl font-bold text-gray-100">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
             Top Rated
           </h2>
           {topRatedLoading ? (
@@ -81,7 +81,7 @@ const Index = () => {
         {/* Genre-based Sections */}
         {genreQueries.map((query, index) => (
           <section key={index} className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-100">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
               {query.name} Movies
             </h2>
             {query.isLoading ? (
