@@ -94,26 +94,41 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     playerContainer.style.position = "fixed";
     playerContainer.style.zIndex = "99999";
 
+    const controlsContainer = document.createElement('div');
+    controlsContainer.className = 'absolute top-4 right-4 flex items-center gap-2 z-10';
+
+    const fullscreenButton = document.createElement('button');
+    fullscreenButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize-2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" x2="14" y1="3" y2="10"></line><line x1="3" x2="10" y1="21" y2="14"></line></svg>`;
+    fullscreenButton.className = 'text-white w-10 h-10 flex items-center justify-center rounded-full bg-gray-600 hover:bg-gray-700 focus:outline-none mr-2';
+    fullscreenButton.onclick = () => {
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      }
+    };
+
     const closeButton = document.createElement('button');
     closeButton.innerHTML = '×';
-    closeButton.className = 'absolute top-4 right-4 text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 z-10 focus:outline-none';
+    closeButton.className = 'text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 focus:outline-none';
     closeButton.onclick = () => {
       document.body.removeChild(playerContainer);
       setIsPlayerOpen(false);
     };
 
+    controlsContainer.appendChild(fullscreenButton);
+    controlsContainer.appendChild(closeButton);
+
     const iframe = document.createElement('iframe');
     iframe.src = streamUrl;
     iframe.className = 'w-full h-full rounded-lg bg-black';
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
 
     const loadingIndicator = document.createElement('div');
     loadingIndicator.className = 'absolute inset-0 flex items-center justify-center bg-black/80';
     loadingIndicator.innerHTML = '<div class="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>';
 
     playerContainer.appendChild(loadingIndicator);
-    playerContainer.appendChild(closeButton);
+    playerContainer.appendChild(controlsContainer);
     playerContainer.appendChild(iframe);
     document.body.appendChild(playerContainer);
 
@@ -144,26 +159,41 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     playerContainer.style.position = "fixed";
     playerContainer.style.zIndex = "99999";
 
+    const controlsContainer = document.createElement('div');
+    controlsContainer.className = 'absolute top-4 right-4 flex items-center gap-2 z-10';
+
+    const fullscreenButton = document.createElement('button');
+    fullscreenButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize-2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" x2="14" y1="3" y2="10"></line><line x1="3" x2="10" y1="21" y2="14"></line></svg>`;
+    fullscreenButton.className = 'text-white w-10 h-10 flex items-center justify-center rounded-full bg-gray-600 hover:bg-gray-700 focus:outline-none mr-2';
+    fullscreenButton.onclick = () => {
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      }
+    };
+
     const closeButton = document.createElement('button');
     closeButton.innerHTML = '×';
-    closeButton.className = 'absolute top-4 right-4 text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 z-10 focus:outline-none';
+    closeButton.className = 'text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 focus:outline-none';
     closeButton.onclick = () => {
       document.body.removeChild(playerContainer);
       setIsPlayerOpen(false);
     };
 
+    controlsContainer.appendChild(fullscreenButton);
+    controlsContainer.appendChild(closeButton);
+
     const iframe = document.createElement('iframe');
     iframe.src = vidsrcUrl;
     iframe.className = 'w-full h-full rounded-lg bg-black';
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
 
     const loadingIndicator = document.createElement('div');
     loadingIndicator.className = 'absolute inset-0 flex items-center justify-center bg-black/80';
     loadingIndicator.innerHTML = '<div class="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>';
 
     playerContainer.appendChild(loadingIndicator);
-    playerContainer.appendChild(closeButton);
+    playerContainer.appendChild(controlsContainer);
     playerContainer.appendChild(iframe);
     document.body.appendChild(playerContainer);
 
