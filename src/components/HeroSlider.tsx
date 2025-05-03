@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useWatchlist } from "@/contexts/WatchlistContext";
@@ -17,6 +18,7 @@ interface HeroSliderProps {
     name?: string;
     overview: string;
     backdrop_path: string;
+    poster_path?: string;
     media_type?: "movie" | "tv";
     release_date?: string;
     first_air_date?: string;
@@ -246,7 +248,8 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                 overview={item.overview}
                 mediaType={item.media_type || "movie"}
                 id={item.id}
-                onAddToWatchlist={() => handleAddToWatchlist(item)}
+                posterPath={item.poster_path || item.backdrop_path}
+                releaseDate={item.release_date || item.first_air_date}
               />
             </div>
           ))}
