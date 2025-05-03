@@ -1,3 +1,4 @@
+
 import React, { Suspense, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
@@ -8,7 +9,7 @@ import { getTrending } from '@/services/tmdb';
 import { MediaCard } from './MediaCard';
 import { LoadingGrid } from './LoadingGrid';
 import { Button } from './ui/button';
-import { Play, Calendar, Star } from 'lucide-react';
+import { Play, Plus, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +26,30 @@ export const TrendingSlider = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const { addToWatchlist, isInWatchlist, removeFromWatchlist } = useWatchlist();
   const { toast } = useToast();
+
+  const handleWatchlistToggle = (item: any) => {
+    const mediaType = item.media_type || 'movie';
+    const title = item.title || item.name || '';
+    
+    if (isInWatchlist(item.id)) {
+      removeFromWatchlist(item.id);
+      toast({
+        title: "Removed from Watchlist",
+        description: `${title} has been removed from your watchlist`,
+      });
+    } else {
+      addToWatchlist({
+        id: item.id,
+        title: title,
+        posterPath: item.poster_path,
+        mediaType: mediaType,
+      });
+      toast({
+        title: "Added to Watchlist",
+        description: `${title} has been added to your watchlist`,
+      });
+    }
+  };
 
   if (isLoading) {
     return <LoadingGrid count={5} />;
@@ -94,25 +119,43 @@ export const TrendingSlider = () => {
                     <h3 className="text-lg font-bold text-white line-clamp-2 mb-1">{item.title || item.name}</h3>
                     <div className="flex items-center justify-center gap-3 text-white/90 text-sm mb-1">
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4 mr-1" />
                         <span>
                           {(item.release_date || item.first_air_date) ? 
                             new Date(item.release_date || item.first_air_date).getFullYear() : 'N/A'}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-yellow-400" />
-                        <span>{item.vote_average?.toFixed(1) || 'N/A'}</span>
+                        <span>★ {item.vote_average?.toFixed(1) || 'N/A'}</span>
                       </div>
                     </div>
-                    <Button
-                      asChild
-                      className="w-full max-w-xs mt-2 bg-netflix-red hover:bg-netflix-red/90 text-white font-bold"
-                    >
-                      <Link to={`/${item.media_type || 'movie'}/${item.id}`}>
-                        <Play className="h-4 w-4 mr-2 inline" /> Watch Now
-                      </Link>
-                    </Button>
+                    <div className="flex flex-col w-full gap-2 mt-2">
+                      <Button
+                        asChild
+                        className="w-full bg-netflix-red hover:bg-netflix-red/90 text-white font-bold"
+                      >
+                        <Link to={`/${item.media_type || 'movie'}/${item.id}`}>
+                          <Play className="h-4 w-4 mr-2" /> Watch Now
+                        </Link>
+                      </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleWatchlistToggle(item);
+                        }}
+                        variant="outline"
+                        className="w-full border-white/50 text-white hover:bg-white/20"
+                      >
+                        {isInWatchlist(item.id) ? (
+                          <>
+                            <Check className="h-4 w-4 mr-2" /> In Watchlist
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4 mr-2" /> Add to Watchlist
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
