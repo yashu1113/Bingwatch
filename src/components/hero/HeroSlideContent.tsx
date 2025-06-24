@@ -26,7 +26,14 @@ export const HeroSlideContent = ({
   const { addToWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
 
+  const handleWatchNow = () => {
+    console.log('Watch Now clicked for:', title, 'ID:', id, 'Type:', mediaType);
+    navigate(`/${mediaType}/${id}`);
+  };
+
   const handleAddToWatchlist = () => {
+    console.log('Add to Watchlist clicked for:', title, 'ID:', id);
+    
     if (isInWatchlist(id)) {
       toast({
         title: "Already in Watchlist",
@@ -63,7 +70,7 @@ export const HeroSlideContent = ({
             <Button
               size="sm"
               className="gap-1 md:gap-2 bg-netflix-red hover:bg-netflix-red/90 text-xs md:text-base"
-              onClick={() => navigate(`/${mediaType}/${id}`)}
+              onClick={handleWatchNow}
             >
               <Play className="h-4 w-4" />
               Watch Now

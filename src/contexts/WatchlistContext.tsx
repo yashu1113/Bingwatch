@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "@/hooks/use-toast";
 
@@ -6,6 +7,7 @@ interface WatchlistItem {
   title: string;
   posterPath: string;
   mediaType: 'movie' | 'tv';
+  releaseDate?: string;
 }
 
 interface WatchlistContextType {
