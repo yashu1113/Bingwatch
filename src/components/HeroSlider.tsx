@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useWatchlist } from "@/contexts/WatchlistContext";
@@ -242,7 +241,7 @@ export const HeroSlider = ({ items }: HeroSliderProps) => {
                   onError={() => handleImageError(index)}
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent pointer-events-none" />
               <HeroSlideContent
                 title={item.title || item.name || ""}
                 overview={item.overview}

@@ -61,19 +61,19 @@ export const HeroSlideContent = ({
   };
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8 z-30">
+    <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8 z-50 pointer-events-none">
       <div className="container mx-auto">
         <div className="max-w-2xl space-y-2 md:space-y-4">
-          <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2">
+          <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white line-clamp-2 pointer-events-none">
             {title}
           </h2>
-          <p className="line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200">
+          <p className="line-clamp-2 text-xs md:text-sm lg:text-base text-gray-200 pointer-events-none">
             {overview}
           </p>
-          <div className="flex flex-wrap gap-2 md:gap-4 pt-2">
+          <div className="flex flex-wrap gap-2 md:gap-4 pt-2 pointer-events-auto">
             <Button
               size="sm"
-              className="gap-1 md:gap-2 bg-netflix-red hover:bg-netflix-red/90 text-xs md:text-base z-40 pointer-events-auto"
+              className="gap-1 md:gap-2 bg-netflix-red hover:bg-netflix-red/90 text-xs md:text-base relative z-50"
               onClick={handleWatchNow}
               type="button"
             >
@@ -83,7 +83,7 @@ export const HeroSlideContent = ({
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 md:h-10 font-semibold flex items-center justify-center hover:bg-white/20 z-40 pointer-events-auto"
+              className="gap-2 border-white text-white bg-transparent border-2 rounded-lg text-xs md:text-sm lg:text-base h-9 md:h-10 font-semibold flex items-center justify-center hover:bg-white/20 relative z-50"
               onClick={handleAddToWatchlist}
               type="button"
             >
