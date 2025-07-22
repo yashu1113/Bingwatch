@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getTrending, getTopRated, getMoviesByGenre, getIndianContent } from '@/services/tmdb';
 import { MovieCarousel } from '@/components/MovieCarousel';
-import { HeroSlider } from '@/components/HeroSlider';
+import { NewHeroSlider } from '@/components/NewHeroSlider';
 import { TrendingSlider } from '@/components/TrendingSlider';
 import { GenreCarousel } from '@/components/GenreCarousel';
 import { IndianSection } from '@/components/IndianSection';
@@ -38,7 +38,7 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-black via-[#141414] to-[#141414] text-white">
       <div className="-mt-16 relative">
         {!indianLoading && indianContent?.results && (
-          <HeroSlider items={indianContent.results.slice(0, 5)} />
+          <NewHeroSlider items={indianContent.results.slice(0, 5)} />
         )}
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#141414] to-transparent" />
       </div>
