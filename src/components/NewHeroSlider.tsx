@@ -99,25 +99,25 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
     <div className="relative w-full h-[80vh] lg:h-[90vh] overflow-hidden">
       {/* Background Images with smooth transition */}
       {limitedItems.map((item, index) => (
-        <div
+        <img
           key={item.id}
-          className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
-            index === currentIndex ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{
-            backgroundImage: `url(${getImageUrl(item.backdrop_path, 'original')})`
-          }}
+          src={getImageUrl(item.backdrop_path, 'original')}
+          alt={`${item.title || item.name} backdrop`}
+          className={`absolute inset-0 w-full h-full object-cover md:object-center object-[50%_30%] transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+          loading={index === currentIndex ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchPriority={index === currentIndex ? 'high' : 'low'}
         />
       ))}
       
       {/* Enhanced Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-background/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
       
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full transition-all duration-300 hover:scale-110"
         aria-label="Previous slide"
       >
         <ChevronLeft className="w-6 h-6" />
@@ -125,30 +125,30 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full transition-all duration-300 hover:scale-110"
         aria-label="Next slide"
       >
         <ChevronRight className="w-6 h-6" />
       </button>
       
       {/* Main Content */}
-      <div className="relative z-20 h-full flex items-center">
+      <div className="relative z-20 h-full flex items-end pb-20 md:pb-28">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="max-w-3xl space-y-6">
             {/* Title with animation */}
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white leading-tight animate-fade-in">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-foreground leading-tight animate-fade-in">
               {currentItem.title || currentItem.name}
             </h1>
             
             {/* Release Year */}
             {(currentItem.release_date || currentItem.first_air_date) && (
-              <div className="text-lg text-gray-300 font-medium">
+              <div className="text-lg text-foreground/70 font-medium">
                 {new Date(currentItem.release_date || currentItem.first_air_date || '').getFullYear()}
               </div>
             )}
             
             {/* Overview */}
-            <p className="text-base sm:text-lg lg:text-xl text-gray-100 line-clamp-3 leading-relaxed max-w-2xl">
+            <p className="text-base sm:text-lg lg:text-xl text-foreground/90 line-clamp-3 leading-relaxed max-w-2xl">
               {currentItem.overview}
             </p>
             
@@ -156,17 +156,17 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <Button
                 size="lg"
-                className="bg-white text-black hover:bg-gray-200 font-bold px-8 py-4 text-base sm:text-lg rounded-lg transition-all duration-300 hover:scale-105 shadow-xl"
+                className="px-8 py-4 text-base sm:text-lg rounded-xl shadow-lg hover-scale"
                 onClick={() => handleWatchNow(currentItem)}
               >
-                <Play className="mr-3 h-6 w-6 fill-black" />
+                <Play className="mr-3 h-6 w-6" />
                 Watch Now
               </Button>
               
               <Button
                 variant="outline"
                 size="lg"
-                className="border-2 border-white/60 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm font-bold px-8 py-4 text-base sm:text-lg rounded-lg transition-all duration-300 hover:scale-105 shadow-xl"
+                className="border border-border bg-background/30 text-foreground hover:bg-background/40 backdrop-blur-sm px-8 py-4 text-base sm:text-lg rounded-xl shadow-lg hover-scale"
                 onClick={() => handleAddToWatchlist(currentItem)}
               >
                 {isInWatchlist(currentItem.id) ? (
@@ -188,8 +188,8 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
             key={index}
             className={`transition-all duration-300 rounded-full ${
               index === currentIndex
-                ? "bg-white w-8 h-2"
-                : "bg-white/40 hover:bg-white/60 w-2 h-2"
+                ? "bg-foreground w-6 h-[6px]"
+                : "bg-foreground/50 hover:bg-foreground/70 w-2 h-2"
             }`}
             onClick={() => goToSlide(index)}
             aria-label={`Go to slide ${index + 1}`}
@@ -198,9 +198,9 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       </div>
       
       {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20 z-20">
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-foreground/20 z-20">
         <div 
-          className="h-full bg-red-600 transition-all duration-300"
+          className="h-full bg-primary transition-all duration-300"
           style={{ 
             width: `${((currentIndex + 1) / limitedItems.length) * 100}%` 
           }}
