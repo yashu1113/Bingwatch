@@ -98,12 +98,13 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   return (
     <div className="relative w-full h-[80vh] lg:h-[90vh] overflow-hidden">
       {/* Background Images with smooth transition */}
+      <div className="absolute inset-0 bg-background" />
       {limitedItems.map((item, index) => (
         <img
           key={item.id}
           src={getImageUrl(item.backdrop_path, 'original')}
           alt={`${item.title || item.name} backdrop`}
-          className={`absolute inset-0 w-full h-full object-cover md:object-center object-[50%_30%] transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 w-full h-full object-contain object-center transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
           loading={index === currentIndex ? 'eager' : 'lazy'}
           decoding="async"
           fetchPriority={index === currentIndex ? 'high' : 'low'}
