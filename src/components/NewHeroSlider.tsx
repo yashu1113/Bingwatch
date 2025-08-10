@@ -153,7 +153,7 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
             </p>
             
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row gap-2 pt-3 sm:gap-3 sm:pt-4">
               <Button
                 size="lg"
                 className="px-8 py-4 text-base sm:text-lg rounded-xl shadow-lg hover-scale"
