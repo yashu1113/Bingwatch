@@ -44,19 +44,19 @@ const Index = () => {
       </div>
       
       <main className="container space-y-12 py-8">
-        {/* Indian Content Section - Moved to top */}
-        <IndianSection />
-
-        {/* Upcoming Indian Movies */}
-        <UpcomingMovies />
-        
-        {/* Trending Section */}
+        {/* Trending Section - Moved right after hero slider */}
         <section className="space-y-6">
           <h2 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
             Trending Now
           </h2>
           <TrendingSlider />
         </section>
+
+        {/* Indian Content Section */}
+        <IndianSection />
+
+        {/* Upcoming Indian Movies */}
+        <UpcomingMovies />
 
         {/* Genres Section */}
         <section className="space-y-6">
