@@ -25,7 +25,8 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [videoData, setVideoData] = useState<Record<number, any>>({});
   const [isMuted, setIsMuted] = useState(true);
-  const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
+  const [youtubeReady, setYoutubeReady] = useState(false);
+  const playerRefs = useRef<Record<number, any>>({});
   const navigate = useNavigate();
   const { addToWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
@@ -130,9 +131,14 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
-    const currentVideo = videoRefs.current[currentItem.id];
-    if (currentVideo) {
-      currentVideo.muted = !isMuted;
+    // Update the iframe src to toggle mute parameter
+    const currentVideoElement = playerRefs.current[currentItem.id];
+    if (currentVideoElement) {
+      const hasTrailer = videoData[currentItem.id];
+      if (hasTrailer) {
+        const muteParam = isMuted ? 0 : 1;
+        currentVideoElement.src = `https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`;
+      }
     }
   };
 
@@ -142,16 +148,17 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       <div className="absolute inset-0 bg-background" />
       {limitedItems.map((item, index) => {
         const hasTrailer = videoData[item.id];
+        const muteParam = isMuted ? 1 : 0;
         return (
           <div key={item.id} className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}>
             {hasTrailer ? (
               <iframe
                 ref={(el) => {
                   if (el && index === currentIndex) {
-                    videoRefs.current[item.id] = el as any;
+                    playerRefs.current[item.id] = el;
                   }
                 }}
-                src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=1&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`}
+                src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`}
                 className="w-full h-full object-cover"
                 style={{ pointerEvents: 'none' }}
                 allow="autoplay; encrypted-media"
