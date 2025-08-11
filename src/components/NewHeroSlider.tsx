@@ -155,21 +155,19 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
             
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-2 pt-3 sm:gap-3 sm:pt-4">
-              <Button
-                size="lg"
-                className="px-8 py-4 text-base sm:text-lg rounded-xl shadow-lg hover-scale"
-                onClick={() => handleWatchNow(currentItem)}
-              >
-                <Play className="mr-3 h-6 w-6" />
-                Watch Now
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="lg"
-                className="border border-border bg-background/30 text-foreground hover:bg-background/40 backdrop-blur-sm px-8 py-4 text-base sm:text-lg rounded-xl shadow-lg hover-scale"
-                onClick={() => handleAddToWatchlist(currentItem)}
-              >
+            <Button
+              className="px-6 py-3 text-sm sm:text-base rounded-xl shadow-lg hover-scale"
+              onClick={() => handleWatchNow(currentItem)}
+            >
+              <Play className="mr-2 h-5 w-5" />
+              Watch Now
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="border border-border bg-background/30 text-foreground hover:bg-background/40 backdrop-blur-sm px-6 py-3 text-sm sm:text-base rounded-xl shadow-lg hover-scale"
+              onClick={() => handleAddToWatchlist(currentItem)}
+            >
                 {isInWatchlist(currentItem.id) ? (
                   <Check className="mr-3 h-6 w-6" />
                 ) : (
