@@ -74,25 +74,6 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
 
   const currentItem = limitedItems[currentIndex];
 
-  // Handle video play/pause based on current slide
-  useEffect(() => {
-    if (!currentItem) return;
-    
-    const currentVideo = videoRefs.current[currentItem.id];
-    if (currentVideo && videoData[currentItem.id]) {
-      currentVideo.play().catch(() => {
-        // Video failed to play, fallback to image
-      });
-    }
-
-    // Pause other videos
-    Object.entries(videoRefs.current).forEach(([id, video]) => {
-      if (video && parseInt(id) !== currentItem.id) {
-        video.pause();
-      }
-    });
-  }, [currentIndex, videoData, currentItem]);
-
   const handleWatchNow = (item: HeroSliderProps["items"][0]) => {
     const mediaType = item.media_type || "movie";
     const route = mediaType === "movie" ? `/movie/${item.id}` : `/tv/${item.id}`;
