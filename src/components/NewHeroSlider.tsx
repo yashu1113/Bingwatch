@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Play, Plus, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Plus, Check, ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useToast } from "@/hooks/use-toast";
-import { getImageUrl } from "@/services/tmdb";
+import { getImageUrl, getVideos } from "@/services/tmdb";
 
 interface HeroSliderProps {
   items: Array<{
@@ -23,11 +23,44 @@ interface HeroSliderProps {
 export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [videoData, setVideoData] = useState<Record<number, any>>({});
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
   const navigate = useNavigate();
   const { addToWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
 
   const limitedItems = items.slice(0, 5);
+
+  // Fetch video data for each item
+  useEffect(() => {
+    const fetchVideos = async () => {
+      const videoPromises = limitedItems.map(async (item) => {
+        try {
+          const mediaType = item.media_type || "movie";
+          const videos = await getVideos(mediaType, item.id);
+          const trailer = videos.results?.find((video: any) => 
+            video.type === "Trailer" && video.site === "YouTube"
+          );
+          return { id: item.id, trailer };
+        } catch (error) {
+          return { id: item.id, trailer: null };
+        }
+      });
+
+      const results = await Promise.all(videoPromises);
+      const videoMap = results.reduce((acc, { id, trailer }) => {
+        acc[id] = trailer;
+        return acc;
+      }, {} as Record<number, any>);
+      
+      setVideoData(videoMap);
+    };
+
+    if (limitedItems.length > 0) {
+      fetchVideos();
+    }
+  }, [limitedItems]);
 
   useEffect(() => {
     if (limitedItems.length === 0 || !isAutoPlaying) return;
@@ -38,6 +71,27 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
 
     return () => clearInterval(interval);
   }, [limitedItems.length, isAutoPlaying]);
+
+  const currentItem = limitedItems[currentIndex];
+
+  // Handle video play/pause based on current slide
+  useEffect(() => {
+    if (!currentItem) return;
+    
+    const currentVideo = videoRefs.current[currentItem.id];
+    if (currentVideo && videoData[currentItem.id]) {
+      currentVideo.play().catch(() => {
+        // Video failed to play, fallback to image
+      });
+    }
+
+    // Pause other videos
+    Object.entries(videoRefs.current).forEach(([id, video]) => {
+      if (video && parseInt(id) !== currentItem.id) {
+        video.pause();
+      }
+    });
+  }, [currentIndex, videoData, currentItem]);
 
   const handleWatchNow = (item: HeroSliderProps["items"][0]) => {
     const mediaType = item.media_type || "movie";
@@ -93,27 +147,63 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
     );
   }
 
-  const currentItem = limitedItems[currentIndex];
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    const currentVideo = videoRefs.current[currentItem.id];
+    if (currentVideo) {
+      currentVideo.muted = !isMuted;
+    }
+  };
 
   return (
     <div className="relative w-full h-[80vh] lg:h-[90vh] overflow-hidden">
-      {/* Background Images with smooth transition */}
+      {/* Background Media with smooth transition */}
       <div className="absolute inset-0 bg-background" />
-      {limitedItems.map((item, index) => (
-        <img
-          key={item.id}
-          src={getImageUrl(item.backdrop_path, 'original')}
-          alt={`${item.title || item.name} backdrop`}
-          className={`absolute inset-0 w-full h-full object-contain object-center transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
-          loading={index === currentIndex ? 'eager' : 'lazy'}
-          decoding="async"
-          fetchPriority={index === currentIndex ? 'high' : 'low'}
-        />
-      ))}
+      {limitedItems.map((item, index) => {
+        const hasTrailer = videoData[item.id];
+        return (
+          <div key={item.id} className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}>
+            {hasTrailer ? (
+              <iframe
+                ref={(el) => {
+                  if (el && index === currentIndex) {
+                    videoRefs.current[item.id] = el as any;
+                  }
+                }}
+                src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=1&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`}
+                className="w-full h-full object-cover"
+                style={{ pointerEvents: 'none' }}
+                allow="autoplay; encrypted-media"
+                loading={index === currentIndex ? 'eager' : 'lazy'}
+              />
+            ) : (
+              <img
+                src={getImageUrl(item.backdrop_path, 'original')}
+                alt={`${item.title || item.name} backdrop`}
+                className="w-full h-full object-contain object-center"
+                loading={index === currentIndex ? 'eager' : 'lazy'}
+                decoding="async"
+                fetchPriority={index === currentIndex ? 'high' : 'low'}
+              />
+            )}
+          </div>
+        );
+      })}
       
       {/* Enhanced Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-background/20" />
       <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+      
+      {/* Mute/Unmute Button */}
+      {videoData[currentItem.id] && (
+        <button
+          onClick={toggleMute}
+          className="absolute top-4 right-4 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full transition-all duration-300 hover:scale-110"
+          aria-label={isMuted ? "Unmute" : "Mute"}
+        >
+          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+        </button>
+      )}
       
       {/* Navigation Arrows */}
       <button
@@ -153,25 +243,25 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
               {currentItem.overview}
             </p>
             
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 pt-3 sm:gap-3 sm:pt-4">
-            <Button
-              className="px-6 py-3 text-sm sm:text-base rounded-xl shadow-lg hover-scale"
-              onClick={() => handleWatchNow(currentItem)}
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Watch Now
-            </Button>
-            
-            <Button
-              variant="outline"
-              className="border border-border bg-background/30 text-foreground hover:bg-background/40 backdrop-blur-sm px-6 py-3 text-sm sm:text-base rounded-xl shadow-lg hover-scale"
-              onClick={() => handleAddToWatchlist(currentItem)}
-            >
+            {/* Action Buttons - Removed spacing */}
+            <div className="flex flex-col sm:flex-row gap-0 pt-3">
+              <Button
+                className="px-6 py-3 text-sm sm:text-base rounded-l-xl sm:rounded-r-none rounded-r-xl shadow-lg hover-scale"
+                onClick={() => handleWatchNow(currentItem)}
+              >
+                <Play className="mr-2 h-5 w-5" />
+                Watch Now
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="border border-border bg-background/30 text-foreground hover:bg-background/40 backdrop-blur-sm px-6 py-3 text-sm sm:text-base rounded-r-xl sm:rounded-l-none rounded-l-xl sm:border-l-0 shadow-lg hover-scale"
+                onClick={() => handleAddToWatchlist(currentItem)}
+              >
                 {isInWatchlist(currentItem.id) ? (
-                  <Check className="mr-3 h-6 w-6" />
+                  <Check className="mr-2 h-5 w-5" />
                 ) : (
-                  <Plus className="mr-3 h-6 w-6" />
+                  <Plus className="mr-2 h-5 w-5" />
                 )}
                 {isInWatchlist(currentItem.id) ? "In Watchlist" : "Add to Watchlist"}
               </Button>
@@ -180,7 +270,7 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
         </div>
       </div>
       
-      {/* Slide Indicators - Smaller and more elegant */}
+      {/* Slide Indicators */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3 z-30">
         {limitedItems.map((_, index) => (
           <button

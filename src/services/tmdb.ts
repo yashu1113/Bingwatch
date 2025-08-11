@@ -216,6 +216,16 @@ export const getWatchProviders = async (mediaType: 'movie' | 'tv', id: number) =
   }
 };
 
+export const getVideos = async (mediaType: 'movie' | 'tv', id: number) => {
+  try {
+    const response = await tmdbApi.get(`/${mediaType}/${id}/videos`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching videos:', error);
+    throw error;
+  }
+};
+
 export const getRecommendations = async (id: number, mediaType: 'movie' | 'tv') => {
   try {
     const response = await tmdbApi.get(`/${mediaType}/${id}/recommendations`);
