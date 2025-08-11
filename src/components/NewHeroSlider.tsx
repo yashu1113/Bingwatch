@@ -25,7 +25,6 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [videoData, setVideoData] = useState<Record<number, any>>({});
   const [isMuted, setIsMuted] = useState(true);
-  const [youtubeReady, setYoutubeReady] = useState(false);
   const playerRefs = useRef<Record<number, any>>({});
   const navigate = useNavigate();
   const { addToWatchlist, isInWatchlist } = useWatchlist();
@@ -154,8 +153,10 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
             {hasTrailer ? (
               <iframe
                 ref={(el) => {
+                  console.log('Setting iframe ref for item:', item.id, 'element:', el);
                   if (el && index === currentIndex) {
                     playerRefs.current[item.id] = el;
+                    console.log('playerRefs updated for item:', item.id);
                   }
                 }}
                 src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`}
