@@ -129,13 +129,15 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   }
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    
     // Update the iframe src to toggle mute parameter
     const currentVideoElement = playerRefs.current[currentItem.id];
     if (currentVideoElement) {
       const hasTrailer = videoData[currentItem.id];
       if (hasTrailer) {
-        const muteParam = isMuted ? 0 : 1;
+        const muteParam = newMutedState ? 1 : 0;
         currentVideoElement.src = `https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`;
       }
     }
@@ -153,10 +155,8 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
             {hasTrailer ? (
               <iframe
                 ref={(el) => {
-                  console.log('Setting iframe ref for item:', item.id, 'element:', el);
                   if (el && index === currentIndex) {
                     playerRefs.current[item.id] = el;
-                    console.log('playerRefs updated for item:', item.id);
                   }
                 }}
                 src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`}
@@ -228,7 +228,7 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
             )}
             
             {/* Overview */}
-            <p className="text-base sm:text-lg lg:text-xl text-foreground/90 line-clamp-3 leading-relaxed max-w-2xl">
+            <p className="text-base sm:text-lg lg:text-xl text-foreground/90 line-clamp-4 sm:line-clamp-3 lg:line-clamp-4 leading-relaxed max-w-3xl">
               {currentItem.overview}
             </p>
             
