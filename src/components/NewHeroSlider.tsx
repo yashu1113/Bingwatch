@@ -24,7 +24,9 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [videoData, setVideoData] = useState<Record<number, any>>({});
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [playingTrailers, setPlayingTrailers] = useState<Record<number, boolean>>({});
+  const [hoverTimeouts, setHoverTimeouts] = useState<Record<number, NodeJS.Timeout>>({});
   const playerRefs = useRef<Record<number, any>>({});
   const navigate = useNavigate();
   const { addToWatchlist, isInWatchlist } = useWatchlist();
@@ -71,6 +73,25 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
 
     return () => clearInterval(interval);
   }, [limitedItems.length, isAutoPlaying]);
+
+  // Cleanup hover timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(hoverTimeouts).forEach(timeout => {
+        if (timeout) clearTimeout(timeout);
+      });
+    };
+  }, []);
+
+  // Clear playing trailers when slide changes
+  useEffect(() => {
+    setPlayingTrailers({});
+    // Clear any pending hover timeouts
+    Object.values(hoverTimeouts).forEach(timeout => {
+      if (timeout) clearTimeout(timeout);
+    });
+    setHoverTimeouts({});
+  }, [currentIndex]);
 
   const currentItem = limitedItems[currentIndex];
 
@@ -132,15 +153,49 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
     
-    // Update the iframe src to toggle mute parameter
-    const currentVideoElement = playerRefs.current[currentItem.id];
-    if (currentVideoElement) {
-      const hasTrailer = videoData[currentItem.id];
-      if (hasTrailer) {
-        const muteParam = newMutedState ? 1 : 0;
-        currentVideoElement.src = `https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`;
+    // Update all playing trailers with new mute state
+    Object.keys(playingTrailers).forEach(itemId => {
+      if (playingTrailers[parseInt(itemId)]) {
+        const videoElement = playerRefs.current[parseInt(itemId)];
+        if (videoElement) {
+          const hasTrailer = videoData[parseInt(itemId)];
+          if (hasTrailer) {
+            const muteParam = newMutedState ? 1 : 0;
+            videoElement.src = `https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1`;
+          }
+        }
       }
+    });
+  };
+
+  const handleMouseEnter = (itemId: number) => {
+    const timeout = setTimeout(() => {
+      if (videoData[itemId]) {
+        setPlayingTrailers(prev => ({ ...prev, [itemId]: true }));
+        setIsAutoPlaying(false);
+      }
+    }, 3000);
+    
+    setHoverTimeouts(prev => ({ ...prev, [itemId]: timeout }));
+  };
+
+  const handleMouseLeave = (itemId: number) => {
+    const timeout = hoverTimeouts[itemId];
+    if (timeout) {
+      clearTimeout(timeout);
+      setHoverTimeouts(prev => {
+        const newTimeouts = { ...prev };
+        delete newTimeouts[itemId];
+        return newTimeouts;
+      });
     }
+  };
+
+  const handleTrailerEnd = () => {
+    // Move to next slide after trailer ends
+    setCurrentIndex((prev) => (prev + 1) % limitedItems.length);
+    setPlayingTrailers({});
+    setIsAutoPlaying(true);
   };
 
   return (
@@ -149,27 +204,39 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       <div className="absolute inset-0 bg-background" />
       {limitedItems.map((item, index) => {
         const hasTrailer = videoData[item.id];
+        const isPlayingTrailer = playingTrailers[item.id];
         const muteParam = isMuted ? 1 : 0;
         return (
-          <div key={item.id} className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}>
-            {hasTrailer ? (
+          <div 
+            key={item.id} 
+            className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+            onMouseEnter={() => handleMouseEnter(item.id)}
+            onMouseLeave={() => handleMouseLeave(item.id)}
+          >
+            {hasTrailer && isPlayingTrailer && index === currentIndex ? (
               <iframe
                 ref={(el) => {
-                  if (el && index === currentIndex) {
+                  if (el) {
                     playerRefs.current[item.id] = el;
                   }
                 }}
-                src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`}
+                src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1`}
                 className="w-full h-full object-cover"
                 style={{ pointerEvents: 'none' }}
                 allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
                 loading={index === currentIndex ? 'eager' : 'lazy'}
+                onLoad={() => {
+                  // Set up listener for video end (simplified approach)
+                  setTimeout(() => {
+                    if (isPlayingTrailer) handleTrailerEnd();
+                  }, 30000); // Approximate trailer length
+                }}
               />
             ) : (
               <img
                 src={getImageUrl(item.backdrop_path, 'original')}
                 alt={`${item.title || item.name} backdrop`}
-                className="w-full h-full object-contain object-center"
+                className="w-full h-full object-cover object-center"
                 loading={index === currentIndex ? 'eager' : 'lazy'}
                 decoding="async"
                 fetchPriority={index === currentIndex ? 'high' : 'low'}
@@ -183,16 +250,14 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-background/20" />
       <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
       
-      {/* Mute/Unmute Button */}
-      {videoData[currentItem.id] && (
-        <button
-          onClick={toggleMute}
-          className="absolute top-4 right-4 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full transition-all duration-300 hover:scale-110"
-          aria-label={isMuted ? "Unmute" : "Mute"}
-        >
-          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-        </button>
-      )}
+      {/* Mute/Unmute Button - Always visible */}
+      <button
+        onClick={toggleMute}
+        className="absolute top-4 right-4 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full transition-all duration-300 hover:scale-110"
+        aria-label={isMuted ? "Unmute" : "Mute"}
+      >
+        {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+      </button>
       
       {/* Navigation Arrows */}
       <button
