@@ -12,7 +12,7 @@ export const SearchInput = ({ query, onChange, onSubmit }: SearchInputProps) => 
     <form onSubmit={onSubmit} className="relative">
       <Input
         type="search"
-        placeholder="Search movies, TV shows..."
+        placeholder="Search movies, TV shows... (typos OK!)"
         value={query}
         onChange={(e) => onChange(e.target.value)}
         className="w-full pl-12 pr-4 py-4 md:py-6 text-base md:text-lg rounded-xl 

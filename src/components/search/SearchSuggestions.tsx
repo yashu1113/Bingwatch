@@ -1,8 +1,8 @@
-import { SearchResult } from '@/types/search';
+import { FuzzySearchResult } from '@/services/fuzzySearch';
 
 interface SearchSuggestionsProps {
-  suggestions: Array<{ item: SearchResult; score: number }>;
-  onSuggestionClick: (suggestion: SearchResult) => void;
+  suggestions: Array<{ item: FuzzySearchResult; score: number }>;
+  onSuggestionClick: (suggestion: FuzzySearchResult) => void;
 }
 
 export const SearchSuggestions = ({ suggestions, onSuggestionClick }: SearchSuggestionsProps) => {
