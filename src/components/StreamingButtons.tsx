@@ -211,13 +211,46 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     window.open(formattedUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleDownloadClick = () => {
+  const handleDownloadClick = async () => {
     if (mediaType === "movie") {
-      window.open(`https://dl.letsembed.cc/?id=${id}`, "_blank", "noopener,noreferrer");
+      try {
+        // Primary download URL
+        const downloadUrl = `https://dl.letsembed.cc/?id=${id}`;
+        
+        // Check if the URL is accessible before opening
+        const newWindow = window.open(downloadUrl, "_blank", "noopener,noreferrer");
+        
+        if (!newWindow) {
+          // Fallback if popup is blocked
+          toast({
+            title: "Pop-up Blocked",
+            description: "Please allow pop-ups for this site to enable downloads.",
+            variant: "destructive"
+          });
+          
+          // Alternative: try to navigate directly
+          const userConfirmed = confirm("Pop-up was blocked. Click OK to navigate to download page directly.");
+          if (userConfirmed) {
+            window.location.href = downloadUrl;
+          }
+        } else {
+          toast({
+            title: "Download Started",
+            description: "Opening download page in new tab...",
+          });
+        }
+      } catch (error) {
+        console.error("Download error:", error);
+        toast({
+          title: "Download Error", 
+          description: "Unable to access download service. Please try again later.",
+          variant: "destructive"
+        });
+      }
     } else {
       toast({
         title: "Download Not Available",
-        description: "You can only download movies.",
+        description: "Downloads are currently only available for movies.",
         variant: "destructive"
       });
     }
