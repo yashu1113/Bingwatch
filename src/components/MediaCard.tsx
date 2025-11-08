@@ -55,7 +55,7 @@ export const MediaCard = ({
   const handleWatchlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (inWatchlist) {
       removeFromWatchlist(id);
       toast({
@@ -69,6 +69,17 @@ export const MediaCard = ({
         description: `${title} has been added to your watchlist`,
       });
     }
+  };
+
+  // Enhanced hover handlers
+  const handleHoverStart = () => {
+    setIsHovered(true);
+    videoPreview.handleHoverStart();
+  };
+
+  const handleHoverEnd = () => {
+    setIsHovered(false);
+    videoPreview.handleHoverEnd();
   };
 
   return (
