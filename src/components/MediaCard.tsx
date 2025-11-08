@@ -43,6 +43,15 @@ export const MediaCard = ({
   const [imageError, setImageError] = useState(false);
   const matchPercentage = Math.floor(65 + Math.random() * 30); // Random 65-95% match
 
+  // Video preview functionality
+  const videoPreview = useVideoPreview({
+    videoId: trailerId,
+    startTime: 30, // Start 30 seconds into the video
+    duration: 15,  // 15 second preview
+    muted: true,
+    autoplay: false,
+  });
+
   const handleWatchlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
