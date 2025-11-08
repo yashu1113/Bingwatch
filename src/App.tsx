@@ -13,6 +13,7 @@ import Watchlist from "./pages/Watchlist";
 import GenrePage from "./pages/GenrePage";
 import { Navigation } from "./components/Navigation";
 import { WatchlistProvider } from "./contexts/WatchlistContext";
+import { ContinueWatchingProvider } from "./contexts/ContinueWatchingContext";
 import { LoadingScreen } from "./components/LoadingScreen";
 
 const queryClient = new QueryClient({
@@ -30,12 +31,13 @@ const App = () => {
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <WatchlistProvider>
-          <TooltipProvider>
-            <LoadingScreen />
-            <Toaster />
-            <Sonner />
-            <div className="min-h-screen bg-netflix-black pb-16 md:pb-0">
-              <Navigation />
+          <ContinueWatchingProvider>
+            <TooltipProvider>
+              <LoadingScreen />
+              <Toaster />
+              <Sonner />
+              <div className="min-h-screen bg-[#141414] pb-16 md:pb-0">
+                <Navigation />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/search" element={<Search />} />
@@ -49,6 +51,7 @@ const App = () => {
               </Routes>
             </div>
           </TooltipProvider>
+          </ContinueWatchingProvider>
         </WatchlistProvider>
       </QueryClientProvider>
     </BrowserRouter>

@@ -1,24 +1,16 @@
 import { Link } from 'react-router-dom';
-import { getImageUrl } from '@/services/tmdb';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
-import { Trash2, ImageIcon } from 'lucide-react';
+import { Plus, Check, Play, Info } from 'lucide-react';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface MediaCardProps {
   id: number;
   title: string;
   posterPath: string;
   mediaType: 'movie' | 'tv';
+  rating?: number;
   releaseDate?: string;
   voteAverage?: number;
   showDeleteButton?: boolean;
@@ -30,96 +22,122 @@ export const MediaCard = ({
   title,
   posterPath,
   mediaType,
-  releaseDate,
+  rating = 0,
   voteAverage,
+  releaseDate,
   showDeleteButton = false,
   CustomActions,
 }: MediaCardProps) => {
-  const isMobile = useIsMobile();
-  const { removeFromWatchlist } = useWatchlist();
+  const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const inWatchlist = isInWatchlist(id);
   const [imageError, setImageError] = useState(false);
+  const matchPercentage = Math.floor(65 + Math.random() * 30); // Random 65-95% match
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleWatchlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    removeFromWatchlist(id);
-    toast({
-      title: "Removed from Watchlist",
-      description: `${title} has been removed from your watchlist`,
-    });
+    e.stopPropagation();
+    
+    if (inWatchlist) {
+      removeFromWatchlist(id);
+      toast({
+        title: "Removed from Watchlist",
+        description: `${title} has been removed from your watchlist`,
+      });
+    } else {
+      addToWatchlist({ id, title, posterPath, mediaType });
+      toast({
+        title: "Added to Watchlist",
+        description: `${title} has been added to your watchlist`,
+      });
+    }
   };
 
-  const DeleteButton = () => (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            onClick={handleDelete}
-            className={cn(
-              "absolute right-2 top-2 z-10 rounded-full bg-black/80 p-2.5 text-white transition-all hover:bg-black/90",
-              isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            )}
-            aria-label={`Remove ${title} from watchlist`}
-          >
-            <Trash2 className="h-5 w-5" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Remove from Watchlist</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-
   return (
-    <Link
-      to={`/${mediaType}/${id}`}
-      className="group relative overflow-hidden rounded-lg transition-transform hover:scale-105 touch-manipulation w-full"
+    <div 
+      className="group relative overflow-hidden rounded-md bg-[#141414] transition-all duration-300 hover:scale-105 hover:z-10 hover:shadow-2xl"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="aspect-[2/3] w-full bg-gray-900 relative">
-        {!imageLoaded && !imageError && (
-          <Skeleton className="absolute inset-0 w-full h-full" />
-        )}
-        {imageError ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-            <ImageIcon className="h-12 w-12 text-gray-400" />
+      <Link to={`/${mediaType}/${id}`} className="block relative">
+        {/* Netflix Logo Overlay */}
+        <div className="absolute top-2 left-2 z-10 opacity-90">
+          <div className="bg-netflix-red text-white font-bold text-lg px-2 py-1 rounded">
+            N
           </div>
-        ) : (
+        </div>
+
+        {!imageError ? (
           <img
-            src={getImageUrl(posterPath, 'w500')}
+            src={`https://image.tmdb.org/t/p/w500${posterPath}`}
             alt={title}
-            className={cn(
-              "h-full w-full object-cover transition-opacity duration-300",
-              !imageLoaded && "opacity-0"
-            )}
+            className="aspect-[2/3] w-full object-cover"
             loading="lazy"
-            onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
           />
+        ) : (
+          <div className="aspect-[2/3] w-full bg-gray-800 flex items-center justify-center">
+            <span className="text-gray-500 text-sm text-center px-4">{title}</span>
+          </div>
         )}
-      </div>
-      {showDeleteButton && <DeleteButton />}
-      <div 
-        className={cn(
-          "absolute inset-0 bg-gradient-to-t from-black/80 to-transparent",
-          isMobile ? "opacity-100" : "opacity-0 transition-opacity group-hover:opacity-100"
-        )}
-      >
-        <div className="absolute bottom-0 p-4 text-white w-full">
-          <h3 className="text-lg font-bold line-clamp-2">{title}</h3>
-          {releaseDate && (
-            <p className="text-sm opacity-80">
-              {new Date(releaseDate).getFullYear()}
-            </p>
-          )}
-          <div className="mt-1 flex items-center gap-1">
-            <span className="text-sm">★</span>
-            <span className="text-sm">{voteAverage?.toFixed(1)}</span>
+
+        {/* Gradient overlay on hover */}
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 transition-opacity duration-300",
+          isHovered && "opacity-100"
+        )} />
+      </Link>
+
+      {isHovered && (
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/95 to-transparent p-3 space-y-2.5">
+          <div className="flex items-center gap-2">
+            {/* Match percentage */}
+            <span className="text-green-500 font-bold text-sm">{matchPercentage}% Match</span>
+            <span className="text-gray-400 text-xs border border-gray-600 px-1.5 py-0.5 rounded">
+              {new Date().getFullYear()}
+            </span>
+          </div>
+          
+          <h3 className="font-semibold text-sm line-clamp-2">{title}</h3>
+          
+          <div className="flex items-center gap-2">
+            <Link
+              to={`/${mediaType}/${id}`}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black hover:bg-white/90 transition-all hover:scale-110"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Play className="h-4 w-4 fill-black ml-0.5" />
+            </Link>
+            <button
+              onClick={handleWatchlistClick}
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all hover:scale-110",
+                inWatchlist 
+                  ? "border-green-500 bg-green-500 text-white" 
+                  : "border-gray-400 hover:border-white bg-black/50"
+              )}
+            >
+              {inWatchlist ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
+            </button>
+            <Link
+              to={`/${mediaType}/${id}`}
+              className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-400 hover:border-white bg-black/50 transition-all hover:scale-110"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Info className="h-4 w-4" />
+            </Link>
+            <div className="ml-auto text-xs text-gray-400">
+              ★ {(voteAverage || rating).toFixed(1)}
+            </div>
           </div>
           {CustomActions && <CustomActions />}
         </div>
-      </div>
-    </Link>
+      )}
+    </div>
   );
 };

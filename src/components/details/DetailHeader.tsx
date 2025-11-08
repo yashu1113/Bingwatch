@@ -2,10 +2,12 @@
 import { Button } from "@/components/ui/button";
 import { Plus, Check, Play } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
+import { useContinueWatching } from "@/contexts/ContinueWatchingContext";
 import { useToast } from "@/hooks/use-toast";
 import { StreamingButtons } from "@/components/StreamingButtons";
 import { CastSection } from "@/components/details/CastSection";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 interface DetailHeaderProps {
   id: number;
@@ -50,7 +52,25 @@ export const DetailHeader = ({
   seasons,
 }: DetailHeaderProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
+  const { updateProgress } = useContinueWatching();
   const { toast } = useToast();
+
+  // Simulate watching progress on page view
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateProgress({
+        id,
+        title,
+        posterPath,
+        mediaType,
+        progress: Math.floor(Math.random() * 30) + 1, // 1-30% for demo
+        lastWatched: new Date().toISOString(),
+        runtime
+      });
+    }, 3000); // Update after 3 seconds on page
+
+    return () => clearTimeout(timer);
+  }, [id]);
 
   const handleWatchlistClick = () => {
     const inWatchlist = isInWatchlist(id);

@@ -212,47 +212,66 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       </button>
       
       {/* Main Content */}
-      <div className="relative z-20 h-full flex items-end pb-20 md:pb-28">
+      <div className="relative z-20 h-full flex items-end pb-24 md:pb-32">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-3xl space-y-6">
+          <div className="max-w-2xl space-y-4">
             {/* Title with animation */}
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-foreground leading-tight animate-fade-in">
+            <h1 className="text-5xl sm:text-6xl lg:text-8xl font-bold text-white leading-tight drop-shadow-2xl">
               {currentItem.title || currentItem.name}
             </h1>
             
-            {/* Release Year */}
-            {(currentItem.release_date || currentItem.first_air_date) && (
-              <div className="text-lg text-foreground/70 font-medium">
-                {new Date(currentItem.release_date || currentItem.first_air_date || '').getFullYear()}
+            {/* Meta Info */}
+            <div className="flex items-center gap-3 text-base">
+              {(currentItem.release_date || currentItem.first_air_date) && (
+                <span className="px-3 py-1 bg-gray-800/80 rounded text-white font-medium">
+                  {new Date(currentItem.release_date || currentItem.first_air_date || '').getFullYear()}
+                </span>
+              )}
+              <div className="flex items-center gap-1">
+                <span className="text-yellow-500">●</span>
+                <span className="text-yellow-500">●</span>
+                <span className="text-yellow-500">●</span>
+                <span className="text-gray-400">●</span>
+                <span className="text-gray-400">●</span>
               </div>
-            )}
+              <span className="text-white/80 font-medium">8.0</span>
+              <span className="text-white/60">{currentItem.media_type === 'tv' ? 'Series' : 'Movie'}</span>
+            </div>
             
             {/* Overview */}
-            <p className="text-base sm:text-lg lg:text-xl text-foreground/90 line-clamp-4 sm:line-clamp-3 lg:line-clamp-4 leading-relaxed max-w-3xl">
+            <p className="text-base sm:text-lg text-white/90 line-clamp-3 leading-relaxed max-w-2xl drop-shadow-lg">
               {currentItem.overview}
             </p>
             
-            {/* Action Buttons - Removed spacing */}
-            <div className="flex flex-col sm:flex-row gap-0 pt-3">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-3 pt-2">
               <Button
-                className="px-6 py-3 text-sm sm:text-base rounded-l-xl sm:rounded-r-none rounded-r-xl shadow-lg hover-scale"
+                className="bg-white text-black hover:bg-white/90 px-8 py-6 text-base font-bold rounded shadow-xl transition-transform hover:scale-105"
                 onClick={() => handleWatchNow(currentItem)}
               >
-                <Play className="mr-2 h-5 w-5" />
-                Watch Now
+                <Play className="mr-2 h-5 w-5 fill-black" />
+                Play Now
               </Button>
               
               <Button
-                variant="outline"
-                className="border border-border bg-background/30 text-foreground hover:bg-background/40 backdrop-blur-sm px-6 py-3 text-sm sm:text-base rounded-r-xl sm:rounded-l-none rounded-l-xl sm:border-l-0 shadow-lg hover-scale"
+                className="bg-netflix-red hover:bg-netflix-red/90 text-white px-8 py-6 text-base font-bold rounded shadow-xl transition-transform hover:scale-105"
+                onClick={() => navigate(`/${currentItem.media_type || 'movie'}/${currentItem.id}`)}
+              >
+                <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                More Info
+              </Button>
+
+              <Button
+                className="bg-transparent border-2 border-white/60 hover:border-white text-white px-6 py-6 text-base rounded-full transition-transform hover:scale-105"
                 onClick={() => handleAddToWatchlist(currentItem)}
               >
                 {isInWatchlist(currentItem.id) ? (
-                  <Check className="mr-2 h-5 w-5" />
+                  <Check className="h-5 w-5" />
                 ) : (
-                  <Plus className="mr-2 h-5 w-5" />
+                  <Plus className="h-5 w-5" />
                 )}
-                {isInWatchlist(currentItem.id) ? "In Watchlist" : "Add to Watchlist"}
               </Button>
             </div>
           </div>
