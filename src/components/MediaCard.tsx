@@ -83,14 +83,15 @@ export const MediaCard = ({
   };
 
   return (
-    <div 
-      className="group relative overflow-hidden rounded-md bg-[#141414] transition-all duration-300 hover:scale-105 hover:z-10 hover:shadow-2xl"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <HoverScale
+      className="group relative overflow-hidden rounded-md bg-[#141414] hover:z-10 hover:shadow-2xl"
+      onMouseEnter={handleHoverStart}
+      onMouseLeave={handleHoverEnd}
+      ref={videoPreview.containerRef}
     >
       <Link to={`/${mediaType}/${id}`} className="block relative">
         {/* Netflix Logo Overlay */}
-        <div className="absolute top-2 left-2 z-10 opacity-90">
+        <div className="absolute top-2 left-2 z-20 opacity-90 pointer-events-none">
           <div className="bg-netflix-red text-white font-bold text-lg px-2 py-1 rounded">
             N
           </div>
@@ -99,76 +100,121 @@ export const MediaCard = ({
         {/* Language Indicator */}
         <LanguageIndicator originalLanguage={originalLanguage} />
 
-        {!imageError ? (
-          <img
-            src={`https://image.tmdb.org/t/p/w500${posterPath}`}
-            alt={title}
-            className="aspect-[2/3] w-full object-cover"
-            loading="lazy"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div className="aspect-[2/3] w-full bg-gray-800 flex items-center justify-center">
-            <span className="text-gray-500 text-sm text-center px-4">{title}</span>
-          </div>
-        )}
+        {/* Video Preview or Static Image */}
+        <AnimatePresence mode="wait">
+          {videoPreview.shouldShowVideo && videoPreview.videoUrl ? (
+            <motion.div
+              key="video"
+              className="absolute inset-0 z-10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <iframe
+                ref={videoPreview.iframeRef}
+                src={videoPreview.videoUrl}
+                className="w-full h-full object-cover"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                onLoad={videoPreview.handleVideoLoad}
+                onError={videoPreview.handleVideoError}
+              />
+              {/* Dark overlay for better text readability */}
+              <div className="absolute inset-0 bg-black/20" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="image"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {!imageError ? (
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${posterPath}`}
+                  alt={title}
+                  className="aspect-[2/3] w-full object-cover"
+                  loading="lazy"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="aspect-[2/3] w-full bg-gray-800 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm text-center px-4">{title}</span>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Gradient overlay on hover */}
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 transition-opacity duration-300",
-          isHovered && "opacity-100"
-        )} />
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isHovered ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
+        />
       </Link>
 
-      {isHovered && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/95 to-transparent p-3 space-y-2.5">
-          <div className="flex items-center gap-2">
-            {/* Match percentage */}
-            <span className="text-green-500 font-bold text-sm">{matchPercentage}% Match</span>
-            <span className="text-gray-400 text-xs border border-gray-600 px-1.5 py-0.5 rounded">
-              {new Date().getFullYear()}
-            </span>
-          </div>
-          
-          <h3 className="font-semibold text-sm line-clamp-2">{title}</h3>
-          
-          <div className="flex items-center gap-2">
-            <Link
-              to={`/${mediaType}/${id}`}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black hover:bg-white/90 transition-all hover:scale-110"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Play className="h-4 w-4 fill-black ml-0.5" />
-            </Link>
-            <button
-              onClick={handleWatchlistClick}
-              className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all hover:scale-110",
-                inWatchlist 
-                  ? "border-green-500 bg-green-500 text-white" 
-                  : "border-gray-400 hover:border-white bg-black/50"
-              )}
-            >
-              {inWatchlist ? (
-                <Check className="h-4 w-4" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
-            </button>
-            <Link
-              to={`/${mediaType}/${id}`}
-              className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-400 hover:border-white bg-black/50 transition-all hover:scale-110"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Info className="h-4 w-4" />
-            </Link>
-            <div className="ml-auto text-xs text-gray-400">
-              ★ {(voteAverage || rating).toFixed(1)}
+      {/* Hover Overlay with Controls */}
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/95 to-transparent p-3 space-y-2.5 z-30"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.2, type: 'spring', stiffness: 300, damping: 30 }}
+          >
+            <div className="flex items-center gap-2">
+              {/* Match percentage */}
+              <span className="text-green-500 font-bold text-sm">{matchPercentage}% Match</span>
+              <span className="text-gray-400 text-xs border border-gray-600 px-1.5 py-0.5 rounded">
+                {new Date().getFullYear()}
+              </span>
             </div>
-          </div>
-          {CustomActions && <CustomActions />}
-        </div>
-      )}
-    </div>
+
+            <h3 className="font-semibold text-sm line-clamp-2">{title}</h3>
+
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/${mediaType}/${id}`}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black hover:bg-white/90 transition-all hover:scale-110"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Play className="h-4 w-4 fill-black ml-0.5" />
+              </Link>
+              <button
+                onClick={handleWatchlistClick}
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all hover:scale-110",
+                  inWatchlist
+                    ? "border-green-500 bg-green-500 text-white"
+                    : "border-gray-400 hover:border-white bg-black/50"
+                )}
+              >
+                {inWatchlist ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+              </button>
+              <Link
+                to={`/${mediaType}/${id}`}
+                className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-400 hover:border-white bg-black/50 transition-all hover:scale-110"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Info className="h-4 w-4" />
+              </Link>
+              <div className="ml-auto text-xs text-gray-400">
+                ★ {(voteAverage || rating).toFixed(1)}
+              </div>
+            </div>
+            {CustomActions && <CustomActions />}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </HoverScale>
   );
 };
