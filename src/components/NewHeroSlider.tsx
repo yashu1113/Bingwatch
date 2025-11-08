@@ -31,6 +31,46 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   const navigate = useNavigate();
   const { addToWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
+  const { settings } = usePlayerSettings();
+  const contentControls = useAnimation();
+
+  // Animation variants based on user settings
+  const getSlideVariants = () => {
+    const duration = settings.animationIntensity === 'minimal' ? 0.3 :
+                     settings.animationIntensity === 'reduced' ? 0.5 : 0.8;
+
+    if (settings.animationIntensity === 'minimal') {
+      return {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+      };
+    }
+
+    return {
+      initial: { opacity: 0, scale: 1.1, x: 50 },
+      animate: {
+        opacity: 1,
+        scale: 1,
+        x: 0,
+        transition: {
+          duration,
+          ease: 'easeInOut',
+        }
+      },
+      exit: {
+        opacity: 0,
+        scale: 0.9,
+        x: -50,
+        transition: {
+          duration: duration * 0.7,
+          ease: 'easeInOut',
+        }
+      },
+    };
+  };
+
+  const slideVariants = getSlideVariants();
 
   const limitedItems = items.slice(0, 5);
 
