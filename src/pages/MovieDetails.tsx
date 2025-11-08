@@ -74,6 +74,8 @@ const MovieDetails = () => {
           mediaType="movie"
           isInTheaters={movie.isInTheaters}
           cast={movie.credits?.cast}
+          spokenLanguages={movie.spoken_languages}
+          originalLanguage={movie.original_language}
         />
 
         <VideoSection videos={videos} />

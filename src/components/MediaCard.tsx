@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Plus, Check, Play, Info } from 'lucide-react';
+import { Plus, Check, Play, Info, Languages } from 'lucide-react';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useToast } from '@/hooks/use-toast';
+import { LanguageIndicator } from '@/components/LanguageIndicator';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -15,6 +16,7 @@ interface MediaCardProps {
   voteAverage?: number;
   showDeleteButton?: boolean;
   CustomActions?: React.ComponentType;
+  originalLanguage?: string;
 }
 
 export const MediaCard = ({
@@ -27,6 +29,7 @@ export const MediaCard = ({
   releaseDate,
   showDeleteButton = false,
   CustomActions,
+  originalLanguage,
 }: MediaCardProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
@@ -67,6 +70,9 @@ export const MediaCard = ({
             N
           </div>
         </div>
+
+        {/* Language Indicator */}
+        <LanguageIndicator originalLanguage={originalLanguage} />
 
         {!imageError ? (
           <img

@@ -1,11 +1,14 @@
 
 import { Button } from "@/components/ui/button";
-import { Plus, Check, Play } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Check, Play, Languages } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useContinueWatching } from "@/contexts/ContinueWatchingContext";
+import { useLanguagePreference } from "@/contexts/LanguagePreferenceContext";
 import { useToast } from "@/hooks/use-toast";
 import { StreamingButtons } from "@/components/StreamingButtons";
 import { CastSection } from "@/components/details/CastSection";
+import { LanguageSection } from "@/components/details/LanguageSection";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 
@@ -23,6 +26,8 @@ interface DetailHeaderProps {
   isInTheaters?: boolean;
   cast?: { id: number; name: string; character: string; profile_path: string | null; }[];
   seasons?: { season_number: number; name: string; episode_count: number }[];
+  spokenLanguages?: { iso_639_1: string; name: string; english_name: string; }[];
+  originalLanguage?: string;
 }
 
 const formatRuntime = (minutes?: number): string => {
@@ -50,9 +55,12 @@ export const DetailHeader = ({
   isInTheaters,
   cast,
   seasons,
+  spokenLanguages,
+  originalLanguage,
 }: DetailHeaderProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { updateProgress } = useContinueWatching();
+  const { preferredLanguage, checkLanguageAvailability } = useLanguagePreference();
   const { toast } = useToast();
 
   // Simulate watching progress on page view
@@ -71,6 +79,10 @@ export const DetailHeader = ({
 
     return () => clearTimeout(timer);
   }, [id]);
+
+  // Check language availability
+  const availableLanguageCodes = spokenLanguages?.map(lang => lang.iso_639_1) || [];
+  const languageInfo = checkLanguageAvailability(availableLanguageCodes);
 
   const handleWatchlistClick = () => {
     const inWatchlist = isInWatchlist(id);
@@ -117,6 +129,22 @@ export const DetailHeader = ({
               </span>
             ))}
           </div>
+          
+          {/* Language Availability Badge */}
+          {preferredLanguage && (
+            <Badge 
+              variant={languageInfo.isPreferredAvailable ? "default" : "secondary"}
+              className={cn(
+                "flex items-center gap-2 w-fit",
+                languageInfo.isPreferredAvailable 
+                  ? "bg-green-600 hover:bg-green-700" 
+                  : "bg-gray-700 hover:bg-gray-600"
+              )}
+            >
+              <Languages className="h-3 w-3" />
+              {languageInfo.displayMessage}
+            </Badge>
+          )}
           <div className="space-y-2">
             <p>{releaseDate && `Release Date: ${releaseDate}`}</p>
             <p>Rating: ★ {voteAverage?.toFixed(1)}</p>
@@ -166,6 +194,10 @@ export const DetailHeader = ({
           </div>
         </div>
       </div>
+      <LanguageSection 
+        spokenLanguages={spokenLanguages} 
+        originalLanguage={originalLanguage}
+      />
       <CastSection cast={cast} />
     </div>
   );

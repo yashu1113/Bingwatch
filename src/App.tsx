@@ -14,6 +14,7 @@ import GenrePage from "./pages/GenrePage";
 import { Navigation } from "./components/Navigation";
 import { WatchlistProvider } from "./contexts/WatchlistContext";
 import { ContinueWatchingProvider } from "./contexts/ContinueWatchingContext";
+import { LanguagePreferenceProvider } from "./contexts/LanguagePreferenceContext";
 import { LoadingScreen } from "./components/LoadingScreen";
 
 const queryClient = new QueryClient({
@@ -32,12 +33,13 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <WatchlistProvider>
           <ContinueWatchingProvider>
-            <TooltipProvider>
-              <LoadingScreen />
-              <Toaster />
-              <Sonner />
-              <div className="min-h-screen bg-[#141414] pb-16 md:pb-0">
-                <Navigation />
+            <LanguagePreferenceProvider>
+              <TooltipProvider>
+                <LoadingScreen />
+                <Toaster />
+                <Sonner />
+                <div className="min-h-screen bg-[#141414] pb-16 md:pb-0">
+                  <Navigation />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/search" element={<Search />} />
@@ -48,9 +50,10 @@ const App = () => {
                 <Route path="/watchlist" element={<Watchlist />} />
                 <Route path="/genre/:id" element={<GenrePage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </div>
-          </TooltipProvider>
+                </Routes>
+              </div>
+            </TooltipProvider>
+            </LanguagePreferenceProvider>
           </ContinueWatchingProvider>
         </WatchlistProvider>
       </QueryClientProvider>

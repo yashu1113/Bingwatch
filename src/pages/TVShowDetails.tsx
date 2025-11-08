@@ -82,6 +82,8 @@ const TVShowDetails = () => {
           mediaType="tv"
           cast={show.credits?.cast}
           seasons={formattedSeasons.length > 0 ? formattedSeasons : undefined}
+          spokenLanguages={show.spoken_languages}
+          originalLanguage={show.original_language}
         />
 
         <VideoSection videos={videos} />
