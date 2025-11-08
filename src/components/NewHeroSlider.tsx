@@ -150,19 +150,30 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
     setCurrentIndex((prev) => (prev + 1) % limitedItems.length);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
+    // Restart content animation
+    contentControls.start('animate');
   };
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev - 1 + limitedItems.length) % limitedItems.length);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
+    // Restart content animation
+    contentControls.start('animate');
   };
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
+    // Restart content animation
+    contentControls.start('animate');
   };
+
+  // Animate content when slide changes
+  useEffect(() => {
+    contentControls.start('animate');
+  }, [currentIndex, contentControls]);
 
   if (!limitedItems.length) {
     return (
