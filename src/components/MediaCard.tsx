@@ -20,6 +20,7 @@ interface MediaCardProps {
   showDeleteButton?: boolean;
   CustomActions?: React.ComponentType;
   originalLanguage?: string;
+  trailerId?: string; // YouTube video ID for preview
 }
 
 export const MediaCard = ({
