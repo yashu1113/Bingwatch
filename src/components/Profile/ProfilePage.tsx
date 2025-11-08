@@ -189,9 +189,11 @@ const ProfilePage: React.FC = () => {
                           >
                             <MediaCard
                               key={item.id}
-                              media={item}
-                              contentType={item.type}
-                              size="small"
+                              id={item.id}
+                              title={item.title || item.name || ''}
+                              posterPath={item.poster_path || item.backdrop_path || ''}
+                              mediaType={item.type || (item.title ? 'movie' : 'tv')}
+                              voteAverage={item.vote_average}
                             />
                           </motion.div>
                         ))}
@@ -231,9 +233,11 @@ const ProfilePage: React.FC = () => {
                           >
                             <MediaCard
                               key={item.id}
-                              media={item}
-                              contentType={item.type}
-                              size="small"
+                              id={item.id}
+                              title={item.title || item.name || ''}
+                              posterPath={item.poster_path || item.backdrop_path || ''}
+                              mediaType={item.type || (item.title ? 'movie' : 'tv')}
+                              voteAverage={item.vote_average}
                             />
                           </motion.div>
                         ))}
