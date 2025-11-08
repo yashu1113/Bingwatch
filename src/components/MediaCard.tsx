@@ -34,6 +34,7 @@ export const MediaCard = ({
   showDeleteButton = false,
   CustomActions,
   originalLanguage,
+  trailerId,
 }: MediaCardProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
