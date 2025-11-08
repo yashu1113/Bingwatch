@@ -198,39 +198,51 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
 
   return (
     <div className="relative w-full h-[80vh] lg:h-[90vh] overflow-hidden">
-      {/* Background Media with smooth transition */}
+      {/* Background Media with smooth transitions */}
       <div className="absolute inset-0 bg-background" />
-      {limitedItems.map((item, index) => {
-        const hasTrailer = videoData[item.id];
-        const muteParam = isMuted ? 1 : 0;
-        return (
-          <div key={item.id} className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}>
-            {hasTrailer ? (
-              <iframe
-                ref={(el) => {
-                  if (el && index === currentIndex) {
-                    playerRefs.current[item.id] = el;
-                  }
-                }}
-                src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`}
-                className="w-full h-full object-cover"
-                style={{ pointerEvents: 'none' }}
-                allow="autoplay; encrypted-media"
-                loading={index === currentIndex ? 'eager' : 'lazy'}
-              />
-            ) : (
-              <img
-                src={getImageUrl(item.backdrop_path, 'original')}
-                alt={`${item.title || item.name} backdrop`}
-                className="w-full h-full object-contain object-center"
-                loading={index === currentIndex ? 'eager' : 'lazy'}
-                decoding="async"
-                fetchPriority={index === currentIndex ? 'high' : 'low'}
-              />
-            )}
-          </div>
-        );
-      })}
+      <AnimatePresence mode="wait">
+        {limitedItems.map((item, index) => {
+          if (index !== currentIndex) return null;
+
+          const hasTrailer = videoData[item.id];
+          const muteParam = isMuted ? 1 : 0;
+
+          return (
+            <motion.div
+              key={item.id}
+              className="absolute inset-0 w-full h-full"
+              variants={slideVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              {hasTrailer ? (
+                <iframe
+                  ref={(el) => {
+                    if (el) {
+                      playerRefs.current[item.id] = el;
+                    }
+                  }}
+                  src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`}
+                  className="w-full h-full object-cover"
+                  style={{ pointerEvents: 'none' }}
+                  allow="autoplay; encrypted-media"
+                  loading="eager"
+                />
+              ) : (
+                <img
+                  src={getImageUrl(item.backdrop_path, 'original')}
+                  alt={`${item.title || item.name} backdrop`}
+                  className="w-full h-full object-contain object-center"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
+                />
+              )}
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
       
       {/* Enhanced Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-background/20" />
