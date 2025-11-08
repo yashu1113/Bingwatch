@@ -250,31 +250,45 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       
       {/* Mute/Unmute Button */}
       {videoData[currentItem.id] && (
-        <button
+        <motion.button
           onClick={toggleMute}
-          className="absolute top-4 right-4 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full transition-all duration-300 hover:scale-110"
+          className="absolute top-4 right-4 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.2 }}
           aria-label={isMuted ? "Unmute" : "Mute"}
         >
-          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-        </button>
+          <motion.div
+            animate={{ rotate: isMuted ? 0 : 180 }}
+            transition={{ duration: 0.3 }}
+          >
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </motion.div>
+        </motion.button>
       )}
-      
+
       {/* Navigation Arrows */}
-      <button
+      <motion.button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full transition-all duration-300 hover:scale-110"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full"
+        whileHover={{ scale: 1.1, x: -5 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.2 }}
         aria-label="Previous slide"
       >
         <ChevronLeft className="w-6 h-6" />
-      </button>
-      
-      <button
+      </motion.button>
+
+      <motion.button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full transition-all duration-300 hover:scale-110"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full"
+        whileHover={{ scale: 1.1, x: 5 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.2 }}
         aria-label="Next slide"
       >
         <ChevronRight className="w-6 h-6" />
-      </button>
+      </motion.button>
       
       {/* Main Content */}
       <div className="relative z-20 h-full flex items-end pb-24 md:pb-32">
