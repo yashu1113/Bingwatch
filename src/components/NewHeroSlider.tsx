@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useToast } from "@/hooks/use-toast";
 import { getImageUrl, getVideos } from "@/services/tmdb";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { usePlayerSettings } from "@/contexts/PlayerSettingsContext";
 
 interface HeroSliderProps {
   items: Array<{
