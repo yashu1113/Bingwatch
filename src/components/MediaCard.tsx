@@ -5,6 +5,9 @@ import { useToast } from '@/hooks/use-toast';
 import { LanguageIndicator } from '@/components/LanguageIndicator';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useVideoPreview } from '@/hooks/useVideoPreview';
+import { HoverScale, FadeIn } from '@/components/animations/MotionComponents';
 
 interface MediaCardProps {
   id: number;
