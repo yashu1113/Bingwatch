@@ -25,7 +25,7 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [videoData, setVideoData] = useState<Record<number, any>>({});
   const [isMuted, setIsMuted] = useState(true);
-  const playerRefs = useRef<Record<number, any>>({});
+  const playerRefs = useRef<Record<number, HTMLIFrameElement | null>>({});
   const navigate = useNavigate();
   const { addToWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
@@ -124,7 +124,7 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
 
   if (!limitedItems.length) {
     return (
-      <div className="relative w-full h-[80vh] lg:h-[90vh] bg-gray-900 animate-pulse" />
+      <div className="relative w-full h-screen bg-netflix-black animate-pulse -mt-16" />
     );
   }
 
@@ -132,47 +132,47 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
     
-    // Update the iframe src to toggle mute parameter
+    // Use postMessage to control YouTube player
     const currentVideoElement = playerRefs.current[currentItem.id];
-    if (currentVideoElement) {
-      const hasTrailer = videoData[currentItem.id];
-      if (hasTrailer) {
-        const muteParam = newMutedState ? 1 : 0;
-        currentVideoElement.src = `https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`;
-      }
+    if (currentVideoElement && currentVideoElement.contentWindow) {
+      const command = newMutedState ? 'mute' : 'unMute';
+      currentVideoElement.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func: command, args: [] }),
+        '*'
+      );
     }
   };
 
   return (
-    <div className="relative w-full h-[80vh] lg:h-[90vh] overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden -mt-16">
       {/* Background Media with smooth transition */}
-      <div className="absolute inset-0 bg-background" />
+      <div className="absolute inset-0 bg-netflix-black" />
       {limitedItems.map((item, index) => {
         const hasTrailer = videoData[item.id];
         const muteParam = isMuted ? 1 : 0;
         return (
           <div key={item.id} className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}>
             {hasTrailer ? (
-              <iframe
-                ref={(el) => {
-                  if (el && index === currentIndex) {
-                    playerRefs.current[item.id] = el;
-                  }
-                }}
-                src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${muteParam}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1`}
-                className="w-full h-full object-cover"
-                style={{ pointerEvents: 'none' }}
-                allow="autoplay; encrypted-media"
-                loading={index === currentIndex ? 'eager' : 'lazy'}
-              />
+              <div className="w-full h-full relative">
+                <iframe
+                  ref={(el) => {
+                    if (el && index === currentIndex) {
+                      playerRefs.current[item.id] = el;
+                    }
+                  }}
+                  src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=1&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.77vh] h-[56.25vw] min-h-full min-w-full"
+                  style={{ pointerEvents: 'none' }}
+                  allow="autoplay; encrypted-media"
+                  title={`${item.title || item.name} trailer`}
+                />
+              </div>
             ) : (
               <img
                 src={getImageUrl(item.backdrop_path, 'original')}
                 alt={`${item.title || item.name} backdrop`}
-                className="w-full h-full object-contain object-center"
+                className="w-full h-full object-cover"
                 loading={index === currentIndex ? 'eager' : 'lazy'}
-                decoding="async"
-                fetchPriority={index === currentIndex ? 'high' : 'low'}
               />
             )}
           </div>
@@ -180,14 +180,14 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       })}
       
       {/* Enhanced Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-background/20" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-netflix-black via-netflix-black/70 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-netflix-black via-transparent to-netflix-black/40" />
       
       {/* Mute/Unmute Button */}
       {videoData[currentItem.id] && (
         <button
           onClick={toggleMute}
-          className="absolute top-4 right-4 z-30 bg-background/60 hover:bg-background/80 text-foreground p-3 rounded-full transition-all duration-300 hover:scale-110"
+          className="absolute top-24 right-8 z-30 bg-black/40 hover:bg-black/60 text-white p-2.5 rounded-full border-2 border-white/60 transition-all duration-300 hover:scale-110"
           aria-label={isMuted ? "Unmute" : "Mute"}
         >
           {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -212,8 +212,8 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       </button>
       
       {/* Main Content */}
-      <div className="relative z-20 h-full flex items-end pb-24 md:pb-32">
-        <div className="container mx-auto px-4 lg:px-8">
+      <div className="relative z-20 h-full flex items-center md:items-end pb-8 md:pb-32 pt-24">
+        <div className="container mx-auto px-6 lg:px-12 max-w-7xl">
           <div className="max-w-2xl space-y-4">
             {/* Title with animation */}
             <h1 className="text-5xl sm:text-6xl lg:text-8xl font-bold text-white leading-tight drop-shadow-2xl">
