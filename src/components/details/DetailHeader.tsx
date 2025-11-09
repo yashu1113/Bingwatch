@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Check, Play, Languages } from "lucide-react";
+import { Plus, Check, Play, Languages, ExternalLink } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useContinueWatching } from "@/contexts/ContinueWatchingContext";
 import { useLanguagePreference } from "@/contexts/LanguagePreferenceContext";
@@ -10,7 +9,9 @@ import { StreamingButtons } from "@/components/StreamingButtons";
 import { CastSection } from "@/components/details/CastSection";
 import { LanguageSection } from "@/components/details/LanguageSection";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getOMDbDetails, OMDbMovie } from "@/services/omdb";
+import { OMDbModal } from "@/components/OMDbModal";
 
 interface DetailHeaderProps {
   id: number;
@@ -62,6 +63,9 @@ export const DetailHeader = ({
   const { updateProgress } = useContinueWatching();
   const { preferredLanguage, checkLanguageAvailability } = useLanguagePreference();
   const { toast } = useToast();
+  const [isOMDbModalOpen, setIsOMDbModalOpen] = useState(false);
+  const [omdbData, setOmdbData] = useState<OMDbMovie | null>(null);
+  const [isLoadingOMDb, setIsLoadingOMDb] = useState(false);
 
   // Simulate watching progress on page view
   useEffect(() => {
@@ -104,6 +108,17 @@ export const DetailHeader = ({
         description: `${title} has been added to your watchlist`,
       });
     }
+  };
+
+  const handleWatchHere = async () => {
+    setIsLoadingOMDb(true);
+    setIsOMDbModalOpen(true);
+    
+    const year = releaseDate ? new Date(releaseDate).getFullYear().toString() : undefined;
+    const data = await getOMDbDetails(title, year);
+    
+    setOmdbData(data);
+    setIsLoadingOMDb(false);
   };
 
   return (
@@ -164,6 +179,13 @@ export const DetailHeader = ({
                 </Button>
               )}
               <Button
+                onClick={handleWatchHere}
+                className="bg-netflix-red hover:bg-netflix-red/90"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Watch Here
+              </Button>
+              <Button
                 onClick={handleWatchlistClick}
                 className={cn(
                   "transition-colors",
@@ -199,6 +221,13 @@ export const DetailHeader = ({
         originalLanguage={originalLanguage}
       />
       <CastSection cast={cast} />
+      
+      <OMDbModal 
+        isOpen={isOMDbModalOpen}
+        onClose={() => setIsOMDbModalOpen(false)}
+        data={omdbData}
+        isLoading={isLoadingOMDb}
+      />
     </div>
   );
 };

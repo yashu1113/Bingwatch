@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Plus, Check, Play, Info, Languages } from 'lucide-react';
+import { Plus, Check, Play, Info, ExternalLink } from 'lucide-react';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useToast } from '@/hooks/use-toast';
 import { LanguageIndicator } from '@/components/LanguageIndicator';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { getOMDbDetails, OMDbMovie } from '@/services/omdb';
+import { OMDbModal } from '@/components/OMDbModal';
 
 interface MediaCardProps {
   id: number;
@@ -37,6 +39,9 @@ export const MediaCard = ({
   const inWatchlist = isInWatchlist(id);
   const [imageError, setImageError] = useState(false);
   const matchPercentage = Math.floor(65 + Math.random() * 30); // Random 65-95% match
+  const [isOMDbModalOpen, setIsOMDbModalOpen] = useState(false);
+  const [omdbData, setOmdbData] = useState<OMDbMovie | null>(null);
+  const [isLoadingOMDb, setIsLoadingOMDb] = useState(false);
 
   const handleWatchlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -55,6 +60,20 @@ export const MediaCard = ({
         description: `${title} has been added to your watchlist`,
       });
     }
+  };
+
+  const handleWatchHere = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setIsLoadingOMDb(true);
+    setIsOMDbModalOpen(true);
+    
+    const year = releaseDate ? new Date(releaseDate).getFullYear().toString() : undefined;
+    const data = await getOMDbDetails(title, year);
+    
+    setOmdbData(data);
+    setIsLoadingOMDb(false);
   };
 
   return (
@@ -137,6 +156,13 @@ export const MediaCard = ({
             >
               <Info className="h-4 w-4" />
             </Link>
+            <button
+              onClick={handleWatchHere}
+              className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-netflix-red hover:border-netflix-red/80 bg-netflix-red/20 hover:bg-netflix-red/30 transition-all hover:scale-110"
+              title="Watch Here"
+            >
+              <ExternalLink className="h-4 w-4 text-netflix-red" />
+            </button>
             <div className="ml-auto text-xs text-gray-400">
               ★ {(voteAverage || rating).toFixed(1)}
             </div>
@@ -144,6 +170,13 @@ export const MediaCard = ({
           {CustomActions && <CustomActions />}
         </div>
       )}
+      
+      <OMDbModal 
+        isOpen={isOMDbModalOpen}
+        onClose={() => setIsOMDbModalOpen(false)}
+        data={omdbData}
+        isLoading={isLoadingOMDb}
+      />
     </div>
   );
 };
