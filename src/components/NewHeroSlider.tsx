@@ -132,15 +132,16 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
     
-    // Use postMessage to control YouTube player
-    const currentVideoElement = playerRefs.current[currentItem.id];
-    if (currentVideoElement && currentVideoElement.contentWindow) {
-      const command = newMutedState ? 'mute' : 'unMute';
-      currentVideoElement.contentWindow.postMessage(
-        JSON.stringify({ event: 'command', func: command, args: [] }),
-        '*'
-      );
-    }
+    // Control all player refs
+    Object.values(playerRefs.current).forEach(player => {
+      if (player && player.contentWindow) {
+        const command = newMutedState ? 'mute' : 'unMute';
+        player.contentWindow.postMessage(
+          JSON.stringify({ event: 'command', func: command, args: [] }),
+          '*'
+        );
+      }
+    });
   };
 
   return (
@@ -149,7 +150,6 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       <div className="absolute inset-0 bg-netflix-black" />
       {limitedItems.map((item, index) => {
         const hasTrailer = videoData[item.id];
-        const muteParam = isMuted ? 1 : 0;
         return (
           <div key={item.id} className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}>
             {hasTrailer ? (
@@ -158,6 +158,19 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
                   ref={(el) => {
                     if (el && index === currentIndex) {
                       playerRefs.current[item.id] = el;
+                      // Initialize mute state when iframe loads
+                      if (el) {
+                        el.onload = () => {
+                          setTimeout(() => {
+                            if (el.contentWindow) {
+                              el.contentWindow.postMessage(
+                                JSON.stringify({ event: 'command', func: isMuted ? 'mute' : 'unMute', args: [] }),
+                                '*'
+                              );
+                            }
+                          }, 1000);
+                        };
+                      }
                     }
                   }}
                   src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=1&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`}
