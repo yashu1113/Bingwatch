@@ -24,8 +24,9 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [videoData, setVideoData] = useState<Record<number, any>>({});
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const playerRefs = useRef<Record<number, HTMLIFrameElement | null>>({});
+  const playerReadyRef = useRef<Record<number, boolean>>({});
   const navigate = useNavigate();
   const { addToWatchlist, isInWatchlist } = useWatchlist();
   const { toast } = useToast();
@@ -132,16 +133,15 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
     
-    // Control all player refs
-    Object.values(playerRefs.current).forEach(player => {
-      if (player && player.contentWindow) {
-        const command = newMutedState ? 'mute' : 'unMute';
-        player.contentWindow.postMessage(
-          JSON.stringify({ event: 'command', func: command, args: [] }),
-          '*'
-        );
-      }
-    });
+    // Control the current player
+    const currentPlayer = playerRefs.current[currentItem.id];
+    if (currentPlayer && currentPlayer.contentWindow && playerReadyRef.current[currentItem.id]) {
+      const command = newMutedState ? 'mute' : 'unMute';
+      currentPlayer.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func: command, args: [] }),
+        '*'
+      );
+    }
   };
 
   return (
@@ -156,24 +156,30 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
               <div className="w-full h-full relative">
                 <iframe
                   ref={(el) => {
-                    if (el && index === currentIndex) {
+                    if (el) {
                       playerRefs.current[item.id] = el;
-                      // Initialize mute state when iframe loads
-                      if (el) {
+                      if (index === currentIndex) {
                         el.onload = () => {
                           setTimeout(() => {
+                            playerReadyRef.current[item.id] = true;
                             if (el.contentWindow) {
+                              // Start unmuted for audio to work
                               el.contentWindow.postMessage(
-                                JSON.stringify({ event: 'command', func: isMuted ? 'mute' : 'unMute', args: [] }),
+                                JSON.stringify({ event: 'command', func: 'unMute', args: [] }),
+                                '*'
+                              );
+                              // Set volume
+                              el.contentWindow.postMessage(
+                                JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }),
                                 '*'
                               );
                             }
-                          }, 1000);
+                          }, 1500);
                         };
                       }
                     }
                   }}
-                  src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=1&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`}
+                  src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=0&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`}
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.77vh] h-[56.25vw] min-h-full min-w-full"
                   style={{ pointerEvents: 'none' }}
                   allow="autoplay; encrypted-media"
