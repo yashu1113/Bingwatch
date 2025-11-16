@@ -3,12 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { getTrending, getTopRated, getMoviesByGenre, getIndianContent } from '@/services/tmdb';
 import { MovieCarousel } from '@/components/MovieCarousel';
 import { NewHeroSlider } from '@/components/NewHeroSlider';
+import { NetflixSlider } from '@/components/NetflixSlider';
 import { TrendingSlider } from '@/components/TrendingSlider';
 import { GenreCarousel } from '@/components/GenreCarousel';
 import { IndianSection } from '@/components/IndianSection';
 import { UpcomingMovies } from '@/components/UpcomingMovies';
 import { WatchlistRecommendations } from '@/components/WatchlistRecommendations';
 import { ContinueWatchingSection } from '@/components/ContinueWatchingSection';
+import { getImageUrl } from '@/services/tmdb';
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -35,6 +37,25 @@ const Index = () => {
     name: genre.name,
   }));
 
+  // Transform data for NetflixSlider
+  const netflixItems = indianContent?.results.slice(0, 10).map(item => ({
+    id: item.id,
+    title: item.title || item.name || '',
+    image: getImageUrl(item.backdrop_path || item.poster_path, 'w780'),
+    rating: item.vote_average ? item.vote_average / 10 : undefined,
+    overview: item.overview,
+    mediaType: item.media_type as 'movie' | 'tv' || 'movie',
+  })) || [];
+
+  const trendingItems = topRated?.results.slice(0, 10).map(item => ({
+    id: item.id,
+    title: item.title || item.name || '',
+    image: getImageUrl(item.backdrop_path || item.poster_path, 'w780'),
+    rating: item.vote_average ? item.vote_average / 10 : undefined,
+    overview: item.overview,
+    mediaType: 'movie' as const,
+  })) || [];
+
   return (
     <div className="min-h-screen bg-[#141414] text-white">
       <div className="-mt-16 relative">
@@ -48,14 +69,11 @@ const Index = () => {
         {/* Continue Watching Section */}
         <ContinueWatchingSection />
 
-        {/* Trending Section */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl md:text-3xl font-bold text-white">Trending Now</h2>
-            <div className="h-1 w-16 bg-netflix-red rounded-full" />
-          </div>
-          <TrendingSlider />
-        </section>
+        {/* Trending Section - Netflix Style */}
+        <NetflixSlider items={trendingItems} title="Trending Now" />
+
+        {/* Indian Content - Netflix Style */}
+        <NetflixSlider items={netflixItems} title="Popular in India" />
 
         {/* Indian Content Section */}
         <IndianSection />
