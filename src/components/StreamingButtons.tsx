@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
-import { Loader2, Wifi, Film, ChevronDown, List } from "lucide-react";
+import { Loader2, Play, ChevronDown } from "lucide-react";
 import { memo, useState } from "react";
 import { 
   Tabs, 
@@ -9,8 +9,8 @@ import {
   TabsTrigger, 
   TabsContent 
 } from "@/components/ui/tabs";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { VideoPlayer } from "@/components/VideoPlayer";
 
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
@@ -18,17 +18,6 @@ interface StreamingButtonsProps {
   isInTheaters?: boolean;
   seasons?: { season_number: number; name: string; episode_count: number }[];
 }
-
-const SUPPORTED_LANGUAGES = [
-  { code: "en", label: "English" },
-  { code: "hi", label: "Hindi" },
-  { code: "ta", label: "Tamil" },
-  { code: "te", label: "Telugu" },
-  { code: "bn", label: "Bengali" }
-];
-
-const getLanguageLabel = (lang: string) =>
-  SUPPORTED_LANGUAGES.find(lng => lng.code === lang)?.label || "English";
 
 const getProviderColor = (providerName: string): string => {
   const name = providerName.toLowerCase();
@@ -47,9 +36,6 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState(seasons && seasons.length > 0 ? seasons[0].season_number : 1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
-  const [showSeasonSelector, setShowSeasonSelector] = useState(false);
-  const [showEpisodeSelector, setShowEpisodeSelector] = useState(false);
-  const [selectedLang, setSelectedLang] = useState<string>('en');
   const { toast } = useToast();
 
   const { data: providers, isLoading } = useQuery({
@@ -72,138 +58,14 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     return Array.from({ length: count }, (_, i) => i + 1);
   };
 
-  const handleLiveStreamClick = () => {
+  // Open the video player with vidking.net embed
+  const handleWatchNow = () => {
     setIsPlayerOpen(true);
-
-    let seasonPath = "";
-    let episodePath = "";
-    if (mediaType === "tv") {
-      seasonPath = `/${selectedSeason}`;
-      episodePath = `/${selectedEpisode}`;
-    }
-    let langParam = selectedLang !== "en" ? `&lang=${selectedLang}` : "";
-    let streamUrl = "";
-    if (mediaType === "movie") {
-      streamUrl = `https://letsembed.cc/embed/movie/?id=${id}&server=mystream${langParam}`;
-    } else {
-      streamUrl = `https://letsembed.cc/embed/tv/?id=${id}${seasonPath}${episodePath}&server=mystream${langParam}`;
-    }
-
-    const playerContainer = document.createElement('div');
-    playerContainer.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
-    playerContainer.style.position = "fixed";
-    playerContainer.style.zIndex = "99999";
-
-    const controlsContainer = document.createElement('div');
-    controlsContainer.className = 'absolute top-4 right-4 flex items-center gap-2 z-10';
-
-    const fullscreenButton = document.createElement('button');
-    fullscreenButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize-2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" x2="14" y1="3" y2="10"></line><line x1="3" x2="10" y1="21" y2="14"></line></svg>`;
-    fullscreenButton.className = 'text-white w-10 h-10 flex items-center justify-center rounded-full bg-gray-600 hover:bg-gray-700 focus:outline-none mr-2';
-    fullscreenButton.onclick = () => {
-      if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
-      }
-    };
-
-    const closeButton = document.createElement('button');
-    closeButton.innerHTML = '×';
-    closeButton.className = 'text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 focus:outline-none';
-    closeButton.onclick = () => {
-      document.body.removeChild(playerContainer);
-      setIsPlayerOpen(false);
-    };
-
-    controlsContainer.appendChild(fullscreenButton);
-    controlsContainer.appendChild(closeButton);
-
-    const iframe = document.createElement('iframe');
-    iframe.src = streamUrl;
-    iframe.className = 'w-full h-full rounded-lg bg-black';
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
-
-    const loadingIndicator = document.createElement('div');
-    loadingIndicator.className = 'absolute inset-0 flex items-center justify-center bg-black/80';
-    loadingIndicator.innerHTML = '<div class="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>';
-
-    playerContainer.appendChild(loadingIndicator);
-    playerContainer.appendChild(controlsContainer);
-    playerContainer.appendChild(iframe);
-    document.body.appendChild(playerContainer);
-
-    iframe.onload = () => {
-      if (loadingIndicator.parentNode === playerContainer) {
-        playerContainer.removeChild(loadingIndicator);
-      }
-    };
-
-    iframe.focus();
   };
 
-  const handleAlternativeStreamClick = () => {
-    setIsPlayerOpen(true);
-
-    let seasonPath = "";
-    let episodePath = "";
-    if (mediaType === "tv") {
-      seasonPath = `/${selectedSeason}`;
-      episodePath = `/${selectedEpisode}`;
-    }
-    const vidsrcUrl = mediaType === 'movie'
-      ? `https://vidsrc.to/embed/movie/${id}`
-      : `https://vidsrc.to/embed/tv/${id}${seasonPath}${episodePath}`;
-      
-    const playerContainer = document.createElement('div');
-    playerContainer.className = 'fixed inset-0 z-50 bg-black flex items-center justify-center';
-    playerContainer.style.position = "fixed";
-    playerContainer.style.zIndex = "99999";
-
-    const controlsContainer = document.createElement('div');
-    controlsContainer.className = 'absolute top-4 right-4 flex items-center gap-2 z-10';
-
-    const fullscreenButton = document.createElement('button');
-    fullscreenButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-maximize-2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" x2="14" y1="3" y2="10"></line><line x1="3" x2="10" y1="21" y2="14"></line></svg>`;
-    fullscreenButton.className = 'text-white w-10 h-10 flex items-center justify-center rounded-full bg-gray-600 hover:bg-gray-700 focus:outline-none mr-2';
-    fullscreenButton.onclick = () => {
-      if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
-      }
-    };
-
-    const closeButton = document.createElement('button');
-    closeButton.innerHTML = '×';
-    closeButton.className = 'text-white text-3xl w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 focus:outline-none';
-    closeButton.onclick = () => {
-      document.body.removeChild(playerContainer);
-      setIsPlayerOpen(false);
-    };
-
-    controlsContainer.appendChild(fullscreenButton);
-    controlsContainer.appendChild(closeButton);
-
-    const iframe = document.createElement('iframe');
-    iframe.src = vidsrcUrl;
-    iframe.className = 'w-full h-full rounded-lg bg-black';
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
-
-    const loadingIndicator = document.createElement('div');
-    loadingIndicator.className = 'absolute inset-0 flex items-center justify-center bg-black/80';
-    loadingIndicator.innerHTML = '<div class="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>';
-
-    playerContainer.appendChild(loadingIndicator);
-    playerContainer.appendChild(controlsContainer);
-    playerContainer.appendChild(iframe);
-    document.body.appendChild(playerContainer);
-
-    iframe.onload = () => {
-      if (loadingIndicator.parentNode === playerContainer) {
-        playerContainer.removeChild(loadingIndicator);
-      }
-    };
-
-    iframe.focus();
+  // Close the video player
+  const handleClosePlayer = () => {
+    setIsPlayerOpen(false);
   };
 
   const handleStreamingClick = (url: string) => {
@@ -256,7 +118,7 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     }
   };
 
-  const availableLangs = SUPPORTED_LANGUAGES.map(l => l.code);
+  
 
   if (isLoading) {
     return (
@@ -365,38 +227,31 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2 items-center">
-        <Button
-          variant="outline"
-          className="bg-purple-600 hover:bg-purple-700 text-white border-purple-700 
-            focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
-            transition-all duration-200 hover:scale-105"
-          onClick={handleLiveStreamClick}
-          aria-label="Live Stream"
-          disabled={isPlayerOpen}
-        >
-          <Wifi className="mr-2 h-4 w-4" />
-          Live Stream
-          {mediaType === 'tv' && (
-            <span className="ml-2 text-xs bg-gray-800 px-2 py-0.5 rounded">
-              S{selectedSeason}:E{selectedEpisode}
-            </span>
-          )}
-        </Button>
+      {/* Video Player Modal */}
+      <VideoPlayer
+        isOpen={isPlayerOpen}
+        onClose={handleClosePlayer}
+        mediaType={mediaType}
+        tmdbId={id}
+        season={selectedSeason}
+        episode={selectedEpisode}
+        title={`${mediaType === 'tv' ? 'TV Show' : 'Movie'} - ID: ${id}`}
+      />
 
+      <div className="flex flex-wrap gap-2 items-center">
+        {/* Main Watch Now Button */}
         <Button
           variant="outline"
-          className="bg-red-600 hover:bg-red-700 text-white border-red-700 
+          className="bg-netflix-red hover:bg-netflix-red/90 text-white border-netflix-red 
             focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
             transition-all duration-200 hover:scale-105"
-          onClick={handleAlternativeStreamClick}
-          aria-label="Alternative Stream"
-          disabled={isPlayerOpen}
+          onClick={handleWatchNow}
+          aria-label="Watch Now"
         >
-          <Film className="mr-2 h-4 w-4" />
-          Alternative Stream
+          <Play className="mr-2 h-4 w-4 fill-white" />
+          Watch Now
           {mediaType === 'tv' && (
-            <span className="ml-2 text-xs bg-gray-800 px-2 py-0.5 rounded">
+            <span className="ml-2 text-xs bg-black/30 px-2 py-0.5 rounded">
               S{selectedSeason}:E{selectedEpisode}
             </span>
           )}
