@@ -1,11 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Play, Plus, Check, ChevronLeft, ChevronRight, Volume2, VolumeX, Info, Pause } from "lucide-react";
+import { Play, Plus, Check, ChevronLeft, ChevronRight, Info, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useToast } from "@/hooks/use-toast";
-import { getImageUrl, getVideos } from "@/services/tmdb";
+import { getImageUrl } from "@/services/tmdb";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
+
+// Vidking embed URL generator
+const getVidkingUrl = (mediaType: "movie" | "tv", id: number, season?: number, episode?: number) => {
+  if (mediaType === "tv" && season && episode) {
+    return `https://www.vidking.net/embed/tv/${id}/${season}/${episode}?autoPlay=true&nextEpisode=true`;
+  }
+  return `https://www.vidking.net/embed/movie/${id}?autoPlay=true&nextEpisode=true`;
+};
 
 interface HeroSliderProps {
   items: Array<{
@@ -24,14 +32,10 @@ interface HeroSliderProps {
 export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [videoData, setVideoData] = useState<Record<number, any>>({});
-  const [isMuted, setIsMuted] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [loadedVideos, setLoadedVideos] = useState<Set<number>>(new Set());
+  const [imageLoaded, setImageLoaded] = useState<Set<number>>(new Set());
   
-  const playerRefs = useRef<Record<number, HTMLIFrameElement | null>>({});
-  const playerReadyRef = useRef<Record<number, boolean>>({});
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
   
@@ -45,43 +49,6 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
   });
 
   const limitedItems = items.slice(0, 5);
-
-  // Fetch YouTube trailers for each item
-  useEffect(() => {
-    const fetchVideos = async () => {
-      const videoPromises = limitedItems.map(async (item) => {
-        try {
-          const mediaType = item.media_type || "movie";
-          const videos = await getVideos(mediaType, item.id);
-          // Find the best trailer (official trailer first, then any trailer)
-          const officialTrailer = videos.results?.find((video: any) => 
-            video.type === "Trailer" && 
-            video.site === "YouTube" && 
-            video.name?.toLowerCase().includes("official")
-          );
-          const anyTrailer = videos.results?.find((video: any) => 
-            video.type === "Trailer" && video.site === "YouTube"
-          );
-          return { id: item.id, trailer: officialTrailer || anyTrailer };
-        } catch (error) {
-          console.error(`Error fetching trailer for ${item.title || item.name}:`, error);
-          return { id: item.id, trailer: null };
-        }
-      });
-
-      const results = await Promise.all(videoPromises);
-      const videoMap = results.reduce((acc, { id, trailer }) => {
-        acc[id] = trailer;
-        return acc;
-      }, {} as Record<number, any>);
-      
-      setVideoData(videoMap);
-    };
-
-    if (limitedItems.length > 0) {
-      fetchVideos();
-    }
-  }, [limitedItems]);
 
   // Smart autoplay with hover detection
   const stopAutoplay = useCallback(() => {
@@ -115,8 +82,14 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
 
   const currentItem = limitedItems[currentIndex];
 
-  // Navigation handlers
+  // Navigation handlers - Open vidking embed in new window or navigate to details
   const handleWatchNow = (item: HeroSliderProps["items"][0]) => {
+    const mediaType = item.media_type || "movie";
+    const vidkingUrl = getVidkingUrl(mediaType, item.id);
+    window.open(vidkingUrl, '_blank');
+  };
+
+  const handleMoreInfo = (item: HeroSliderProps["items"][0]) => {
     const mediaType = item.media_type || "movie";
     const route = mediaType === "movie" ? `/movie/${item.id}` : `/tv/${item.id}`;
     navigate(route);
@@ -200,9 +173,6 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         handleWatchNow(currentItem);
-      } else if (e.key === 'm' || e.key === 'M') {
-        e.preventDefault();
-        toggleMute();
       }
     };
 
@@ -215,22 +185,6 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       <div className="relative w-full h-screen bg-netflix-black animate-pulse -mt-16" />
     );
   }
-
-  const toggleMute = () => {
-    const newMutedState = !isMuted;
-    setIsMuted(newMutedState);
-    
-    // Control all loaded players for smooth transition
-    Object.entries(playerRefs.current).forEach(([id, player]) => {
-      if (player && player.contentWindow && playerReadyRef.current[Number(id)]) {
-        const command = newMutedState ? 'mute' : 'unMute';
-        player.contentWindow.postMessage(
-          JSON.stringify({ event: 'command', func: command, args: [] }),
-          '*'
-        );
-      }
-    });
-  };
 
   const toggleAutoplay = () => {
     setIsAutoPlaying(prev => !prev);
@@ -250,11 +204,12 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       role="region"
       aria-label="Hero content slider"
     >
-      {/* Background Media with smooth transition */}
+      {/* Background Poster Images with smooth transition */}
       <div className="absolute inset-0 bg-netflix-black" />
       {limitedItems.map((item, index) => {
-        const hasTrailer = videoData[item.id];
         const isActive = index === currentIndex;
+        const isLoaded = imageLoaded.has(item.id);
+        
         return (
           <div 
             key={item.id} 
@@ -262,72 +217,27 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
               isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
-            {hasTrailer ? (
-              <div className="w-full h-full relative">
-                <iframe
-                  ref={(el) => {
-                    if (el) {
-                      playerRefs.current[item.id] = el;
-                      // Initialize player when it becomes active
-                      if (isActive && !loadedVideos.has(item.id)) {
-                        el.onload = () => {
-                          setTimeout(() => {
-                            playerReadyRef.current[item.id] = true;
-                            setLoadedVideos(prev => new Set([...prev, item.id]));
-                            
-                            if (el.contentWindow && isIntersecting) {
-                              // Auto-play with current mute state
-                              el.contentWindow.postMessage(
-                                JSON.stringify({ 
-                                  event: 'command', 
-                                  func: isMuted ? 'mute' : 'unMute', 
-                                  args: [] 
-                                }),
-                                '*'
-                              );
-                              // Set full volume
-                              el.contentWindow.postMessage(
-                                JSON.stringify({ 
-                                  event: 'command', 
-                                  func: 'setVolume', 
-                                  args: [100] 
-                                }),
-                                '*'
-                              );
-                              // Play the video
-                              el.contentWindow.postMessage(
-                                JSON.stringify({ 
-                                  event: 'command', 
-                                  func: 'playVideo', 
-                                  args: [] 
-                                }),
-                                '*'
-                              );
-                            }
-                          }, 1000);
-                        };
-                      }
-                    }
-                  }}
-                  src={`https://www.youtube.com/embed/${hasTrailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=${hasTrailer.key}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.77vh] h-[56.25vw] min-h-full min-w-full"
-                  style={{ pointerEvents: 'none' }}
-                  allow="autoplay; encrypted-media"
-                  title={`${item.title || item.name} trailer`}
-                  loading={isActive ? 'eager' : 'lazy'}
-                />
-              </div>
-            ) : (
-              <img
-                src={getImageUrl(item.backdrop_path, 'original')}
-                alt={`${item.title || item.name} backdrop`}
-                className="w-full h-full object-cover"
-                loading={isActive ? 'eager' : 'lazy'}
-                onError={(e) => {
-                  e.currentTarget.src = 'https://placehold.co/1920x1080?text=No+Image';
-                }}
-              />
+            {/* Loading skeleton */}
+            {!isLoaded && isActive && (
+              <div className="absolute inset-0 bg-gray-800 animate-pulse" />
             )}
+            
+            {/* Poster Image */}
+            <img
+              src={getImageUrl(item.backdrop_path, 'original')}
+              alt={`${item.title || item.name} backdrop`}
+              className={`w-full h-full object-cover transition-opacity duration-500 ${
+                isLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              loading={isActive ? 'eager' : 'lazy'}
+              onLoad={() => {
+                setImageLoaded(prev => new Set([...prev, item.id]));
+              }}
+              onError={(e) => {
+                e.currentTarget.src = 'https://placehold.co/1920x1080?text=No+Image';
+                setImageLoaded(prev => new Set([...prev, item.id]));
+              }}
+            />
           </div>
         );
       })}
@@ -346,17 +256,6 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
         >
           {isAutoPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
         </button>
-        
-        {/* Mute/Unmute Button */}
-        {videoData[currentItem.id] && (
-          <button
-            onClick={toggleMute}
-            className="bg-black/50 hover:bg-black/70 text-white p-2.5 rounded-full border-2 border-white/40 hover:border-white/70 transition-all duration-200 hover:scale-110"
-            aria-label={isMuted ? "Unmute trailer" : "Mute trailer"}
-          >
-            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-          </button>
-        )}
       </div>
       
       {/* Navigation Arrows - Visible on hover */}
