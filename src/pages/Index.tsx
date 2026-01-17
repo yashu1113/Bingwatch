@@ -10,6 +10,7 @@ import { IndianSection } from '@/components/IndianSection';
 import { UpcomingMovies } from '@/components/UpcomingMovies';
 import { WatchlistRecommendations } from '@/components/WatchlistRecommendations';
 import { ContinueWatchingSection } from '@/components/ContinueWatchingSection';
+import { AIRecommendations } from '@/components/AIRecommendations';
 import { getImageUrl } from '@/services/tmdb';
 
 const FEATURED_GENRES = [
@@ -68,6 +69,9 @@ const Index = () => {
       <main className="container space-y-12 py-8">
         {/* Continue Watching Section */}
         <ContinueWatchingSection />
+
+        {/* AI Recommendations */}
+        <AIRecommendations />
 
         {/* Trending Section - Netflix Style */}
         <NetflixSlider items={trendingItems} title="Trending Now" />
