@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Fuse from 'fuse.js';
 import { useDebounce } from '@/hooks/use-debounce';
 import { fuzzySearch, FuzzySearchResult } from '@/services/fuzzySearch';
 import { useQuery } from '@tanstack/react-query';
@@ -10,39 +9,24 @@ import { SearchSuggestions } from './search/SearchSuggestions';
 export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
   const [query, setQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const debouncedQuery = useDebounce(query, 300);
   const navigate = useNavigate();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const { data: searchResults } = useQuery({
+  const { data: searchResults, isLoading } = useQuery({
     queryKey: ['fuzzy-search-suggestions', debouncedQuery],
     queryFn: () => fuzzySearch(debouncedQuery),
     enabled: debouncedQuery.length > 1,
-    staleTime: 1000 * 60 * 5, // Cache results for 5 minutes
+    staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
 
-  const fuse = new Fuse(searchResults?.results || [], {
-    keys: [
-      { name: 'title', weight: 0.7 },
-      { name: 'name', weight: 0.7 },
-      { name: 'original_title', weight: 0.5 },
-      { name: 'original_name', weight: 0.5 },
-      { name: 'overview', weight: 0.2 },
-    ],
-    threshold: 0.6, // More forgiving for typos
-    includeScore: true,
-    ignoreLocation: true,
-    findAllMatches: true,
-    minMatchCharLength: 2,
-    shouldSort: true,
-    includeMatches: true,
-  });
-
-  const suggestions = debouncedQuery
-    ? (fuse.search(debouncedQuery) as Array<{ item: FuzzySearchResult; score: number }>)
-      .sort((a, b) => (b.item.popularity || 0) - (a.item.popularity || 0))
-      .slice(0, 5)
-    : searchResults?.results?.slice(0, 5)?.map(item => ({ item, score: 0 })) || [];
+  // Direct suggestions from search results - no double Fuse processing
+  const suggestions = searchResults?.results?.slice(0, 6).map(item => ({ 
+    item, 
+    score: 0 
+  })) || [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,35 +34,84 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
       setQuery('');
       setShowSuggestions(false);
+      setSelectedIndex(-1);
       onSearch?.();
     }
   };
 
   const handleSuggestionClick = (suggestion: FuzzySearchResult) => {
-    const title = suggestion.title || suggestion.name;
-    navigate(`/search?q=${encodeURIComponent(title || '')}`);
+    // Navigate directly to the detail page instead of search
+    const mediaType = suggestion.media_type;
+    navigate(`/${mediaType}/${suggestion.id}`);
     setQuery('');
     setShowSuggestions(false);
+    setSelectedIndex(-1);
     onSearch?.();
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev < suggestions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev > 0 ? prev - 1 : suggestions.length - 1
+        );
+        break;
+      case 'Enter':
+        if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+          e.preventDefault();
+          handleSuggestionClick(suggestions[selectedIndex].item);
+        }
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        setSelectedIndex(-1);
+        break;
+    }
+  };
+
+  // Click outside to close
   useEffect(() => {
-    const shouldShowSuggestions = debouncedQuery.length > 1 && 
-      (searchResults?.results?.length || 0) > 0;
-    setShowSuggestions(shouldShowSuggestions);
-  }, [debouncedQuery, searchResults]);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+        setSelectedIndex(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const shouldShow = debouncedQuery.length > 1 && suggestions.length > 0;
+    setShowSuggestions(shouldShow);
+    setSelectedIndex(-1);
+  }, [debouncedQuery, suggestions.length]);
 
   return (
-    <div className="relative w-full max-w-[90vw] md:max-w-2xl">
+    <div ref={containerRef} className="relative w-full max-w-[90vw] md:max-w-2xl">
       <SearchInput 
         query={query}
         onChange={setQuery}
         onSubmit={handleSubmit}
+        onKeyDown={handleKeyDown}
+        isLoading={isLoading && debouncedQuery.length > 1}
       />
       {showSuggestions && suggestions.length > 0 && (
         <SearchSuggestions 
           suggestions={suggestions}
           onSuggestionClick={handleSuggestionClick}
+          selectedIndex={selectedIndex}
+          correctedQuery={searchResults?.correctedQuery}
         />
       )}
     </div>
