@@ -1,31 +1,44 @@
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 
 interface SearchInputProps {
   query: string;
   onChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
+  isLoading?: boolean;
 }
 
-export const SearchInput = ({ query, onChange, onSubmit }: SearchInputProps) => {
+export const SearchInput = ({ 
+  query, 
+  onChange, 
+  onSubmit, 
+  onKeyDown,
+  isLoading 
+}: SearchInputProps) => {
   return (
-    <form onSubmit={onSubmit} className="relative">
+    <form onSubmit={onSubmit} className="relative group">
       <Input
         type="search"
-        placeholder="Search movies, TV shows... (typos OK!)"
+        placeholder="Search movies, TV shows..."
         value={query}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-12 pr-4 py-4 md:py-6 text-base md:text-lg rounded-xl 
-          border-2 focus:border-primary focus:ring-2 focus:ring-primary bg-background/80 
-          text-foreground placeholder:text-foreground/50
-          font-medium leading-relaxed
-          shadow-lg backdrop-blur-sm
-          h-[56px] md:h-[68px]"
-        style={{
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-        }}
+        onKeyDown={onKeyDown}
+        className="w-full pl-12 pr-12 py-3 md:py-4 text-sm md:text-base rounded-xl 
+          border border-white/20 focus:border-netflix-red focus:ring-2 focus:ring-netflix-red/30 
+          bg-black/80 text-white placeholder:text-white/40
+          font-medium leading-relaxed backdrop-blur-md
+          h-[48px] md:h-[56px]
+          transition-all duration-300
+          group-hover:border-white/30"
       />
-      <Search className="absolute left-4 top-1/2 h-6 w-6 md:h-7 md:w-7 -translate-y-1/2 text-foreground/60" />
+      <div className="absolute left-4 top-1/2 -translate-y-1/2">
+        {isLoading ? (
+          <Loader2 className="h-5 w-5 text-white/50 animate-spin" />
+        ) : (
+          <Search className="h-5 w-5 text-white/50 group-hover:text-white/70 transition-colors" />
+        )}
+      </div>
     </form>
   );
 };
