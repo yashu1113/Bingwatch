@@ -50,7 +50,14 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showSuggestions || suggestions.length === 0) return;
+    // Only handle navigation keys when suggestions are shown
+    if (!showSuggestions || suggestions.length === 0) {
+      // Allow form submission with Enter when no suggestions
+      if (e.key === 'Enter') {
+        return; // Let form handle it
+      }
+      return;
+    }
 
     switch (e.key) {
       case 'ArrowDown':
@@ -66,15 +73,18 @@ export const SearchBar = ({ onSearch }: { onSearch?: () => void }) => {
         );
         break;
       case 'Enter':
+        // Only navigate to suggestion if one is selected
         if (selectedIndex >= 0 && suggestions[selectedIndex]) {
           e.preventDefault();
           handleSuggestionClick(suggestions[selectedIndex].item);
         }
+        // Otherwise let form submit normally
         break;
       case 'Escape':
         setShowSuggestions(false);
         setSelectedIndex(-1);
         break;
+      // Don't handle Space - let it type normally
     }
   };
 

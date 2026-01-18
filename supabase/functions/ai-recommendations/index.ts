@@ -16,7 +16,9 @@ interface WatchlistItem {
 interface RecommendationRequest {
   watchlist: WatchlistItem[];
   continueWatching?: WatchlistItem[];
+  searchHistory?: string[];
   mood?: string;
+  isNewUser?: boolean;
 }
 
 serve(async (req) => {
@@ -26,7 +28,7 @@ serve(async (req) => {
   }
 
   try {
-    const { watchlist, continueWatching, mood } = await req.json() as RecommendationRequest;
+    const { watchlist, continueWatching, searchHistory, mood, isNewUser } = await req.json() as RecommendationRequest;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -43,15 +45,48 @@ serve(async (req) => {
       `${item.title} (${item.media_type})`
     ).join(', ') || 'None';
 
+    const recentSearches = searchHistory?.length 
+      ? `Recent searches: ${searchHistory.join(', ')}`
+      : '';
+
     const moodContext = mood ? `The user is in the mood for: ${mood}` : '';
 
-    const systemPrompt = `You are a movie and TV show recommendation expert. Based on the user's watchlist and viewing history, suggest 5 personalized recommendations. 
+    // Different prompts for new vs returning users
+    let systemPrompt: string;
+    let userPrompt: string;
+
+    if (isNewUser) {
+      systemPrompt = `You are a movie and TV show recommendation expert. Since this is a new user with no viewing history, recommend 5 popular, highly-rated titles that appeal to a wide audience. Include a mix of:
+- Recent blockbusters and critically acclaimed films
+- Popular streaming series
+- Hidden gems that are universally loved
+- Mix of different genres
+
+Format your response as a JSON object with this structure:
+{
+  "recommendations": [
+    {
+      "title": "Movie/Show Title",
+      "type": "movie" or "tv",
+      "year": 2023,
+      "reason": "Brief explanation why this is a must-watch",
+      "matchScore": 90
+    }
+  ],
+  "summary": "Welcome! Here are some top picks to get you started"
+}`;
+
+      userPrompt = `Give me 5 highly recommended movies and TV shows for a new viewer. ${moodContext}
+      
+Focus on universally loved titles that are great starting points. Include recent releases and timeless classics.`;
+    } else {
+      systemPrompt = `You are a movie and TV show recommendation expert. Based on the user's watchlist, viewing history, and search behavior, suggest 5 personalized recommendations. 
 
 Be specific and explain WHY each recommendation fits their taste. Consider:
-- Similar genres and themes
-- Directors and actors they might like
+- Similar genres and themes from their watchlist
+- Directors and actors they might like based on their history
 - Hidden gems they may have missed
-- Mix of popular and lesser-known titles
+- Their recent search interests
 
 Format your response as a JSON object with this structure:
 {
@@ -67,15 +102,17 @@ Format your response as a JSON object with this structure:
   "summary": "A brief personalized message about their taste"
 }`;
 
-    const userPrompt = `Based on my preferences, give me personalized recommendations:
+      userPrompt = `Based on my preferences, give me personalized recommendations:
 
 My Watchlist: ${watchlistTitles}
 Currently Watching: ${recentlyWatching}
+${recentSearches}
 ${moodContext}
 
 Give me 5 recommendations that match my taste. Be specific about why each fits my preferences.`;
+    }
 
-    console.log("Calling Lovable AI for recommendations...");
+    console.log("Calling Lovable AI for recommendations...", { isNewUser, hasWatchlist: watchlist?.length > 0 });
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
