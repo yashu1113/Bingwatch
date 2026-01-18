@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useContinueWatching } from '@/contexts/ContinueWatchingContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +6,7 @@ import { Sparkles, Loader2, RefreshCw, Film, Tv, Star, ExternalLink } from 'luci
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface Recommendation {
   title: string;
@@ -29,6 +30,8 @@ export const AIRecommendations = () => {
   const { watchProgress } = useContinueWatching();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchHistory] = useLocalStorage<string[]>('search-history', []);
+  const [hasAutoFetched, setHasAutoFetched] = useState(false);
 
   const moods = [
     { label: 'Action-packed', emoji: '💥' },
@@ -39,15 +42,11 @@ export const AIRecommendations = () => {
     { label: 'Funny', emoji: '😂' },
   ];
 
-  const getRecommendations = async () => {
-    if (watchlist.length === 0 && watchProgress.length === 0) {
-      toast({
-        title: "Add some titles first!",
-        description: "Add movies or shows to your watchlist for personalized recommendations.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const getRecommendations = useCallback(async (isAutoFetch = false) => {
+    // Build context from available data
+    const hasWatchlist = watchlist.length > 0;
+    const hasWatchProgress = watchProgress.length > 0;
+    const hasSearchHistory = searchHistory.length > 0;
 
     setIsLoading(true);
     try {
@@ -63,14 +62,16 @@ export const AIRecommendations = () => {
             title: item.title,
             media_type: item.mediaType,
           })),
+          searchHistory: searchHistory.slice(0, 10), // Last 10 searches
           mood: mood || undefined,
+          isNewUser: !hasWatchlist && !hasWatchProgress && !hasSearchHistory,
         },
       });
 
       if (error) throw error;
 
       setRecommendations(data);
-      if (data.error) {
+      if (data.error && !isAutoFetch) {
         toast({
           title: "Couldn't generate recommendations",
           description: data.error,
@@ -79,15 +80,25 @@ export const AIRecommendations = () => {
       }
     } catch (error) {
       console.error('Error getting AI recommendations:', error);
-      toast({
-        title: "Error",
-        description: "Failed to get recommendations. Please try again.",
-        variant: "destructive",
-      });
+      if (!isAutoFetch) {
+        toast({
+          title: "Error",
+          description: "Failed to get recommendations. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [watchlist, watchProgress, searchHistory, mood, toast]);
+
+  // Auto-fetch recommendations on mount
+  useEffect(() => {
+    if (!hasAutoFetched && !recommendations) {
+      setHasAutoFetched(true);
+      getRecommendations(true);
+    }
+  }, [hasAutoFetched, recommendations, getRecommendations]);
 
   const searchTitle = (title: string, type: 'movie' | 'tv') => {
     navigate(`/search?q=${encodeURIComponent(title)}`);
@@ -123,7 +134,7 @@ export const AIRecommendations = () => {
 
         {/* Get Recommendations Button */}
         <Button
-          onClick={getRecommendations}
+          onClick={() => getRecommendations(false)}
           disabled={isLoading}
           className="mb-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 
             text-white font-semibold px-6 py-3 rounded-xl shadow-lg 
@@ -203,11 +214,11 @@ export const AIRecommendations = () => {
           </div>
         )}
 
-        {/* Empty State */}
-        {!recommendations && !isLoading && (
-          <div className="text-center py-12 text-white/50">
-            <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p>Add titles to your watchlist and click the button above to get personalized AI recommendations!</p>
+        {/* Loading State - always show something */}
+        {isLoading && !recommendations && (
+          <div className="text-center py-12">
+            <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-purple-400" />
+            <p className="text-white/70">Analyzing trending content and your preferences...</p>
           </div>
         )}
       </div>

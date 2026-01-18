@@ -1,12 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
 import { fuzzySearch } from '@/services/fuzzySearch';
 import { MediaGrid } from '@/components/MediaGrid';
 import { NotFound } from '@/components/NotFound';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
+  const [searchHistory, setSearchHistory] = useLocalStorage<string[]>('search-history', []);
+
+  // Save search to history for AI recommendations
+  useEffect(() => {
+    if (query && query.trim()) {
+      setSearchHistory(prev => {
+        const newHistory = [query.trim(), ...prev.filter(q => q !== query.trim())].slice(0, 20);
+        return newHistory;
+      });
+    }
+  }, [query, setSearchHistory]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['fuzzy-search', query],
