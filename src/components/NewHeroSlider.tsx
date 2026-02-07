@@ -142,11 +142,21 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
     toast({ title: "Added to Watchlist", description: `${mediaItem.title} added to your watchlist` });
   }, [addToWatchlist, isInWatchlist, toast]);
 
-  // Keyboard navigation
+  // Keyboard navigation - only for arrow keys, no Enter/Space to prevent conflicts with search
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isIntersecting || showVideoPlayer) return;
       
+      // Don't interfere if user is typing in an input, search bar, or any form element
+      const activeElement = document.activeElement;
+      const isTyping = activeElement instanceof HTMLInputElement || 
+                       activeElement instanceof HTMLTextAreaElement ||
+                       activeElement?.getAttribute('role') === 'combobox' ||
+                       activeElement?.closest('[data-search-input]');
+      
+      if (isTyping) return;
+      
+      // Only handle arrow keys for navigation - removed Enter/Space to prevent conflicts
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault();
@@ -156,19 +166,12 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
           e.preventDefault();
           nextSlide();
           break;
-        case 'Enter':
-        case ' ':
-          e.preventDefault();
-          if (currentItem) {
-            handleWatchNow(currentItem);
-          }
-          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isIntersecting, prevSlide, nextSlide, handleWatchNow, showVideoPlayer]);
+  }, [isIntersecting, prevSlide, nextSlide, showVideoPlayer]);
 
   if (!limitedItems.length) {
     return (

@@ -67,7 +67,7 @@ export const DetailHeader = ({
   const [omdbData, setOmdbData] = useState<OMDbMovie | null>(null);
   const [isLoadingOMDb, setIsLoadingOMDb] = useState(false);
 
-  // Simulate watching progress on page view
+  // Simulate watching progress on page view - includes TV show season/episode
   useEffect(() => {
     const timer = setTimeout(() => {
       updateProgress({
@@ -77,12 +77,16 @@ export const DetailHeader = ({
         mediaType,
         progress: Math.floor(Math.random() * 30) + 1, // 1-30% for demo
         lastWatched: new Date().toISOString(),
-        runtime
+        runtime,
+        // TV show specific - start with first episode
+        currentSeason: mediaType === 'tv' ? 1 : undefined,
+        currentEpisode: mediaType === 'tv' ? 1 : undefined,
+        totalSeasons: mediaType === 'tv' && seasons ? seasons.length : undefined,
       });
     }, 3000); // Update after 3 seconds on page
 
     return () => clearTimeout(timer);
-  }, [id]);
+  }, [id, title, posterPath, mediaType, runtime, seasons, updateProgress]);
 
   // Check language availability
   const availableLanguageCodes = spokenLanguages?.map(lang => lang.iso_639_1) || [];

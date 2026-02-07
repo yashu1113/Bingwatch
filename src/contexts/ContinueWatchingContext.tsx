@@ -10,6 +10,11 @@ export interface WatchProgress {
   lastWatched: string;
   runtime?: number;
   currentTime?: number;
+  // TV show specific
+  currentSeason?: number;
+  currentEpisode?: number;
+  totalSeasons?: number;
+  episodesWatched?: number;
 }
 
 interface ContinueWatchingContextType {
