@@ -1,16 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getWatchProviders } from "@/services/tmdb";
-import { Loader2, Play, ChevronDown } from "lucide-react";
+import { Loader2, Play } from "lucide-react";
 import { memo, useState } from "react";
-import { 
-  Tabs, 
-  TabsList, 
-  TabsTrigger, 
-  TabsContent 
-} from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { VideoPlayer } from "@/components/VideoPlayer";
+import { EpisodeSelector } from "@/components/EpisodeSelector";
 
 interface StreamingButtonsProps {
   mediaType: 'movie' | 'tv';
@@ -47,23 +42,10 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     refetchInterval: 1000 * 60 * 60 * 6,
   });
 
-  const getEpisodeCount = () => {
-    if (!seasons) return 0;
-    const season = seasons.find(s => s.season_number === selectedSeason);
-    return season ? season.episode_count : 0;
-  };
-
-  const generateEpisodeNumbers = () => {
-    const count = getEpisodeCount();
-    return Array.from({ length: count }, (_, i) => i + 1);
-  };
-
-  // Open the video player with vidking.net embed
   const handleWatchNow = () => {
     setIsPlayerOpen(true);
   };
 
-  // Close the video player
   const handleClosePlayer = () => {
     setIsPlayerOpen(false);
   };
@@ -76,21 +58,16 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
   const handleDownloadClick = async () => {
     if (mediaType === "movie") {
       try {
-        // Primary download URL
         const downloadUrl = `https://dl.letsembed.cc/?id=${id}`;
-        
-        // Check if the URL is accessible before opening
         const newWindow = window.open(downloadUrl, "_blank", "noopener,noreferrer");
         
         if (!newWindow) {
-          // Fallback if popup is blocked
           toast({
             title: "Pop-up Blocked",
             description: "Please allow pop-ups for this site to enable downloads.",
             variant: "destructive"
           });
           
-          // Alternative: try to navigate directly
           const userConfirmed = confirm("Pop-up was blocked. Click OK to navigate to download page directly.");
           if (userConfirmed) {
             window.location.href = downloadUrl;
@@ -117,8 +94,6 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
       });
     }
   };
-
-  
 
   if (isLoading) {
     return (
@@ -167,64 +142,6 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     );
   };
 
-  const renderSeasonSelector = () => {
-    if (!seasons || seasons.length === 0 || mediaType !== 'tv') return null;
-    
-    return (
-      <div className="mt-4">
-        <h4 className="text-sm font-medium mb-2">Episodes:</h4>
-        <Tabs defaultValue="season" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-gray-800">
-            <TabsTrigger value="season">Season</TabsTrigger>
-            <TabsTrigger value="episode">Episode</TabsTrigger>
-          </TabsList>
-          <TabsContent value="season" className="bg-gray-900 rounded-b-lg p-3">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-              {seasons.map((season) => (
-                <Button
-                  key={season.season_number}
-                  variant="outline" 
-                  size="sm"
-                  className={`flex items-center justify-between ${
-                    selectedSeason === season.season_number 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-800 hover:bg-gray-700'
-                  }`}
-                  onClick={() => {
-                    setSelectedSeason(season.season_number);
-                    setSelectedEpisode(1);
-                  }}
-                >
-                  <span>{season.name}</span>
-                  <span className="text-xs opacity-70">({season.episode_count})</span>
-                </Button>
-              ))}
-            </div>
-          </TabsContent>
-          <TabsContent value="episode" className="bg-gray-900 rounded-b-lg p-3">
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-48 overflow-y-auto">
-              {generateEpisodeNumbers().map((epNum) => (
-                <Button
-                  key={epNum}
-                  variant="outline"
-                  size="sm"
-                  className={`${
-                    selectedEpisode === epNum 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-800 hover:bg-gray-700'
-                  }`}
-                  onClick={() => setSelectedEpisode(epNum)}
-                >
-                  {epNum}
-                </Button>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-4">
       {/* Video Player Modal */}
@@ -238,41 +155,48 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
         title={`${mediaType === 'tv' ? 'TV Show' : 'Movie'} - ID: ${id}`}
       />
 
-      <div className="flex flex-wrap gap-2 items-center">
-        {/* Main Watch Now Button */}
-        <Button
-          variant="outline"
-          className="bg-netflix-red hover:bg-netflix-red/90 text-white border-netflix-red 
-            focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
-            transition-all duration-200 hover:scale-105"
-          onClick={handleWatchNow}
-          aria-label="Watch Now"
-        >
-          <Play className="mr-2 h-4 w-4 fill-white" />
-          Watch Now
-          {mediaType === 'tv' && (
-            <span className="ml-2 text-xs bg-black/30 px-2 py-0.5 rounded">
-              S{selectedSeason}:E{selectedEpisode}
-            </span>
-          )}
-        </Button>
-
-        {mediaType === 'movie' && (
+      {/* TV Show Episode Selector */}
+      {mediaType === 'tv' && seasons && seasons.length > 0 ? (
+        <EpisodeSelector
+          seasons={seasons}
+          selectedSeason={selectedSeason}
+          selectedEpisode={selectedEpisode}
+          onSeasonChange={setSelectedSeason}
+          onEpisodeChange={setSelectedEpisode}
+          onPlay={handleWatchNow}
+        />
+      ) : (
+        <div className="flex flex-wrap gap-2 items-center">
+          {/* Main Watch Now Button for Movies */}
           <Button
             variant="outline"
-            className="bg-green-700 hover:bg-green-800 text-white border-green-800 transition-all duration-200 hover:scale-105"
-            onClick={handleDownloadClick}
-            aria-label="Download"
+            className="bg-netflix-red hover:bg-netflix-red/90 text-white border-netflix-red 
+              focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
+              transition-all duration-200 hover:scale-105"
+            onClick={handleWatchNow}
+            aria-label="Watch Now"
           >
-            <span className="mr-2">
-              <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" strokeLinejoin="round" strokeLinecap="round"/></svg>
-            </span>
-            Download
+            <Play className="mr-2 h-4 w-4 fill-white" />
+            Watch Now
           </Button>
-        )}
-      </div>
 
-      {mediaType === 'tv' && seasons && seasons.length > 0 && renderSeasonSelector()}
+          {mediaType === 'movie' && (
+            <Button
+              variant="outline"
+              className="bg-green-700 hover:bg-green-800 text-white border-green-800 transition-all duration-200 hover:scale-105"
+              onClick={handleDownloadClick}
+              aria-label="Download"
+            >
+              <span className="mr-2">
+                <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" strokeLinejoin="round" strokeLinecap="round"/>
+                </svg>
+              </span>
+              Download
+            </Button>
+          )}
+        </div>
+      )}
 
       {streamingProviders.length > 0 && (
         <div>
