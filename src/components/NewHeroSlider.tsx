@@ -77,12 +77,15 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
     return () => stopAutoplay();
   }, [isIntersecting, isHovering, isTransitioning, startAutoplay, stopAutoplay]);
 
-  // Navigation handlers
-  const handleWatchNow = useCallback(() => {
+  // Navigation handlers - capture item at click time to prevent stale closure
+  const handleWatchNow = useCallback((item: typeof limitedItems[0]) => {
+    setCurrentItemForPlayer(item);
     setShowVideoPlayer(true);
   }, []);
 
-  const handleMoreInfo = useCallback((item: typeof currentItem) => {
+  const [currentItemForPlayer, setCurrentItemForPlayer] = useState<typeof limitedItems[0] | null>(null);
+
+  const handleMoreInfo = useCallback((item: typeof limitedItems[0]) => {
     const route = item.media_type === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`;
     navigate(route);
   }, [navigate]);
@@ -156,7 +159,9 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
         case 'Enter':
         case ' ':
           e.preventDefault();
-          handleWatchNow();
+          if (currentItem) {
+            handleWatchNow(currentItem);
+          }
           break;
       }
     };
@@ -323,7 +328,7 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
                   className="bg-white text-black hover:bg-white/90 px-8 py-6 text-base font-bold 
                              rounded-md shadow-xl transition-all duration-200 
                              hover:scale-105 active:scale-95 group"
-                  onClick={handleWatchNow}
+                  onClick={() => handleWatchNow(currentItem)}
                   aria-label={`Play ${currentItem.title || currentItem.name}`}
                 >
                   <Play className="mr-2 h-5 w-5 fill-black group-hover:scale-110 transition-transform" />
@@ -399,13 +404,16 @@ export const NewHeroSlider = ({ items }: HeroSliderProps) => {
       </div>
 
       {/* Video Player Modal */}
-      {showVideoPlayer && currentItem && (
+      {showVideoPlayer && currentItemForPlayer && (
         <VideoPlayer
           isOpen={showVideoPlayer}
-          onClose={() => setShowVideoPlayer(false)}
-          mediaType={mediaType}
-          tmdbId={currentItem.id}
-          title={currentItem.title || currentItem.name}
+          onClose={() => {
+            setShowVideoPlayer(false);
+            setCurrentItemForPlayer(null);
+          }}
+          mediaType={currentItemForPlayer.media_type || "movie"}
+          tmdbId={currentItemForPlayer.id}
+          title={currentItemForPlayer.title || currentItemForPlayer.name}
         />
       )}
 

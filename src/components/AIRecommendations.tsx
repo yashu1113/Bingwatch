@@ -32,6 +32,16 @@ interface AIResponse {
   error?: string;
 }
 
+interface CachedRecommendations {
+  recommendations: EnhancedRecommendation[];
+  summary: string;
+  timestamp: number;
+  watchlistLength: number;
+  watchProgressLength: number;
+}
+
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes cache
+
 export const AIRecommendations = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<EnhancedRecommendation[]>([]);
@@ -44,7 +54,8 @@ export const AIRecommendations = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchHistory] = useLocalStorage<string[]>('search-history', []);
-  const [hasAutoFetched, setHasAutoFetched] = useState(false);
+  const [cachedRecs, setCachedRecs] = useLocalStorage<CachedRecommendations | null>('ai-recommendations-cache', null);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   const moods = [
     { label: 'Action-packed', emoji: '💥', gradient: 'from-orange-500 to-red-600' },
@@ -89,7 +100,24 @@ export const AIRecommendations = () => {
     return enriched;
   };
 
-  const getRecommendations = useCallback(async (isAutoFetch = false) => {
+  // Check if cache is valid
+  const isCacheValid = useCallback(() => {
+    if (!cachedRecs) return false;
+    const now = Date.now();
+    const cacheAge = now - cachedRecs.timestamp;
+    const dataChanged = cachedRecs.watchlistLength !== watchlist.length || 
+                       cachedRecs.watchProgressLength !== watchProgress.length;
+    return cacheAge < CACHE_DURATION && !dataChanged;
+  }, [cachedRecs, watchlist.length, watchProgress.length]);
+
+  const getRecommendations = useCallback(async (isAutoFetch = false, forceFetch = false) => {
+    // Use cache if valid and not forcing refresh
+    if (!forceFetch && isAutoFetch && isCacheValid() && cachedRecs) {
+      setRecommendations(cachedRecs.recommendations);
+      setSummary(cachedRecs.summary);
+      return;
+    }
+
     const hasWatchlist = watchlist.length > 0;
     const hasWatchProgress = watchProgress.length > 0;
     const hasSearchHistory = searchHistory.length > 0;
@@ -120,6 +148,15 @@ export const AIRecommendations = () => {
         const enriched = await enrichWithTMDB(data.recommendations);
         setRecommendations(enriched);
         setSummary(data.summary || '');
+        
+        // Cache the results
+        setCachedRecs({
+          recommendations: enriched,
+          summary: data.summary || '',
+          timestamp: Date.now(),
+          watchlistLength: watchlist.length,
+          watchProgressLength: watchProgress.length,
+        });
       }
 
       if (data?.error && !isAutoFetch) {
@@ -141,14 +178,15 @@ export const AIRecommendations = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [watchlist, watchProgress, searchHistory, mood, toast]);
+  }, [watchlist, watchProgress, searchHistory, mood, toast, isCacheValid, cachedRecs, setCachedRecs]);
 
+  // Initialize from cache or fetch
   useEffect(() => {
-    if (!hasAutoFetched) {
-      setHasAutoFetched(true);
-      getRecommendations(true);
+    if (!hasInitialized) {
+      setHasInitialized(true);
+      getRecommendations(true, false);
     }
-  }, [hasAutoFetched, getRecommendations]);
+  }, [hasInitialized, getRecommendations]);
 
   const handlePlay = (rec: EnhancedRecommendation) => {
     if (rec.tmdbId) {
@@ -189,7 +227,7 @@ export const AIRecommendations = () => {
             </div>
             
             <Button
-              onClick={() => getRecommendations(false)}
+              onClick={() => getRecommendations(false, true)}
               disabled={isLoading}
               size="lg"
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 
@@ -223,7 +261,7 @@ export const AIRecommendations = () => {
                   onClick={() => {
                     setMood(mood === label ? '' : label);
                     if (mood !== label) {
-                      setTimeout(() => getRecommendations(false), 100);
+                      setTimeout(() => getRecommendations(false, true), 100);
                     }
                   }}
                   className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300
