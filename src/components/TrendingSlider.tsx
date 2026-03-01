@@ -1,7 +1,9 @@
 import React, { Suspense, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
+// @ts-ignore
 import 'swiper/css';
+// @ts-ignore
 import 'swiper/css/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getTrending } from '@/services/tmdb';
