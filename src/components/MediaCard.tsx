@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Plus, Check, Play, Info, ExternalLink } from 'lucide-react';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useToast } from '@/hooks/use-toast';
-import { LanguageIndicator } from '@/components/LanguageIndicator';
+
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { getOMDbDetails, OMDbMovie } from '@/services/omdb';
@@ -89,9 +89,6 @@ export const MediaCard = ({
             N
           </div>
         </div>
-
-        {/* Language Indicator */}
-        <LanguageIndicator originalLanguage={originalLanguage} />
 
         {!imageError ? (
           <img

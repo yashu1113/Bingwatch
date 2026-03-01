@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
 import { SearchBar } from './SearchBar';
-import { LanguageSelector } from './LanguageSelector';
 import { cn } from '@/lib/utils';
 import { Menu, X, Home, Search, List } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -70,7 +69,6 @@ export const Navigation = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <LanguageSelector />
             <div className="hidden md:block">
               <SearchBar />
             </div>

@@ -14,7 +14,7 @@ import GenrePage from "./pages/GenrePage";
 import { Navigation } from "./components/Navigation";
 import { WatchlistProvider } from "./contexts/WatchlistContext";
 import { ContinueWatchingProvider } from "./contexts/ContinueWatchingContext";
-import { LanguagePreferenceProvider } from "./contexts/LanguagePreferenceContext";
+
 import { LoadingScreen } from "./components/LoadingScreen";
 
 const queryClient = new QueryClient({
@@ -33,7 +33,6 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <WatchlistProvider>
           <ContinueWatchingProvider>
-            <LanguagePreferenceProvider>
               <TooltipProvider>
                 <LoadingScreen />
                 <Toaster />
@@ -53,7 +52,6 @@ const App = () => {
                 </Routes>
               </div>
             </TooltipProvider>
-            </LanguagePreferenceProvider>
           </ContinueWatchingProvider>
         </WatchlistProvider>
       </QueryClientProvider>

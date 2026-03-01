@@ -1,17 +1,16 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { getTrending, getTopRated, getMoviesByGenre, getIndianContent } from '@/services/tmdb';
+import { getTrending, getTopRated, getMoviesByGenre, getIndianContent, getImageUrl } from '@/services/tmdb';
 import { MovieCarousel } from '@/components/MovieCarousel';
 import { NewHeroSlider } from '@/components/NewHeroSlider';
 import { NetflixSlider } from '@/components/NetflixSlider';
-import { TrendingSlider } from '@/components/TrendingSlider';
 import { GenreCarousel } from '@/components/GenreCarousel';
 import { IndianSection } from '@/components/IndianSection';
 import { UpcomingMovies } from '@/components/UpcomingMovies';
 import { WatchlistRecommendations } from '@/components/WatchlistRecommendations';
 import { ContinueWatchingSection } from '@/components/ContinueWatchingSection';
 import { AIRecommendations } from '@/components/AIRecommendations';
-import { getImageUrl } from '@/services/tmdb';
+
 
 const FEATURED_GENRES = [
   { id: 28, name: 'Action' },
@@ -38,15 +37,6 @@ const Index = () => {
     name: genre.name,
   }));
 
-  // Transform data for NetflixSlider
-  const netflixItems = indianContent?.results.slice(0, 10).map(item => ({
-    id: item.id,
-    title: item.title || item.name || '',
-    image: getImageUrl(item.backdrop_path || item.poster_path, 'w780'),
-    rating: item.vote_average ? item.vote_average / 10 : undefined,
-    overview: item.overview,
-    mediaType: item.media_type as 'movie' | 'tv' || 'movie',
-  })) || [];
 
   const trendingItems = topRated?.results.slice(0, 10).map(item => ({
     id: item.id,
@@ -85,8 +75,18 @@ const Index = () => {
           <GenreCarousel />
         </section>
 
-        {/* Indian Content - Netflix Style */}
-        <NetflixSlider items={netflixItems} title="Popular in India" />
+        {/* Popular in India */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl md:text-3xl font-bold text-white">Popular in India</h2>
+            <div className="h-1 w-16 bg-netflix-red rounded-full" />
+          </div>
+          {indianLoading ? (
+            <div className="animate-pulse rounded-lg bg-gray-800/50 h-[300px]" />
+          ) : (
+            <MovieCarousel items={indianContent?.results?.slice(0, 10).map(item => ({ ...item, media_type: 'movie' as const })) || []} />
+          )}
+        </section>
 
         {/* Indian Content Section */}
         <IndianSection />
