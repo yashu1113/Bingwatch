@@ -1,13 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Check, Play, Languages, ExternalLink } from "lucide-react";
+import { Plus, Check, Play, ExternalLink } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useContinueWatching } from "@/contexts/ContinueWatchingContext";
-import { useLanguagePreference } from "@/contexts/LanguagePreferenceContext";
 import { useToast } from "@/hooks/use-toast";
 import { StreamingButtons } from "@/components/StreamingButtons";
 import { CastSection } from "@/components/details/CastSection";
-import { LanguageSection } from "@/components/details/LanguageSection";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { getOMDbDetails, OMDbMovie } from "@/services/omdb";
@@ -33,10 +31,8 @@ interface DetailHeaderProps {
 
 const formatRuntime = (minutes?: number): string => {
   if (!minutes) return 'N/A';
-  
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
-  
   if (hours === 0) return `${remainingMinutes}m`;
   if (remainingMinutes === 0) return `${hours}h`;
   return `${hours}h ${remainingMinutes}m`;
@@ -56,18 +52,15 @@ export const DetailHeader = ({
   isInTheaters,
   cast,
   seasons,
-  spokenLanguages,
-  originalLanguage,
 }: DetailHeaderProps) => {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const { updateProgress } = useContinueWatching();
-  const { preferredLanguage, checkLanguageAvailability } = useLanguagePreference();
   const { toast } = useToast();
   const [isOMDbModalOpen, setIsOMDbModalOpen] = useState(false);
   const [omdbData, setOmdbData] = useState<OMDbMovie | null>(null);
   const [isLoadingOMDb, setIsLoadingOMDb] = useState(false);
 
-  // Simulate watching progress on page view - includes TV show season/episode
+  // Simulate watching progress on page view
   useEffect(() => {
     const timer = setTimeout(() => {
       updateProgress({
@@ -75,52 +68,33 @@ export const DetailHeader = ({
         title,
         posterPath,
         mediaType,
-        progress: Math.floor(Math.random() * 30) + 1, // 1-30% for demo
+        progress: Math.floor(Math.random() * 30) + 1,
         lastWatched: new Date().toISOString(),
         runtime,
-        // TV show specific - start with first episode
         currentSeason: mediaType === 'tv' ? 1 : undefined,
         currentEpisode: mediaType === 'tv' ? 1 : undefined,
         totalSeasons: mediaType === 'tv' && seasons ? seasons.length : undefined,
       });
-    }, 3000); // Update after 3 seconds on page
-
+    }, 3000);
     return () => clearTimeout(timer);
   }, [id, title, posterPath, mediaType, runtime, seasons, updateProgress]);
-
-  // Check language availability
-  const availableLanguageCodes = spokenLanguages?.map(lang => lang.iso_639_1) || [];
-  const languageInfo = checkLanguageAvailability(availableLanguageCodes);
 
   const handleWatchlistClick = () => {
     const inWatchlist = isInWatchlist(id);
     if (inWatchlist) {
       removeFromWatchlist(id);
-      toast({
-        title: "Removed from Watchlist",
-        description: `${title} has been removed from your watchlist`,
-      });
+      toast({ title: "Removed from Watchlist", description: `${title} has been removed from your watchlist` });
     } else {
-      addToWatchlist({
-        id,
-        title,
-        posterPath,
-        mediaType
-      });
-      toast({
-        title: "Added to Watchlist",
-        description: `${title} has been added to your watchlist`,
-      });
+      addToWatchlist({ id, title, posterPath, mediaType });
+      toast({ title: "Added to Watchlist", description: `${title} has been added to your watchlist` });
     }
   };
 
   const handleWatchHere = async () => {
     setIsLoadingOMDb(true);
     setIsOMDbModalOpen(true);
-    
     const year = releaseDate ? new Date(releaseDate).getFullYear().toString() : undefined;
     const data = await getOMDbDetails(title, year);
-    
     setOmdbData(data);
     setIsLoadingOMDb(false);
   };
@@ -140,30 +114,11 @@ export const DetailHeader = ({
           <p className="text-base md:text-lg text-gray-400">{overview}</p>
           <div className="flex flex-wrap gap-2">
             {genres?.map((genre) => (
-              <span
-                key={genre.id}
-                className="rounded-full bg-gray-800 px-3 py-1 text-sm"
-              >
+              <span key={genre.id} className="rounded-full bg-gray-800 px-3 py-1 text-sm">
                 {genre.name}
               </span>
             ))}
           </div>
-          
-          {/* Language Availability Badge */}
-          {preferredLanguage && (
-            <Badge 
-              variant={languageInfo.isPreferredAvailable ? "default" : "secondary"}
-              className={cn(
-                "flex items-center gap-2 w-fit",
-                languageInfo.isPreferredAvailable 
-                  ? "bg-green-600 hover:bg-green-700" 
-                  : "bg-gray-700 hover:bg-gray-600"
-              )}
-            >
-              <Languages className="h-3 w-3" />
-              {languageInfo.displayMessage}
-            </Badge>
-          )}
           <div className="space-y-2">
             <p>{releaseDate && `Release Date: ${releaseDate}`}</p>
             <p>Rating: ★ {voteAverage?.toFixed(1)}</p>
@@ -182,10 +137,7 @@ export const DetailHeader = ({
                   Watch Trailer
                 </Button>
               )}
-              <Button
-                onClick={handleWatchHere}
-                className="bg-netflix-red hover:bg-netflix-red/90"
-              >
+              <Button onClick={handleWatchHere} className="bg-netflix-red hover:bg-netflix-red/90">
                 <ExternalLink className="mr-2 h-4 w-4" />
                 Watch Here
               </Button>
@@ -199,15 +151,9 @@ export const DetailHeader = ({
                 )}
               >
                 {isInWatchlist(id) ? (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    In Watchlist
-                  </>
+                  <><Check className="mr-2 h-4 w-4" />In Watchlist</>
                 ) : (
-                  <>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add to Watchlist
-                  </>
+                  <><Plus className="mr-2 h-4 w-4" />Add to Watchlist</>
                 )}
               </Button>
             </div>
@@ -220,10 +166,6 @@ export const DetailHeader = ({
           </div>
         </div>
       </div>
-      <LanguageSection 
-        spokenLanguages={spokenLanguages} 
-        originalLanguage={originalLanguage}
-      />
       <CastSection cast={cast} />
       
       <OMDbModal 
