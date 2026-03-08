@@ -156,8 +156,8 @@ export const AIRecommendations = () => {
           recommendations: enriched,
           summary: data.summary || '',
           timestamp: Date.now(),
-          watchlistLength: watchlist.length,
-          watchProgressLength: watchProgress.length,
+          watchlistIds: watchlist.map(i => i.id).sort().join(','),
+          watchProgressIds: watchProgress.map(i => i.id).sort().join(','),
         });
       }
 
