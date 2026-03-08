@@ -34,6 +34,25 @@ export const EpisodeSelector = ({
 }: EpisodeSelectorProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { watchProgress } = useContinueWatching();
+  const selectedRef = useRef<HTMLButtonElement>(null);
+  const hasScrolled = useRef(false);
+
+  // Auto-scroll to selected episode when panel opens or season changes
+  useEffect(() => {
+    if (isExpanded && selectedRef.current && !hasScrolled.current) {
+      // Small delay to let ScrollArea render
+      const timer = setTimeout(() => {
+        selectedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        hasScrolled.current = true;
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+    if (!isExpanded) hasScrolled.current = false;
+  }, [isExpanded, selectedSeason]);
+
+  const handleEpisodeChange = useCallback((epNum: number) => {
+    onEpisodeChange(epNum);
+  }, [onEpisodeChange]);
 
   const currentSeason = seasons.find(s => s.season_number === selectedSeason);
 
