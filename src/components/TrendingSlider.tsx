@@ -19,9 +19,6 @@ export const TrendingSlider = () => {
     retryDelay: 1000,
   });
 
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const { addToWatchlist, isInWatchlist, removeFromWatchlist } = useWatchlist();
-  const { toast } = useToast();
 
   if (isLoading) {
     return <LoadingGrid count={5} />;
