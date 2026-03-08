@@ -36,8 +36,8 @@ interface CachedRecommendations {
   recommendations: EnhancedRecommendation[];
   summary: string;
   timestamp: number;
-  watchlistLength: number;
-  watchProgressLength: number;
+  watchlistIds: string;
+  watchProgressIds: string;
 }
 
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes cache
@@ -105,10 +105,12 @@ export const AIRecommendations = () => {
     if (!cachedRecs) return false;
     const now = Date.now();
     const cacheAge = now - cachedRecs.timestamp;
-    const dataChanged = cachedRecs.watchlistLength !== watchlist.length || 
-                       cachedRecs.watchProgressLength !== watchProgress.length;
+    const currentWatchlistIds = watchlist.map(i => i.id).sort().join(',');
+    const currentProgressIds = watchProgress.map(i => i.id).sort().join(',');
+    const dataChanged = cachedRecs.watchlistIds !== currentWatchlistIds || 
+                       cachedRecs.watchProgressIds !== currentProgressIds;
     return cacheAge < CACHE_DURATION && !dataChanged;
-  }, [cachedRecs, watchlist.length, watchProgress.length]);
+  }, [cachedRecs, watchlist, watchProgress]);
 
   const getRecommendations = useCallback(async (isAutoFetch = false, forceFetch = false) => {
     // Use cache if valid and not forcing refresh
@@ -154,8 +156,8 @@ export const AIRecommendations = () => {
           recommendations: enriched,
           summary: data.summary || '',
           timestamp: Date.now(),
-          watchlistLength: watchlist.length,
-          watchProgressLength: watchProgress.length,
+          watchlistIds: watchlist.map(i => i.id).sort().join(','),
+          watchProgressIds: watchProgress.map(i => i.id).sort().join(','),
         });
       }
 
