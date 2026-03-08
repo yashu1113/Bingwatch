@@ -80,13 +80,16 @@ Format your response as a JSON object with this structure:
       
 Focus on universally loved titles that are great starting points. Include recent releases and timeless classics.`;
     } else {
-      systemPrompt = `You are a movie and TV show recommendation expert. Based on the user's watchlist, viewing history, and search behavior, suggest 5 personalized recommendations. 
+      systemPrompt = `You are a movie and TV show recommendation expert. Based on the user's COMPLETE watchlist, ALL viewing history, and search behavior, suggest 5 personalized recommendations. 
+
+IMPORTANT: Consider ALL items in their watchlist equally - not just the most recent ones. Analyze the overall patterns, favorite genres, themes, and preferences across their ENTIRE viewing history.
 
 Be specific and explain WHY each recommendation fits their taste. Consider:
-- Similar genres and themes from their watchlist
-- Directors and actors they might like based on their history
-- Hidden gems they may have missed
-- Their recent search interests
+- Common genres and themes across their ENTIRE watchlist (not just recent additions)
+- Directors and actors they might like based on their full history
+- Hidden gems they may have missed based on their overall taste profile
+- Their recent search interests as supplementary signals
+- Overall patterns in the types of content they enjoy
 
 Format your response as a JSON object with this structure:
 {
@@ -95,21 +98,23 @@ Format your response as a JSON object with this structure:
       "title": "Movie/Show Title",
       "type": "movie" or "tv",
       "year": 2023,
-      "reason": "Brief explanation why they'd love this",
+      "reason": "Brief explanation why they'd love this based on their overall taste",
       "matchScore": 85
     }
   ],
-  "summary": "A brief personalized message about their taste"
+  "summary": "A brief personalized message about their overall taste profile"
 }`;
 
-      userPrompt = `Based on my preferences, give me personalized recommendations:
+      userPrompt = `Based on my COMPLETE viewing preferences, give me personalized recommendations:
 
-My Watchlist: ${watchlistTitles}
+My Full Watchlist (${watchlist?.length || 0} items): ${watchlistTitles}
 Currently Watching: ${recentlyWatching}
 ${recentSearches}
 ${moodContext}
 
-Give me 5 recommendations that match my taste. Be specific about why each fits my preferences.`;
+IMPORTANT: Analyze my ENTIRE watchlist to understand my overall taste - don't focus only on recent additions. Look for patterns across ALL the titles above and recommend accordingly.
+
+Give me 5 recommendations that match my overall taste profile. Be specific about why each fits my preferences.`;
     }
 
     console.log("Calling Lovable AI for recommendations...", { isNewUser, hasWatchlist: watchlist?.length > 0 });
