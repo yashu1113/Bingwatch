@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Plus, Check, Play, Info, ExternalLink } from 'lucide-react';
+import { Plus, Check, Play, Info, ExternalLink, Clock, Bell } from 'lucide-react';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useToast } from '@/hooks/use-toast';
 
