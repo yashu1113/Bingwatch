@@ -114,24 +114,52 @@ export const MediaCard = ({
 
       {isHovered && (
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/95 to-transparent p-3 space-y-2.5">
+          {!isReleased && (
+            <div className="flex items-center gap-1.5 text-yellow-400 text-xs font-semibold">
+              <Clock className="h-3.5 w-3.5" />
+              <span>Coming {releaseDate ? new Date(releaseDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Soon'}</span>
+            </div>
+          )}
           <div className="flex items-center gap-2">
-            {/* Match percentage */}
-            <span className="text-green-500 font-bold text-sm">{matchPercentage}% Match</span>
+            {isReleased ? (
+              <span className="text-green-500 font-bold text-sm">{matchPercentage}% Match</span>
+            ) : (
+              <span className="text-yellow-400 font-bold text-sm">Upcoming</span>
+            )}
             <span className="text-gray-400 text-xs border border-gray-600 px-1.5 py-0.5 rounded">
-              {new Date().getFullYear()}
+              {releaseDate ? new Date(releaseDate).getFullYear() : new Date().getFullYear()}
             </span>
           </div>
           
           <h3 className="font-semibold text-sm line-clamp-2">{title}</h3>
           
           <div className="flex items-center gap-2">
-            <Link
-              to={`/${mediaType}/${id}`}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black hover:bg-white/90 transition-all hover:scale-110"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Play className="h-4 w-4 fill-black ml-0.5" />
-            </Link>
+            {isReleased ? (
+              <>
+                <Link
+                  to={`/${mediaType}/${id}`}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black hover:bg-white/90 transition-all hover:scale-110"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Play className="h-4 w-4 fill-black ml-0.5" />
+                </Link>
+                <button
+                  onClick={handleWatchHere}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-netflix-red hover:border-netflix-red/80 bg-netflix-red/20 hover:bg-netflix-red/30 transition-all hover:scale-110"
+                  title="Watch Here"
+                >
+                  <ExternalLink className="h-4 w-4 text-netflix-red" />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleWatchlistClick}
+                className="flex h-9 items-center gap-1.5 px-3 rounded-full bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 text-xs font-semibold hover:bg-yellow-500/30 transition-all hover:scale-105"
+              >
+                <Bell className="h-3.5 w-3.5" />
+                {inWatchlist ? 'Reminded' : 'Remind Me'}
+              </button>
+            )}
             <button
               onClick={handleWatchlistClick}
               className={cn(
@@ -154,13 +182,6 @@ export const MediaCard = ({
             >
               <Info className="h-4 w-4" />
             </Link>
-            <button
-              onClick={handleWatchHere}
-              className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-netflix-red hover:border-netflix-red/80 bg-netflix-red/20 hover:bg-netflix-red/30 transition-all hover:scale-110"
-              title="Watch Here"
-            >
-              <ExternalLink className="h-4 w-4 text-netflix-red" />
-            </button>
             <div className="ml-auto text-xs text-gray-400">
               ★ {(voteAverage || rating).toFixed(1)}
             </div>
