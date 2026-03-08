@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Play, Check, Eye, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -34,6 +34,25 @@ export const EpisodeSelector = ({
 }: EpisodeSelectorProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { watchProgress } = useContinueWatching();
+  const selectedRef = useRef<HTMLButtonElement>(null);
+  const hasScrolled = useRef(false);
+
+  // Auto-scroll to selected episode when panel opens or season changes
+  useEffect(() => {
+    if (isExpanded && selectedRef.current && !hasScrolled.current) {
+      // Small delay to let ScrollArea render
+      const timer = setTimeout(() => {
+        selectedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        hasScrolled.current = true;
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+    if (!isExpanded) hasScrolled.current = false;
+  }, [isExpanded, selectedSeason]);
+
+  const handleEpisodeChange = useCallback((epNum: number) => {
+    onEpisodeChange(epNum);
+  }, [onEpisodeChange]);
 
   const currentSeason = seasons.find(s => s.season_number === selectedSeason);
 
@@ -138,8 +157,8 @@ export const EpisodeSelector = ({
                 Loading episodes...
               </div>
             ) : (
-              <ScrollArea className="max-h-[400px] sm:max-h-[480px]">
-                <div className="space-y-2 pr-2">
+              <ScrollArea className="max-h-[400px] sm:max-h-[480px]" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div className="space-y-2 pr-2" style={{ willChange: 'transform' }}>
                   {fallbackEpisodes.map((ep: any) => {
                     const isSelected = selectedEpisode === ep.episode_number;
                     const watched = isEpisodeWatched(selectedSeason, ep.episode_number);
@@ -148,7 +167,8 @@ export const EpisodeSelector = ({
                     return (
                       <button
                         key={ep.episode_number}
-                        onClick={() => onEpisodeChange(ep.episode_number)}
+                        ref={isSelected ? selectedRef : undefined}
+                        onClick={() => handleEpisodeChange(ep.episode_number)}
                         className={cn(
                           "w-full flex gap-2.5 sm:gap-3 rounded-lg text-left transition-all group/ep",
                           "border focus:outline-none focus:ring-2 focus:ring-netflix-red/50 overflow-hidden",
