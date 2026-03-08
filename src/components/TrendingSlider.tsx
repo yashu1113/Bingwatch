@@ -1,4 +1,4 @@
-import React, { Suspense, useState } from 'react';
+import React, { Suspense } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 // @ts-ignore
@@ -9,11 +9,6 @@ import { useQuery } from '@tanstack/react-query';
 import { getTrending } from '@/services/tmdb';
 import { MediaCard } from './MediaCard';
 import { LoadingGrid } from './LoadingGrid';
-import { Button } from './ui/button';
-import { Play, Calendar, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useWatchlist } from '@/contexts/WatchlistContext';
-import { useToast } from '@/hooks/use-toast';
 
 export const TrendingSlider = () => {
   const { data: trendingData, isLoading, error } = useQuery({
