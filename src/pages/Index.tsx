@@ -63,8 +63,14 @@ const Index = () => {
         {/* AI Recommendations */}
         <AIRecommendations />
 
-        {/* Trending Section - Netflix Style */}
-        <NetflixSlider items={trendingItems} title="Trending Now" />
+        {/* Trending Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl md:text-3xl font-bold text-white">Trending Now</h2>
+            <div className="h-1 w-16 bg-netflix-red rounded-full" />
+          </div>
+          <MovieCarousel items={topRated?.results.slice(0, 10) || []} />
+        </section>
 
         {/* Browse by Genre - Moved Up */}
         <section className="space-y-4">
