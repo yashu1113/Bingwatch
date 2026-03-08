@@ -235,3 +235,13 @@ export const getRecommendations = async (id: number, mediaType: 'movie' | 'tv') 
     throw error;
   }
 };
+
+export const getSeasonDetails = async (tvId: number, seasonNumber: number) => {
+  try {
+    const response = await tmdbApi.get(`/tv/${tvId}/season/${seasonNumber}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching season details:', error);
+    throw error;
+  }
+};
