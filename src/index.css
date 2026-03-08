@@ -109,3 +109,9 @@
 .streaming-aha {
   @apply bg-streaming-aha text-white border-streaming-aha;
 }
+
+/* Smooth scrolling for episode lists */
+[data-radix-scroll-area-viewport] {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
