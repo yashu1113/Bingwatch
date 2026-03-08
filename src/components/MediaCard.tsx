@@ -38,6 +38,7 @@ export const MediaCard = ({
   const [isHovered, setIsHovered] = useState(false);
   const inWatchlist = isInWatchlist(id);
   const [imageError, setImageError] = useState(false);
+  const isReleased = releaseDate ? new Date(releaseDate) <= new Date() : true;
   const matchPercentage = Math.floor(65 + Math.random() * 30); // Random 65-95% match
   const [isOMDbModalOpen, setIsOMDbModalOpen] = useState(false);
   const [omdbData, setOmdbData] = useState<OMDbMovie | null>(null);
