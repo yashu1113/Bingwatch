@@ -157,8 +157,8 @@ export const EpisodeSelector = ({
                 Loading episodes...
               </div>
             ) : (
-              <ScrollArea className="max-h-[400px] sm:max-h-[480px]" style={{ WebkitOverflowScrolling: 'touch' }}>
-                <div className="space-y-2 pr-2" style={{ willChange: 'transform' }}>
+              <div className="max-h-[400px] sm:max-h-[480px] overflow-y-auto overscroll-contain scroll-smooth" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div className="space-y-2 pr-1">
                   {fallbackEpisodes.map((ep: any) => {
                     const isSelected = selectedEpisode === ep.episode_number;
                     const watched = isEpisodeWatched(selectedSeason, ep.episode_number);
