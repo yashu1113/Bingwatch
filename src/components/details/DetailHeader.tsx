@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Check, Play, ExternalLink } from "lucide-react";
+import { Plus, Check, Play, ExternalLink, Clock, Bell } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useContinueWatching } from "@/contexts/ContinueWatchingContext";
 import { useToast } from "@/hooks/use-toast";
@@ -59,6 +59,7 @@ export const DetailHeader = ({
   const [isOMDbModalOpen, setIsOMDbModalOpen] = useState(false);
   const [omdbData, setOmdbData] = useState<OMDbMovie | null>(null);
   const [isLoadingOMDb, setIsLoadingOMDb] = useState(false);
+  const isReleased = releaseDate ? new Date(releaseDate) <= new Date() : true;
 
   // Simulate watching progress on page view
   useEffect(() => {
@@ -127,20 +128,49 @@ export const DetailHeader = ({
             )}
           </div>
           <div className="flex flex-col space-y-4 mt-auto">
+            {!isReleased && (
+              <div className="flex items-center gap-2 text-yellow-400 text-sm font-semibold">
+                <Clock className="h-4 w-4" />
+                <span>Releases {releaseDate ? new Date(releaseDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Soon'}</span>
+              </div>
+            )}
             <div className="flex flex-wrap gap-3">
-              {trailer && (
-                <Button
-                  onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
-                  className="bg-netflix-red hover:bg-netflix-red/90"
-                >
-                  <Play className="mr-2 h-4 w-4" />
-                  Watch Trailer
-                </Button>
+              {isReleased ? (
+                <>
+                  {trailer && (
+                    <Button
+                      onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
+                      className="bg-netflix-red hover:bg-netflix-red/90"
+                    >
+                      <Play className="mr-2 h-4 w-4" />
+                      Watch Trailer
+                    </Button>
+                  )}
+                  <Button onClick={handleWatchHere} className="bg-netflix-red hover:bg-netflix-red/90">
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Watch Here
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {trailer && (
+                    <Button
+                      onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
+                      className="bg-netflix-red hover:bg-netflix-red/90"
+                    >
+                      <Play className="mr-2 h-4 w-4" />
+                      Watch Trailer
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleWatchlistClick}
+                    className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/50"
+                  >
+                    <Bell className="mr-2 h-4 w-4" />
+                    {isInWatchlist(id) ? 'Reminded' : 'Remind Me'}
+                  </Button>
+                </>
               )}
-              <Button onClick={handleWatchHere} className="bg-netflix-red hover:bg-netflix-red/90">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Watch Here
-              </Button>
               <Button
                 onClick={handleWatchlistClick}
                 className={cn(
@@ -157,12 +187,14 @@ export const DetailHeader = ({
                 )}
               </Button>
             </div>
-            <StreamingButtons 
-              mediaType={mediaType} 
-              id={id} 
-              isInTheaters={isInTheaters} 
-              seasons={seasons}
-            />
+            {isReleased && (
+              <StreamingButtons 
+                mediaType={mediaType} 
+                id={id} 
+                isInTheaters={isInTheaters} 
+                seasons={seasons}
+              />
+            )}
           </div>
         </div>
       </div>
