@@ -70,6 +70,16 @@ export const VideoPlayer = ({
           onClose();
         }
       }
+      // Prevent Space from scrolling the parent page; let iframe handle it
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        iframeRef.current?.focus();
+      }
+      // Re-focus iframe on arrow keys too
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+        e.preventDefault();
+        iframeRef.current?.focus();
+      }
     };
 
     if (isOpen) {
