@@ -36,8 +36,8 @@ interface CachedRecommendations {
   recommendations: EnhancedRecommendation[];
   summary: string;
   timestamp: number;
-  watchlistLength: number;
-  watchProgressLength: number;
+  watchlistIds: string;
+  watchProgressIds: string;
 }
 
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes cache
