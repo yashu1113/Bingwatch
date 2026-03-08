@@ -24,6 +24,11 @@ const Index = () => {
     queryFn: () => getIndianContent('movie', 1),
   });
 
+  const { data: trendingData, isLoading: trendingLoading } = useQuery({
+    queryKey: ['trending', 'all', 'week'],
+    queryFn: () => getTrending('all', 'week'),
+  });
+
   const { data: topRated, isLoading: topRatedLoading } = useQuery({
     queryKey: ['movies', 'top-rated'],
     queryFn: () => getTopRated(),
