@@ -19,7 +19,7 @@ interface EpisodeSelectorProps {
   selectedEpisode: number;
   onSeasonChange: (season: number) => void;
   onEpisodeChange: (episode: number) => void;
-  onPlay: () => void;
+  onPlay: (episode?: number) => void;
   tvId?: number;
 }
 
