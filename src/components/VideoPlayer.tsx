@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { X, Maximize2, Minimize2, Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { X, Maximize2, Minimize2, Loader2, ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface VideoPlayerProps {
@@ -12,11 +12,6 @@ interface VideoPlayerProps {
   title?: string;
 }
 
-/**
- * Generates the vidking.net embed URL based on media type and IDs
- * Movies: /embed/movie/{tmdbId}?autoPlay=true&nextEpisode=true
- * TV: /embed/tv/{tmdbId}/{season}/{episode}?autoPlay=true&nextEpisode=true
- */
 const getVidkingUrl = (
   mediaType: "movie" | "tv",
   tmdbId: number,
@@ -24,11 +19,9 @@ const getVidkingUrl = (
   episode?: number
 ): string => {
   const baseUrl = "https://www.vidking.net";
-  
   if (mediaType === "tv" && season && episode) {
     return `${baseUrl}/embed/tv/${tmdbId}/${season}/${episode}?autoPlay=true&nextEpisode=true`;
   }
-  
   return `${baseUrl}/embed/movie/${tmdbId}?autoPlay=true&nextEpisode=true`;
 };
 
@@ -43,12 +36,30 @@ export const VideoPlayer = ({
 }: VideoPlayerProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [iframeRef, setIframeRef] = useState<HTMLIFrameElement | null>(null);
+  const [showHint, setShowHint] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Generate the embed URL
   const embedUrl = getVidkingUrl(mediaType, tmdbId, season, episode);
 
-  // Handle escape key to close player
+  // Auto-hide hint after 5 seconds
+  useEffect(() => {
+    if (isOpen && showHint) {
+      const timer = setTimeout(() => setShowHint(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, showHint]);
+
+  // Focus iframe on load so embedded player receives keyboard events
+  const handleIframeLoad = useCallback(() => {
+    setIsLoading(false);
+    // Try to focus the iframe so keyboard shortcuts work inside it
+    setTimeout(() => {
+      iframeRef.current?.focus();
+    }, 500);
+  }, []);
+
+  // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -63,7 +74,6 @@ export const VideoPlayer = ({
 
     if (isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      // Prevent body scroll when player is open
       document.body.style.overflow = "hidden";
     }
 
@@ -73,40 +83,29 @@ export const VideoPlayer = ({
     };
   }, [isOpen, isFullscreen, onClose]);
 
-  // Handle fullscreen change events
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-
     document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // Toggle fullscreen
   const toggleFullscreen = useCallback(() => {
-    if (!iframeRef) return;
-
     if (document.fullscreenElement) {
       document.exitFullscreen();
       setIsFullscreen(false);
     } else {
-      iframeRef.requestFullscreen?.();
+      containerRef.current?.requestFullscreen?.();
       setIsFullscreen(true);
     }
-  }, [iframeRef]);
+  }, []);
 
-  // Handle iframe load
-  const handleIframeLoad = () => {
-    setIsLoading(false);
-  };
-
-  // Reset loading state when URL changes
+  // Reset state when URL changes
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
+      setShowHint(true);
     }
   }, [embedUrl, isOpen]);
 
@@ -114,10 +113,12 @@ export const VideoPlayer = ({
 
   return (
     <div
-      className="fixed inset-0 z-[99999] bg-black/95 flex items-center justify-center"
+      ref={containerRef}
+      className="fixed inset-0 z-[99999] bg-black flex items-center justify-center"
       role="dialog"
       aria-modal="true"
       aria-label={title}
+      onClick={() => iframeRef.current?.focus()}
     >
       {/* Loading indicator */}
       {isLoading && (
@@ -129,9 +130,32 @@ export const VideoPlayer = ({
         </div>
       )}
 
+      {/* Keyboard hint overlay */}
+      {showHint && !isLoading && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 animate-fade-in">
+          <div className="bg-black/80 backdrop-blur-sm border border-white/10 rounded-xl px-5 py-3 flex items-center gap-4 text-white text-sm">
+            <Info className="h-4 w-4 text-blue-400 shrink-0" />
+            <span>Click on the video and use</span>
+            <div className="flex items-center gap-2">
+              <kbd className="bg-white/10 border border-white/20 rounded px-2 py-0.5 text-xs font-mono flex items-center gap-1">
+                <ArrowLeft className="h-3 w-3" /> ←
+              </kbd>
+              <span className="text-white/60">10s back</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="bg-white/10 border border-white/20 rounded px-2 py-0.5 text-xs font-mono flex items-center gap-1">
+                → <ArrowRight className="h-3 w-3" />
+              </kbd>
+              <span className="text-white/60">10s forward</span>
+            </div>
+            <kbd className="bg-white/10 border border-white/20 rounded px-2 py-0.5 text-xs font-mono">Space</kbd>
+            <span className="text-white/60">play/pause</span>
+          </div>
+        </div>
+      )}
+
       {/* Control buttons */}
       <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
-        {/* Fullscreen button */}
         <Button
           variant="ghost"
           size="icon"
@@ -139,14 +163,8 @@ export const VideoPlayer = ({
           className="bg-gray-800/80 hover:bg-gray-700 text-white rounded-full h-10 w-10"
           aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         >
-          {isFullscreen ? (
-            <Minimize2 className="h-5 w-5" />
-          ) : (
-            <Maximize2 className="h-5 w-5" />
-          )}
+          {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
         </Button>
-
-        {/* Close button */}
         <Button
           variant="ghost"
           size="icon"
@@ -172,13 +190,14 @@ export const VideoPlayer = ({
 
       {/* Video iframe */}
       <iframe
-        ref={setIframeRef}
+        ref={iframeRef}
         src={embedUrl}
-        className="w-full h-full max-w-[95vw] max-h-[90vh] rounded-lg bg-black"
+        className="w-full h-full"
         onLoad={handleIframeLoad}
         allowFullScreen
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
         title={title}
+        tabIndex={0}
       />
     </div>
   );
