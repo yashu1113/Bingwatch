@@ -105,10 +105,12 @@ export const AIRecommendations = () => {
     if (!cachedRecs) return false;
     const now = Date.now();
     const cacheAge = now - cachedRecs.timestamp;
-    const dataChanged = cachedRecs.watchlistLength !== watchlist.length || 
-                       cachedRecs.watchProgressLength !== watchProgress.length;
+    const currentWatchlistIds = watchlist.map(i => i.id).sort().join(',');
+    const currentProgressIds = watchProgress.map(i => i.id).sort().join(',');
+    const dataChanged = cachedRecs.watchlistIds !== currentWatchlistIds || 
+                       cachedRecs.watchProgressIds !== currentProgressIds;
     return cacheAge < CACHE_DURATION && !dataChanged;
-  }, [cachedRecs, watchlist.length, watchProgress.length]);
+  }, [cachedRecs, watchlist, watchProgress]);
 
   const getRecommendations = useCallback(async (isAutoFetch = false, forceFetch = false) => {
     // Use cache if valid and not forcing refresh
