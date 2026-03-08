@@ -59,6 +59,7 @@ export const DetailHeader = ({
   const [isOMDbModalOpen, setIsOMDbModalOpen] = useState(false);
   const [omdbData, setOmdbData] = useState<OMDbMovie | null>(null);
   const [isLoadingOMDb, setIsLoadingOMDb] = useState(false);
+  const isReleased = releaseDate ? new Date(releaseDate) <= new Date() : true;
 
   // Simulate watching progress on page view
   useEffect(() => {
