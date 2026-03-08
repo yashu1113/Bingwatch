@@ -168,7 +168,11 @@ export const EpisodeSelector = ({
                       <button
                         key={ep.episode_number}
                         ref={isSelected ? selectedRef : undefined}
-                        onClick={() => handleEpisodeChange(ep.episode_number)}
+                        onClick={() => {
+                          handleEpisodeChange(ep.episode_number);
+                          // Small delay to let state update, then auto-play
+                          setTimeout(() => onPlay(), 50);
+                        }}
                         className={cn(
                           "w-full flex gap-2.5 sm:gap-3 rounded-lg text-left transition-all group/ep",
                           "border focus:outline-none focus:ring-2 focus:ring-netflix-red/50 overflow-hidden",
