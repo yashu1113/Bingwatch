@@ -42,7 +42,10 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     refetchInterval: 1000 * 60 * 60 * 6,
   });
 
-  const handleWatchNow = () => {
+  const handleWatchNow = (episode?: number) => {
+    if (episode !== undefined) {
+      setSelectedEpisode(episode);
+    }
     setIsPlayerOpen(true);
   };
 
@@ -174,7 +177,7 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
             className="bg-netflix-red hover:bg-netflix-red/90 text-white border-netflix-red 
               focus:ring-2 focus:ring-offset-2 focus:ring-offset-netflix-black
               transition-all duration-200 hover:scale-105"
-            onClick={handleWatchNow}
+            onClick={() => handleWatchNow()}
             aria-label="Watch Now"
           >
             <Play className="mr-2 h-4 w-4 fill-white" />

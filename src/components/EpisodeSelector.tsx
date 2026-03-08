@@ -19,7 +19,7 @@ interface EpisodeSelectorProps {
   selectedEpisode: number;
   onSeasonChange: (season: number) => void;
   onEpisodeChange: (episode: number) => void;
-  onPlay: () => void;
+  onPlay: (episode?: number) => void;
   tvId?: number;
 }
 
@@ -87,7 +87,7 @@ export const EpisodeSelector = ({
       {/* Header */}
       <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
         <Button
-          onClick={onPlay}
+          onClick={() => onPlay()}
           size="sm"
           className="bg-netflix-red hover:bg-netflix-red/90 text-white font-semibold text-xs sm:text-sm"
         >
@@ -168,7 +168,10 @@ export const EpisodeSelector = ({
                       <button
                         key={ep.episode_number}
                         ref={isSelected ? selectedRef : undefined}
-                        onClick={() => handleEpisodeChange(ep.episode_number)}
+                        onClick={() => {
+                          handleEpisodeChange(ep.episode_number);
+                          onPlay(ep.episode_number);
+                        }}
                         className={cn(
                           "w-full flex gap-2.5 sm:gap-3 rounded-lg text-left transition-all group/ep",
                           "border focus:outline-none focus:ring-2 focus:ring-netflix-red/50 overflow-hidden",
