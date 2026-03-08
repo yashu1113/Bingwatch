@@ -87,7 +87,7 @@ export const EpisodeSelector = ({
       {/* Header */}
       <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
         <Button
-          onClick={onPlay}
+          onClick={() => onPlay()}
           size="sm"
           className="bg-netflix-red hover:bg-netflix-red/90 text-white font-semibold text-xs sm:text-sm"
         >
