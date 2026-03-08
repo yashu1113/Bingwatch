@@ -164,6 +164,7 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
           onSeasonChange={setSelectedSeason}
           onEpisodeChange={setSelectedEpisode}
           onPlay={handleWatchNow}
+          tvId={id}
         />
       ) : (
         <div className="flex flex-wrap gap-2 items-center">
