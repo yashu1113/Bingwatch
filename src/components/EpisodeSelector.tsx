@@ -260,7 +260,7 @@ export const EpisodeSelector = ({
                     );
                   })}
                 </div>
-              </ScrollArea>
+              </div>
             )}
           </div>
 
