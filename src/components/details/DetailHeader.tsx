@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Check, Play, ExternalLink } from "lucide-react";
+import { Plus, Check, Play, ExternalLink, Clock, Bell } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { useContinueWatching } from "@/contexts/ContinueWatchingContext";
 import { useToast } from "@/hooks/use-toast";
