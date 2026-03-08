@@ -42,7 +42,10 @@ const StreamingButtonsComponent = ({ mediaType, id, isInTheaters, seasons }: Str
     refetchInterval: 1000 * 60 * 60 * 6,
   });
 
-  const handleWatchNow = () => {
+  const handleWatchNow = (episode?: number) => {
+    if (episode !== undefined) {
+      setSelectedEpisode(episode);
+    }
     setIsPlayerOpen(true);
   };
 

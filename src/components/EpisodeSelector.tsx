@@ -170,8 +170,7 @@ export const EpisodeSelector = ({
                         ref={isSelected ? selectedRef : undefined}
                         onClick={() => {
                           handleEpisodeChange(ep.episode_number);
-                          // Small delay to let state update, then auto-play
-                          setTimeout(() => onPlay(), 50);
+                          onPlay(ep.episode_number);
                         }}
                         className={cn(
                           "w-full flex gap-2.5 sm:gap-3 rounded-lg text-left transition-all group/ep",
